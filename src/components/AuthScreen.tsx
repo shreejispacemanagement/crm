@@ -84,38 +84,36 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-[#F8F6F1] dark:bg-[#111111]">
-      <header className="flex items-center justify-between px-6 py-4 border-b border-[#E5DEC9] dark:border-[#242424] bg-white dark:bg-[#171717]">
+    <div className="min-h-screen flex flex-col bg-[#F8FAFC] dark:bg-[#0C141E]">
+      <header className="flex items-center justify-between px-6 py-4 border-b border-[#E2E8F0] dark:border-[#1E3349] bg-white dark:bg-[#121E2C]">
         <BrandMark settings={settings} />
         <div className="flex items-center gap-3">
           <PWAInstallButton />
           <button
             type="button"
             onClick={onToggleTheme}
-            className="inline-flex items-center justify-center rounded-lg border border-[#E5DEC9] p-2 text-[#171717] hover:bg-[#F3EBDD] dark:border-[#2E2E2E] dark:text-[#F3EBDD] dark:hover:bg-[#242424] transition-colors"
+            className="inline-flex items-center justify-center rounded-lg border border-[#E2E8F0] p-2 text-[#16273A] hover:bg-[#FBF6EE] dark:border-[#1E3349] dark:text-[#FBF6EE] dark:hover:bg-[#1A2C40] transition-colors"
             aria-label="Toggle theme"
           >
-            {theme === 'dark' ? <Sun className="h-4 w-4 text-[#B58A35]" /> : <Moon className="h-4 w-4" />}
+            {theme === 'dark' ? <Sun className="h-4 w-4 text-[#C99B56]" /> : <Moon className="h-4 w-4" />}
           </button>
         </div>
       </header>
 
       <main className="flex-1 flex items-center justify-center px-4 py-10">
-        <div className="w-full max-w-md rounded-xl border border-[#E5DEC9] bg-white p-8 dark:border-[#2A2A2A] dark:bg-[#171717]">
+        <div className="w-full max-w-md rounded-xl border border-[#E2E8F0] bg-white p-8 dark:border-[#1E3349] dark:bg-[#121E2C]">
           <div className="mb-6">
-            {settings.company_logo ? (
-              <img
-                src={settings.company_logo}
-                alt={settings.company_name}
-                referrerPolicy="no-referrer"
-                className="h-12 w-auto mb-4 object-contain"
-              />
-            ) : (
-              <div className="inline-flex h-11 w-11 items-center justify-center rounded-lg bg-[#171717] border border-[#B58A35]/60 mb-4">
-                <ShieldCheck className="h-5 w-5 text-[#B58A35]" />
+            <div className="flex justify-center mb-5">
+              <div className="p-3 rounded-xl bg-white border border-[#E2E8F0] shadow-xs flex items-center justify-center">
+                <img
+                  src={settings.company_logo || '/assets/aistudio/image_b871e6e7.png'}
+                  alt={settings.company_name || 'Shreeji Space'}
+                  referrerPolicy="no-referrer"
+                  className="h-16 w-auto object-contain"
+                />
               </div>
-            )}
-            <h1 className="text-xl font-bold tracking-tight text-[#171717] dark:text-white text-balance">
+            </div>
+            <h1 className="text-xl font-bold tracking-tight text-[#16273A] dark:text-white text-balance">
               {bootstrapUser ? 'Initialize Shreeji Space Management CRM' : settings.company_name}
             </h1>
             <p className="mt-1.5 text-sm text-[#525252] dark:text-[#A3A3A3]">
@@ -147,7 +145,7 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({
                   type="email"
                   readOnly
                   value={bootstrapUser.email || ''}
-                  className="w-full rounded-lg border border-[#E5DEC9] bg-[#F8F6F1] px-3 py-2 text-sm text-[#525252] dark:border-[#2E2E2E] dark:bg-[#141414] dark:text-[#A3A3A3]"
+                  className="w-full rounded-lg border border-[#E2E8F0] bg-[#F8FAFC] px-3 py-2 text-sm text-[#525252] dark:border-[#1E3349] dark:bg-[#0F1926] dark:text-[#A3A3A3]"
                 />
               </div>
 
@@ -161,7 +159,7 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({
                     required
                     value={fullName}
                     onChange={(e) => setFullName(e.target.value)}
-                    className="w-full rounded-lg border border-[#E5DEC9] bg-white px-3 py-2 text-sm text-[#171717] focus:border-[#B58A35] focus:outline-none dark:border-[#2E2E2E] dark:bg-[#111111] dark:text-white"
+                    className="w-full rounded-lg border border-[#E2E8F0] bg-white px-3 py-2 text-sm text-[#16273A] focus:border-[#C99B56] focus:outline-none dark:border-[#1E3349] dark:bg-[#0C141E] dark:text-white"
                   />
                 </div>
                 <div>
@@ -174,18 +172,18 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({
                     maxLength={10}
                     value={mobile}
                     onChange={(e) => setMobile(e.target.value.replace(/\D/g, ''))}
-                    className="w-full rounded-lg border border-[#E5DEC9] bg-white px-3 py-2 text-sm font-mono-tabular text-[#171717] focus:border-[#B58A35] focus:outline-none dark:border-[#2E2E2E] dark:bg-[#111111] dark:text-white"
+                    className="w-full rounded-lg border border-[#E2E8F0] bg-white px-3 py-2 text-sm font-mono-tabular text-[#16273A] focus:border-[#C99B56] focus:outline-none dark:border-[#1E3349] dark:bg-[#0C141E] dark:text-white"
                   />
                 </div>
               </div>
 
-              <div className="rounded-lg border border-[#E5DEC9] bg-[#F8F6F1] p-3.5 dark:border-[#2A2A2A] dark:bg-[#121212]">
+              <div className="rounded-lg border border-[#E2E8F0] bg-[#F8FAFC] p-3.5 dark:border-[#1E3349] dark:bg-[#0F1926]">
                 <label className="flex items-start gap-2.5 cursor-pointer">
                   <input
                     type="checkbox"
                     checked={includeSampleData}
                     onChange={(e) => setIncludeSampleData(e.target.checked)}
-                    className="mt-0.5 accent-[#B58A35]"
+                    className="mt-0.5 accent-[#C99B56]"
                   />
                   <span className="text-xs text-[#262626] dark:text-[#E5E5E5]">
                     <strong>Load Ahmedabad Sample Workspace</strong>
@@ -199,7 +197,7 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full rounded-lg bg-[#171717] py-2.5 text-sm font-semibold text-white hover:bg-[#2E2E2E] disabled:opacity-50 dark:bg-[#B58A35] dark:text-[#171717] dark:hover:bg-[#C69B45] transition-colors"
+                className="w-full rounded-lg bg-[#16273A] py-2.5 text-sm font-semibold text-white hover:bg-[#20364F] disabled:opacity-50 dark:bg-[#C99B56] dark:text-[#16273A] dark:hover:bg-[#C99B56] transition-colors"
               >
                 {loading ? 'Initializing Workspace...' : 'Initialize Workspace & Launch CRM'}
               </button>
@@ -207,7 +205,7 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({
               <button
                 type="button"
                 onClick={handleSwitchAccount}
-                className="w-full inline-flex items-center justify-center gap-1.5 text-xs font-medium text-[#737373] hover:text-[#171717] dark:hover:text-white"
+                className="w-full inline-flex items-center justify-center gap-1.5 text-xs font-medium text-[#737373] hover:text-[#16273A] dark:hover:text-white"
               >
                 <LogOut className="h-3.5 w-3.5" /> Use a different Google account
               </button>
@@ -218,7 +216,7 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({
                 type="button"
                 onClick={handleGoogleSignIn}
                 disabled={loading}
-                className="w-full flex items-center justify-center gap-3 rounded-lg bg-[#171717] py-2.5 px-4 text-sm font-semibold text-white hover:bg-[#2E2E2E] disabled:opacity-50 dark:bg-[#B58A35] dark:text-[#171717] dark:hover:bg-[#C69B45] transition-colors"
+                className="w-full flex items-center justify-center gap-3 rounded-lg bg-[#16273A] py-2.5 px-4 text-sm font-semibold text-white hover:bg-[#20364F] disabled:opacity-50 dark:bg-[#C99B56] dark:text-[#16273A] dark:hover:bg-[#C99B56] transition-colors"
               >
                 <svg className="h-4 w-4 shrink-0" viewBox="0 0 24 24" aria-hidden="true">
                   <path
@@ -241,13 +239,13 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({
                 {loading ? 'Connecting to Google...' : 'Continue with Google'}
               </button>
 
-              <div className="rounded-lg border border-[#E5DEC9] bg-[#F8F6F1] p-3.5 text-[11px] text-[#525252] dark:border-[#2A2A2A] dark:bg-[#121212] dark:text-[#A3A3A3] space-y-1">
+              <div className="rounded-lg border border-[#E2E8F0] bg-[#F8FAFC] p-3.5 text-[11px] text-[#525252] dark:border-[#1E3349] dark:bg-[#0F1926] dark:text-[#A3A3A3] space-y-1">
                 <p className="font-medium text-[#262626] dark:text-[#E5E5E5]">
                   Internal access only · Sign in with your Google account provisioned by Super Admin.
                 </p>
                 <p>
                   First-time workspace owners should sign in with{' '}
-                  <span className="font-mono-tabular font-semibold text-[#171717] dark:text-white">
+                  <span className="font-mono-tabular font-semibold text-[#16273A] dark:text-white">
                     {BOOTSTRAPPED_ADMIN_EMAIL}
                   </span>{' '}
                   to initialize the CRM.

@@ -1,6 +1,16 @@
 @import "tailwindcss";
 @custom-variant dark (&:where(.dark, .dark *));
 
+@theme {
+  --color-brand-navy: #16273A;
+  --color-brand-navy-dark: #0C141E;
+  --color-brand-navy-card: #121E2C;
+  --color-brand-navy-border: #1E3349;
+  --color-brand-gold: #C99B56;
+  --color-brand-gold-dark: #B88B43;
+  --color-brand-gold-tint: #FBF6EE;
+}
+
 @layer base {
   :root {
     --font-sans: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;

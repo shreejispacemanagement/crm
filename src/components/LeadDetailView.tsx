@@ -131,7 +131,7 @@ export const LeadDetailView: React.FC<LeadDetailViewProps> = ({
 
   if (loading) {
     return (
-      <div className="rounded-xl border border-[#E5DEC9] bg-white p-8 dark:border-[#2A2A2A] dark:bg-[#171717]">
+      <div className="rounded-xl border border-[#E2E8F0] bg-white p-8 dark:border-[#1E3349] dark:bg-[#121E2C]">
         <p className="text-xs text-[#737373]">Loading lead profile...</p>
       </div>
     );
@@ -139,9 +139,9 @@ export const LeadDetailView: React.FC<LeadDetailViewProps> = ({
 
   if (error && !lead) {
     return (
-      <div className="rounded-xl border border-red-500/30 bg-white p-6 dark:bg-[#171717]">
+      <div className="rounded-xl border border-red-500/30 bg-white p-6 dark:bg-[#121E2C]">
         <p className="text-sm font-medium text-red-700 dark:text-red-300">{error}</p>
-        <button type="button" onClick={onBack} className="mt-3 text-xs font-semibold text-[#B58A35] hover:underline">
+        <button type="button" onClick={onBack} className="mt-3 text-xs font-semibold text-[#C99B56] hover:underline">
           ← Back to Leads
         </button>
       </div>
@@ -322,19 +322,19 @@ export const LeadDetailView: React.FC<LeadDetailViewProps> = ({
   return (
     <div className="space-y-5">
       {/* Header Bar */}
-      <div className="rounded-xl border border-[#E5DEC9] bg-white p-5 dark:border-[#2A2A2A] dark:bg-[#171717]">
+      <div className="rounded-xl border border-[#E2E8F0] bg-white p-5 dark:border-[#1E3349] dark:bg-[#121E2C]">
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
           <div className="space-y-1">
             <button
               type="button"
               onClick={onBack}
-              className="inline-flex items-center gap-1 text-xs font-medium text-[#737373] hover:text-[#B58A35] mb-1"
+              className="inline-flex items-center gap-1 text-xs font-medium text-[#737373] hover:text-[#C99B56] mb-1"
             >
               <ArrowLeft className="h-3.5 w-3.5" /> Back to Leads
             </button>
             <div className="flex flex-wrap items-center gap-2.5">
-              <span className="font-mono-tabular text-sm font-bold text-[#B58A35]">{lead.lead_code}</span>
-              <h1 className="text-xl font-bold text-[#171717] dark:text-white">{lead.customer_name}</h1>
+              <span className="font-mono-tabular text-sm font-bold text-[#C99B56]">{lead.lead_code}</span>
+              <h1 className="text-xl font-bold text-[#16273A] dark:text-white">{lead.customer_name}</h1>
               {lead.is_inactive === 1 && (
                 <span className="rounded bg-amber-100 px-2 py-0.5 text-xs font-semibold text-amber-900 dark:bg-amber-950/60 dark:text-amber-300">
                   Inactive ({lead.inactive_days}d)
@@ -347,7 +347,7 @@ export const LeadDetailView: React.FC<LeadDetailViewProps> = ({
               )}
             </div>
             <div className="text-xs text-[#737373] dark:text-[#A3A3A3] flex flex-wrap items-center gap-x-2 gap-y-1">
-              <span>Assigned: <strong className="text-[#171717] dark:text-white">{lead.assigned_to_name}</strong></span>
+              <span>Assigned: <strong className="text-[#16273A] dark:text-white">{lead.assigned_to_name}</strong></span>
               <span>·</span>
               <span>Creator: {lead.created_by_name}</span>
               <span>·</span>
@@ -363,7 +363,7 @@ export const LeadDetailView: React.FC<LeadDetailViewProps> = ({
               <select
                 value={lead.stage}
                 onChange={(e) => handleStageSelect(e.target.value)}
-                className="rounded-lg border border-[#B58A35] bg-[#F3EBDD]/60 px-3 py-1.5 text-xs font-semibold text-[#171717] dark:bg-[#26211A] dark:text-[#F3EBDD]"
+                className="rounded-lg border border-[#C99B56] bg-[#FBF6EE]/60 px-3 py-1.5 text-xs font-semibold text-[#16273A] dark:bg-[#2A2318] dark:text-[#FBF6EE]"
               >
                 {stages.map((s) => (
                   <option key={s.id} value={s.name}>
@@ -388,7 +388,7 @@ export const LeadDetailView: React.FC<LeadDetailViewProps> = ({
                 <button
                   type="button"
                   onClick={() => setShowReassign(true)}
-                  className="inline-flex items-center gap-1.5 rounded-lg border border-[#E5DEC9] px-3 py-1.5 text-xs font-medium text-[#171717] hover:bg-[#F3EBDD] dark:border-[#2E2E2E] dark:text-white dark:hover:bg-[#242424]"
+                  className="inline-flex items-center gap-1.5 rounded-lg border border-[#E2E8F0] px-3 py-1.5 text-xs font-medium text-[#16273A] hover:bg-[#FBF6EE] dark:border-[#1E3349] dark:text-white dark:hover:bg-[#1A2C40]"
                 >
                   <UserCheck className="h-3.5 w-3.5" /> Reassign
                 </button>
@@ -397,7 +397,7 @@ export const LeadDetailView: React.FC<LeadDetailViewProps> = ({
                   <button
                     type="button"
                     onClick={() => setShowReopen(true)}
-                    className="inline-flex items-center gap-1.5 rounded-lg border border-[#B58A35] px-3 py-1.5 text-xs font-medium text-[#B58A35] hover:bg-[#B58A35]/10"
+                    className="inline-flex items-center gap-1.5 rounded-lg border border-[#C99B56] px-3 py-1.5 text-xs font-medium text-[#C99B56] hover:bg-[#C99B56]/10"
                   >
                     <RefreshCw className="h-3.5 w-3.5" /> Reopen Lead
                   </button>
@@ -417,7 +417,7 @@ export const LeadDetailView: React.FC<LeadDetailViewProps> = ({
               <button
                 type="button"
                 onClick={handleRestore}
-                className="inline-flex items-center gap-1.5 rounded-lg bg-[#171717] px-3 py-1.5 text-xs font-semibold text-white dark:bg-[#B58A35] dark:text-[#171717]"
+                className="inline-flex items-center gap-1.5 rounded-lg bg-[#16273A] px-3 py-1.5 text-xs font-semibold text-white dark:bg-[#C99B56] dark:text-[#16273A]"
               >
                 <RotateCcw className="h-3.5 w-3.5" /> Restore Lead
               </button>
@@ -446,9 +446,9 @@ export const LeadDetailView: React.FC<LeadDetailViewProps> = ({
                     type="button"
                     disabled={!canOpen}
                     onClick={() => canOpen && onOpenLead(d.id)}
-                    className="rounded border border-amber-500/30 bg-white px-2.5 py-1 text-[11px] font-medium text-[#171717] hover:border-[#B58A35] disabled:opacity-60 dark:bg-[#171717] dark:text-white"
+                    className="rounded border border-amber-500/30 bg-white px-2.5 py-1 text-[11px] font-medium text-[#16273A] hover:border-[#C99B56] disabled:opacity-60 dark:bg-[#121E2C] dark:text-white"
                   >
-                    <span className="font-mono-tabular text-[#B58A35]">{d.lead_code}</span> · {d.requirement_summary} · {d.stage}
+                    <span className="font-mono-tabular text-[#C99B56]">{d.lead_code}</span> · {d.requirement_summary} · {d.stage}
                   </button>
                 );
               })}
@@ -462,9 +462,9 @@ export const LeadDetailView: React.FC<LeadDetailViewProps> = ({
         {/* Left Column: Customer, Requirement, Booking/Dead Details */}
         <div className="lg:col-span-5 space-y-5">
           {/* Customer Details */}
-          <div className="rounded-xl border border-[#E5DEC9] bg-white p-5 dark:border-[#2A2A2A] dark:bg-[#171717]">
+          <div className="rounded-xl border border-[#E2E8F0] bg-white p-5 dark:border-[#1E3349] dark:bg-[#121E2C]">
             <div className="flex items-center justify-between mb-3">
-              <h2 className="text-sm font-semibold text-[#171717] dark:text-white">Customer Details</h2>
+              <h2 className="text-sm font-semibold text-[#16273A] dark:text-white">Customer Details</h2>
               {canEdit && !editingCustomer && (
                 <button
                   type="button"
@@ -481,7 +481,7 @@ export const LeadDetailView: React.FC<LeadDetailViewProps> = ({
                     });
                     setEditingCustomer(true);
                   }}
-                  className="inline-flex items-center gap-1 text-xs font-medium text-[#B58A35] hover:underline"
+                  className="inline-flex items-center gap-1 text-xs font-medium text-[#C99B56] hover:underline"
                 >
                   <Edit3 className="h-3 w-3" /> Edit
                 </button>
@@ -495,7 +495,7 @@ export const LeadDetailView: React.FC<LeadDetailViewProps> = ({
                   value={String(editDraft.customer_name || '')}
                   onChange={(e) => setEditDraft({ ...editDraft, customer_name: e.target.value })}
                   placeholder="Customer Name"
-                  className="w-full rounded-lg border border-[#E5DEC9] px-2.5 py-1.5 dark:border-[#2E2E2E] dark:bg-[#111111] dark:text-white"
+                  className="w-full rounded-lg border border-[#E2E8F0] px-2.5 py-1.5 dark:border-[#1E3349] dark:bg-[#0C141E] dark:text-white"
                 />
                 <div className="grid grid-cols-2 gap-2">
                   <input
@@ -504,7 +504,7 @@ export const LeadDetailView: React.FC<LeadDetailViewProps> = ({
                     value={String(editDraft.mobile || '')}
                     onChange={(e) => setEditDraft({ ...editDraft, mobile: e.target.value.replace(/\D/g, '') })}
                     placeholder="Mobile"
-                    className="w-full rounded-lg border border-[#E5DEC9] px-2.5 py-1.5 font-mono-tabular dark:border-[#2E2E2E] dark:bg-[#111111] dark:text-white"
+                    className="w-full rounded-lg border border-[#E2E8F0] px-2.5 py-1.5 font-mono-tabular dark:border-[#1E3349] dark:bg-[#0C141E] dark:text-white"
                   />
                   <input
                     type="tel"
@@ -512,7 +512,7 @@ export const LeadDetailView: React.FC<LeadDetailViewProps> = ({
                     value={String(editDraft.alternate_mobile || '')}
                     onChange={(e) => setEditDraft({ ...editDraft, alternate_mobile: e.target.value.replace(/\D/g, '') })}
                     placeholder="Alternate Mobile"
-                    className="w-full rounded-lg border border-[#E5DEC9] px-2.5 py-1.5 font-mono-tabular dark:border-[#2E2E2E] dark:bg-[#111111] dark:text-white"
+                    className="w-full rounded-lg border border-[#E2E8F0] px-2.5 py-1.5 font-mono-tabular dark:border-[#1E3349] dark:bg-[#0C141E] dark:text-white"
                   />
                 </div>
                 <div className="grid grid-cols-2 gap-2">
@@ -523,7 +523,7 @@ export const LeadDetailView: React.FC<LeadDetailViewProps> = ({
                         type="button"
                         onClick={() => setEditDraft({ ...editDraft, whatsapp: editDraft.mobile })}
                         disabled={!editDraft.mobile}
-                        className="text-[10px] font-semibold text-[#B58A35] hover:underline disabled:opacity-40 cursor-pointer"
+                        className="text-[10px] font-semibold text-[#C99B56] hover:underline disabled:opacity-40 cursor-pointer"
                         title="Copy Mobile into WhatsApp"
                       >
                         Same as Primary
@@ -535,7 +535,7 @@ export const LeadDetailView: React.FC<LeadDetailViewProps> = ({
                       value={String(editDraft.whatsapp || '')}
                       onChange={(e) => setEditDraft({ ...editDraft, whatsapp: e.target.value.replace(/\D/g, '') })}
                       placeholder="WhatsApp (10 digits)"
-                      className="w-full rounded-lg border border-[#E5DEC9] px-2.5 py-1.5 font-mono-tabular dark:border-[#2E2E2E] dark:bg-[#111111] dark:text-white"
+                      className="w-full rounded-lg border border-[#E2E8F0] px-2.5 py-1.5 font-mono-tabular dark:border-[#1E3349] dark:bg-[#0C141E] dark:text-white"
                     />
                   </div>
                   <div>
@@ -545,7 +545,7 @@ export const LeadDetailView: React.FC<LeadDetailViewProps> = ({
                       value={String(editDraft.email || '')}
                       onChange={(e) => setEditDraft({ ...editDraft, email: e.target.value })}
                       placeholder="Email"
-                      className="w-full rounded-lg border border-[#E5DEC9] px-2.5 py-1.5 dark:border-[#2E2E2E] dark:bg-[#111111] dark:text-white"
+                      className="w-full rounded-lg border border-[#E2E8F0] px-2.5 py-1.5 dark:border-[#1E3349] dark:bg-[#0C141E] dark:text-white"
                     />
                   </div>
                 </div>
@@ -555,12 +555,12 @@ export const LeadDetailView: React.FC<LeadDetailViewProps> = ({
                     value={String(editDraft.company_name || '')}
                     onChange={(e) => setEditDraft({ ...editDraft, company_name: e.target.value })}
                     placeholder="Company"
-                    className="w-full rounded-lg border border-[#E5DEC9] px-2.5 py-1.5 dark:border-[#2E2E2E] dark:bg-[#111111] dark:text-white"
+                    className="w-full rounded-lg border border-[#E2E8F0] px-2.5 py-1.5 dark:border-[#1E3349] dark:bg-[#0C141E] dark:text-white"
                   />
                   <select
                     value={String(editDraft.lead_source || '')}
                     onChange={(e) => setEditDraft({ ...editDraft, lead_source: e.target.value })}
-                    className="w-full rounded-lg border border-[#E5DEC9] px-2.5 py-1.5 dark:border-[#2E2E2E] dark:bg-[#111111] dark:text-white"
+                    className="w-full rounded-lg border border-[#E2E8F0] px-2.5 py-1.5 dark:border-[#1E3349] dark:bg-[#0C141E] dark:text-white"
                   >
                     {sources.map((s) => (
                       <option key={s.id} value={s.name}>
@@ -574,20 +574,20 @@ export const LeadDetailView: React.FC<LeadDetailViewProps> = ({
                   value={String(editDraft.customer_remarks || '')}
                   onChange={(e) => setEditDraft({ ...editDraft, customer_remarks: e.target.value })}
                   placeholder="Customer Remarks"
-                  className="w-full rounded-lg border border-[#E5DEC9] px-2.5 py-1.5 dark:border-[#2E2E2E] dark:bg-[#111111] dark:text-white"
+                  className="w-full rounded-lg border border-[#E2E8F0] px-2.5 py-1.5 dark:border-[#1E3349] dark:bg-[#0C141E] dark:text-white"
                 />
                 <div className="flex justify-end gap-2 pt-1">
                   <button
                     type="button"
                     onClick={() => setEditingCustomer(false)}
-                    className="rounded border border-[#E5DEC9] px-3 py-1 text-xs dark:border-[#2E2E2E] dark:text-white"
+                    className="rounded border border-[#E2E8F0] px-3 py-1 text-xs dark:border-[#1E3349] dark:text-white"
                   >
                     Cancel
                   </button>
                   <button
                     type="button"
                     onClick={() => saveEdit('customer')}
-                    className="rounded bg-[#171717] px-3 py-1 text-xs font-semibold text-white dark:bg-[#B58A35] dark:text-[#171717]"
+                    className="rounded bg-[#16273A] px-3 py-1 text-xs font-semibold text-white dark:bg-[#C99B56] dark:text-[#16273A]"
                   >
                     Save
                   </button>
@@ -597,34 +597,34 @@ export const LeadDetailView: React.FC<LeadDetailViewProps> = ({
               <dl className="grid grid-cols-2 gap-y-2.5 gap-x-3 text-xs">
                 <div>
                   <dt className="text-[#737373] dark:text-[#A3A3A3]">Primary Mobile</dt>
-                  <dd className="font-mono-tabular font-medium text-[#171717] dark:text-white">{lead.mobile}</dd>
+                  <dd className="font-mono-tabular font-medium text-[#16273A] dark:text-white">{lead.mobile}</dd>
                 </div>
                 <div>
                   <dt className="text-[#737373] dark:text-[#A3A3A3]">Alternate Mobile</dt>
-                  <dd className="font-mono-tabular text-[#171717] dark:text-white">{lead.alternate_mobile || '—'}</dd>
+                  <dd className="font-mono-tabular text-[#16273A] dark:text-white">{lead.alternate_mobile || '—'}</dd>
                 </div>
                 <div>
                   <dt className="text-[#737373] dark:text-[#A3A3A3]">WhatsApp</dt>
-                  <dd className="font-mono-tabular text-[#171717] dark:text-white">{lead.whatsapp || '—'}</dd>
+                  <dd className="font-mono-tabular text-[#16273A] dark:text-white">{lead.whatsapp || '—'}</dd>
                 </div>
                 <div>
                   <dt className="text-[#737373] dark:text-[#A3A3A3]">Email</dt>
-                  <dd className="text-[#171717] dark:text-white truncate">{lead.email || '—'}</dd>
+                  <dd className="text-[#16273A] dark:text-white truncate">{lead.email || '—'}</dd>
                 </div>
                 <div>
                   <dt className="text-[#737373] dark:text-[#A3A3A3]">Company</dt>
-                  <dd className="text-[#171717] dark:text-white">{lead.company_name || '—'}</dd>
+                  <dd className="text-[#16273A] dark:text-white">{lead.company_name || '—'}</dd>
                 </div>
                 <div>
                   <dt className="text-[#737373] dark:text-[#A3A3A3]">Last Interaction</dt>
-                  <dd className="font-mono-tabular text-[#171717] dark:text-white">
+                  <dd className="font-mono-tabular text-[#16273A] dark:text-white">
                     {formatDateOnly(lead.last_qualifying_interaction_at)}
                   </dd>
                 </div>
                 {lead.customer_remarks && (
                   <div className="col-span-2">
                     <dt className="text-[#737373] dark:text-[#A3A3A3]">Customer Remarks</dt>
-                    <dd className="text-[#171717] dark:text-white mt-0.5">{lead.customer_remarks}</dd>
+                    <dd className="text-[#16273A] dark:text-white mt-0.5">{lead.customer_remarks}</dd>
                   </div>
                 )}
               </dl>
@@ -632,9 +632,9 @@ export const LeadDetailView: React.FC<LeadDetailViewProps> = ({
           </div>
 
           {/* Property Requirement */}
-          <div className="rounded-xl border border-[#E5DEC9] bg-white p-5 dark:border-[#2A2A2A] dark:bg-[#171717]">
+          <div className="rounded-xl border border-[#E2E8F0] bg-white p-5 dark:border-[#1E3349] dark:bg-[#121E2C]">
             <div className="flex items-center justify-between mb-3">
-              <h2 className="text-sm font-semibold text-[#171717] dark:text-white">Property Requirement</h2>
+              <h2 className="text-sm font-semibold text-[#16273A] dark:text-white">Property Requirement</h2>
               {canEdit && !editingRequirement && (
                 <button
                   type="button"
@@ -657,7 +657,7 @@ export const LeadDetailView: React.FC<LeadDetailViewProps> = ({
                     });
                     setEditingRequirement(true);
                   }}
-                  className="inline-flex items-center gap-1 text-xs font-medium text-[#B58A35] hover:underline"
+                  className="inline-flex items-center gap-1 text-xs font-medium text-[#C99B56] hover:underline"
                 >
                   <Edit3 className="h-3 w-3" /> Edit
                 </button>
@@ -684,8 +684,8 @@ export const LeadDetailView: React.FC<LeadDetailViewProps> = ({
                           }
                           className={`rounded px-2 py-0.5 text-[11px] border ${
                             active
-                              ? 'border-[#B58A35] bg-[#F3EBDD] text-[#171717] dark:bg-[#26211A] dark:text-[#F3EBDD]'
-                              : 'border-[#E5DEC9] text-[#737373] dark:border-[#2E2E2E]'
+                              ? 'border-[#C99B56] bg-[#FBF6EE] text-[#16273A] dark:bg-[#2A2318] dark:text-[#FBF6EE]'
+                              : 'border-[#E2E8F0] text-[#737373] dark:border-[#1E3349]'
                           }`}
                         >
                           {loc.name}
@@ -699,7 +699,7 @@ export const LeadDetailView: React.FC<LeadDetailViewProps> = ({
                     <div className="flex items-center justify-between mb-1">
                       <span className="text-[11px] text-[#737373]">Budget From (INR)</span>
                       {Boolean(editDraft.budget_from && Number(editDraft.budget_from) > 0) && (
-                        <span className="text-[10px] font-semibold text-[#B58A35]">
+                        <span className="text-[10px] font-semibold text-[#C99B56]">
                           {formatAmountInWords(editDraft.budget_from as string | number)}
                         </span>
                       )}
@@ -709,7 +709,7 @@ export const LeadDetailView: React.FC<LeadDetailViewProps> = ({
                       onChange={(e) => {
                         if (e.target.value) setEditDraft({ ...editDraft, budget_from: e.target.value });
                       }}
-                      className="w-full mb-1 rounded-lg border border-[#E5DEC9] px-2 py-1 text-xs dark:border-[#2E2E2E] dark:bg-[#111111] dark:text-white"
+                      className="w-full mb-1 rounded-lg border border-[#E2E8F0] px-2 py-1 text-xs dark:border-[#1E3349] dark:bg-[#0C141E] dark:text-white"
                     >
                       <option value="">Select Preset...</option>
                       {generateBudgetOptions(lead.transaction_type).map((opt) => (
@@ -723,14 +723,14 @@ export const LeadDetailView: React.FC<LeadDetailViewProps> = ({
                       value={String(editDraft.budget_from ?? '')}
                       onChange={(e) => setEditDraft({ ...editDraft, budget_from: e.target.value })}
                       placeholder="Budget From (INR)"
-                      className="w-full rounded-lg border border-[#E5DEC9] px-2.5 py-1.5 font-mono-tabular dark:border-[#2E2E2E] dark:bg-[#111111] dark:text-white"
+                      className="w-full rounded-lg border border-[#E2E8F0] px-2.5 py-1.5 font-mono-tabular dark:border-[#1E3349] dark:bg-[#0C141E] dark:text-white"
                     />
                   </div>
                   <div>
                     <div className="flex items-center justify-between mb-1">
                       <span className="text-[11px] text-[#737373]">Budget To (INR)</span>
                       {Boolean(editDraft.budget_to && Number(editDraft.budget_to) > 0) && (
-                        <span className="text-[10px] font-semibold text-[#B58A35]">
+                        <span className="text-[10px] font-semibold text-[#C99B56]">
                           {formatAmountInWords(editDraft.budget_to as string | number)}
                         </span>
                       )}
@@ -740,7 +740,7 @@ export const LeadDetailView: React.FC<LeadDetailViewProps> = ({
                       onChange={(e) => {
                         if (e.target.value) setEditDraft({ ...editDraft, budget_to: e.target.value });
                       }}
-                      className="w-full mb-1 rounded-lg border border-[#E5DEC9] px-2 py-1 text-xs dark:border-[#2E2E2E] dark:bg-[#111111] dark:text-white"
+                      className="w-full mb-1 rounded-lg border border-[#E2E8F0] px-2 py-1 text-xs dark:border-[#1E3349] dark:bg-[#0C141E] dark:text-white"
                     >
                       <option value="">Select Preset...</option>
                       {generateBudgetOptions(lead.transaction_type).map((opt) => (
@@ -754,7 +754,7 @@ export const LeadDetailView: React.FC<LeadDetailViewProps> = ({
                       value={String(editDraft.budget_to ?? '')}
                       onChange={(e) => setEditDraft({ ...editDraft, budget_to: e.target.value })}
                       placeholder="Budget To (INR)"
-                      className="w-full rounded-lg border border-[#E5DEC9] px-2.5 py-1.5 font-mono-tabular dark:border-[#2E2E2E] dark:bg-[#111111] dark:text-white"
+                      className="w-full rounded-lg border border-[#E2E8F0] px-2.5 py-1.5 font-mono-tabular dark:border-[#1E3349] dark:bg-[#0C141E] dark:text-white"
                     />
                   </div>
                 </div>
@@ -764,19 +764,19 @@ export const LeadDetailView: React.FC<LeadDetailViewProps> = ({
                     value={String(editDraft.min_area ?? '')}
                     onChange={(e) => setEditDraft({ ...editDraft, min_area: e.target.value })}
                     placeholder="Min Area"
-                    className="rounded-lg border border-[#E5DEC9] px-2.5 py-1.5 font-mono-tabular dark:border-[#2E2E2E] dark:bg-[#111111] dark:text-white"
+                    className="rounded-lg border border-[#E2E8F0] px-2.5 py-1.5 font-mono-tabular dark:border-[#1E3349] dark:bg-[#0C141E] dark:text-white"
                   />
                   <input
                     type="number"
                     value={String(editDraft.max_area ?? '')}
                     onChange={(e) => setEditDraft({ ...editDraft, max_area: e.target.value })}
                     placeholder="Max Area"
-                    className="rounded-lg border border-[#E5DEC9] px-2.5 py-1.5 font-mono-tabular dark:border-[#2E2E2E] dark:bg-[#111111] dark:text-white"
+                    className="rounded-lg border border-[#E2E8F0] px-2.5 py-1.5 font-mono-tabular dark:border-[#1E3349] dark:bg-[#0C141E] dark:text-white"
                   />
                   <select
                     value={String(editDraft.area_unit || 'Sq. Ft.')}
                     onChange={(e) => setEditDraft({ ...editDraft, area_unit: e.target.value })}
-                    className="rounded-lg border border-[#E5DEC9] px-2 py-1.5 dark:border-[#2E2E2E] dark:bg-[#111111] dark:text-white"
+                    className="rounded-lg border border-[#E2E8F0] px-2 py-1.5 dark:border-[#1E3349] dark:bg-[#0C141E] dark:text-white"
                   >
                     {AREA_UNITS.map((u) => (
                       <option key={u} value={u}>
@@ -790,7 +790,7 @@ export const LeadDetailView: React.FC<LeadDetailViewProps> = ({
                     <select
                       value={String(editDraft.bhk_config || '')}
                       onChange={(e) => setEditDraft({ ...editDraft, bhk_config: e.target.value })}
-                      className="rounded-lg border border-[#E5DEC9] px-2.5 py-1.5 dark:border-[#2E2E2E] dark:bg-[#111111] dark:text-white"
+                      className="rounded-lg border border-[#E2E8F0] px-2.5 py-1.5 dark:border-[#1E3349] dark:bg-[#0C141E] dark:text-white"
                     >
                       <option value="">BHK (Any)</option>
                       {bhkMaster.map((b) => (
@@ -805,13 +805,13 @@ export const LeadDetailView: React.FC<LeadDetailViewProps> = ({
                       value={String(editDraft.commercial_config || '')}
                       onChange={(e) => setEditDraft({ ...editDraft, commercial_config: e.target.value })}
                       placeholder="Commercial Config"
-                      className="rounded-lg border border-[#E5DEC9] px-2.5 py-1.5 dark:border-[#2E2E2E] dark:bg-[#111111] dark:text-white"
+                      className="rounded-lg border border-[#E2E8F0] px-2.5 py-1.5 dark:border-[#1E3349] dark:bg-[#0C141E] dark:text-white"
                     />
                   )}
                   <select
                     value={String(editDraft.furnishing_type || '')}
                     onChange={(e) => setEditDraft({ ...editDraft, furnishing_type: e.target.value })}
-                    className="rounded-lg border border-[#E5DEC9] px-2.5 py-1.5 dark:border-[#2E2E2E] dark:bg-[#111111] dark:text-white"
+                    className="rounded-lg border border-[#E2E8F0] px-2.5 py-1.5 dark:border-[#1E3349] dark:bg-[#0C141E] dark:text-white"
                   >
                     <option value="">Furnishing (Any)</option>
                     {furnishingMaster.map((f) => (
@@ -828,7 +828,7 @@ export const LeadDetailView: React.FC<LeadDetailViewProps> = ({
                       <select
                         value={String(editDraft.preferred_floor || '')}
                         onChange={(e) => setEditDraft({ ...editDraft, preferred_floor: e.target.value })}
-                        className="w-full rounded-lg border border-[#E5DEC9] px-2.5 py-1.5 dark:border-[#2E2E2E] dark:bg-[#111111] dark:text-white"
+                        className="w-full rounded-lg border border-[#E2E8F0] px-2.5 py-1.5 dark:border-[#1E3349] dark:bg-[#0C141E] dark:text-white"
                       >
                         <option value="Ground Floor">Ground Floor</option>
                         <option value="First Floor">First Floor</option>
@@ -844,7 +844,7 @@ export const LeadDetailView: React.FC<LeadDetailViewProps> = ({
                         value={String(editDraft.preferred_floor || '')}
                         onChange={(e) => setEditDraft({ ...editDraft, preferred_floor: e.target.value })}
                         placeholder="Preferred Floor"
-                        className="w-full rounded-lg border border-[#E5DEC9] px-2.5 py-1.5 dark:border-[#2E2E2E] dark:bg-[#111111] dark:text-white"
+                        className="w-full rounded-lg border border-[#E2E8F0] px-2.5 py-1.5 dark:border-[#1E3349] dark:bg-[#0C141E] dark:text-white"
                       />
                     </div>
                   )}
@@ -853,7 +853,7 @@ export const LeadDetailView: React.FC<LeadDetailViewProps> = ({
                     <select
                       value={String(editDraft.possession_pref || '')}
                       onChange={(e) => setEditDraft({ ...editDraft, possession_pref: e.target.value })}
-                      className="w-full rounded-lg border border-[#E5DEC9] px-2.5 py-1.5 dark:border-[#2E2E2E] dark:bg-[#111111] dark:text-white"
+                      className="w-full rounded-lg border border-[#E2E8F0] px-2.5 py-1.5 dark:border-[#1E3349] dark:bg-[#0C141E] dark:text-white"
                     >
                       <option value="">Possession (Any)</option>
                       {possessionMaster.map((p) => (
@@ -869,20 +869,20 @@ export const LeadDetailView: React.FC<LeadDetailViewProps> = ({
                   value={String(editDraft.requirement_remarks || '')}
                   onChange={(e) => setEditDraft({ ...editDraft, requirement_remarks: e.target.value })}
                   placeholder="Requirement Remarks"
-                  className="w-full rounded-lg border border-[#E5DEC9] px-2.5 py-1.5 dark:border-[#2E2E2E] dark:bg-[#111111] dark:text-white"
+                  className="w-full rounded-lg border border-[#E2E8F0] px-2.5 py-1.5 dark:border-[#1E3349] dark:bg-[#0C141E] dark:text-white"
                 />
                 <div className="flex justify-end gap-2 pt-1">
                   <button
                     type="button"
                     onClick={() => setEditingRequirement(false)}
-                    className="rounded border border-[#E5DEC9] px-3 py-1 text-xs dark:border-[#2E2E2E] dark:text-white"
+                    className="rounded border border-[#E2E8F0] px-3 py-1 text-xs dark:border-[#1E3349] dark:text-white"
                   >
                     Cancel
                   </button>
                   <button
                     type="button"
                     onClick={() => saveEdit('requirement')}
-                    className="rounded bg-[#171717] px-3 py-1 text-xs font-semibold text-white dark:bg-[#B58A35] dark:text-[#171717]"
+                    className="rounded bg-[#16273A] px-3 py-1 text-xs font-semibold text-white dark:bg-[#C99B56] dark:text-[#16273A]"
                   >
                     Save
                   </button>
@@ -892,27 +892,27 @@ export const LeadDetailView: React.FC<LeadDetailViewProps> = ({
               <dl className="grid grid-cols-2 gap-y-2.5 gap-x-3 text-xs">
                 <div>
                   <dt className="text-[#737373] dark:text-[#A3A3A3]">Type &amp; Subtype</dt>
-                  <dd className="font-medium text-[#171717] dark:text-white">
+                  <dd className="font-medium text-[#16273A] dark:text-white">
                     {lead.property_type} · {lead.property_subtype}
                   </dd>
                 </div>
                 <div>
                   <dt className="text-[#737373] dark:text-[#A3A3A3]">Transaction</dt>
-                  <dd className="font-medium text-[#171717] dark:text-white">{lead.transaction_type}</dd>
+                  <dd className="font-medium text-[#16273A] dark:text-white">{lead.transaction_type}</dd>
                 </div>
                 <div className="col-span-2">
                   <dt className="text-[#737373] dark:text-[#A3A3A3]">Preferred Localities</dt>
-                  <dd className="text-[#171717] dark:text-white mt-0.5">{lead.localities.join(' · ')}</dd>
+                  <dd className="text-[#16273A] dark:text-white mt-0.5">{lead.localities.join(' · ')}</dd>
                 </div>
                 <div>
                   <dt className="text-[#737373] dark:text-[#A3A3A3]">Budget (INR)</dt>
-                  <dd className="font-mono-tabular font-medium text-[#171717] dark:text-white">
+                  <dd className="font-mono-tabular font-medium text-[#16273A] dark:text-white">
                     {formatBudgetRange(lead.budget_from, lead.budget_to)}
                   </dd>
                 </div>
                 <div>
                   <dt className="text-[#737373] dark:text-[#A3A3A3]">Area</dt>
-                  <dd className="font-mono-tabular text-[#171717] dark:text-white">
+                  <dd className="font-mono-tabular text-[#16273A] dark:text-white">
                     {lead.min_area || lead.max_area
                       ? `${lead.min_area ?? '—'} to ${lead.max_area ?? '—'} ${lead.area_unit || ''}`
                       : '—'}
@@ -921,17 +921,17 @@ export const LeadDetailView: React.FC<LeadDetailViewProps> = ({
                 {lead.property_type === 'Residential' ? (
                   <div>
                     <dt className="text-[#737373] dark:text-[#A3A3A3]">BHK</dt>
-                    <dd className="text-[#171717] dark:text-white">{lead.bhk_config || '—'}</dd>
+                    <dd className="text-[#16273A] dark:text-white">{lead.bhk_config || '—'}</dd>
                   </div>
                 ) : (
                   <>
                     <div>
                       <dt className="text-[#737373] dark:text-[#A3A3A3]">Commercial Config</dt>
-                      <dd className="text-[#171717] dark:text-white">{lead.commercial_config || '—'}</dd>
+                      <dd className="text-[#16273A] dark:text-white">{lead.commercial_config || '—'}</dd>
                     </div>
                     <div>
                       <dt className="text-[#737373] dark:text-[#A3A3A3]">Workstations / Cabins</dt>
-                      <dd className="font-mono-tabular text-[#171717] dark:text-white">
+                      <dd className="font-mono-tabular text-[#16273A] dark:text-white">
                         {lead.required_workstations ?? '—'} WS / {lead.required_cabins ?? '—'} Cabins
                       </dd>
                     </div>
@@ -939,20 +939,20 @@ export const LeadDetailView: React.FC<LeadDetailViewProps> = ({
                 )}
                 <div>
                   <dt className="text-[#737373] dark:text-[#A3A3A3]">Furnishing</dt>
-                  <dd className="text-[#171717] dark:text-white">{lead.furnishing_type || '—'}</dd>
+                  <dd className="text-[#16273A] dark:text-white">{lead.furnishing_type || '—'}</dd>
                 </div>
                 <div>
                   <dt className="text-[#737373] dark:text-[#A3A3A3]">Preferred Floor</dt>
-                  <dd className="text-[#171717] dark:text-white">{lead.preferred_floor || '—'}</dd>
+                  <dd className="text-[#16273A] dark:text-white">{lead.preferred_floor || '—'}</dd>
                 </div>
                 <div>
                   <dt className="text-[#737373] dark:text-[#A3A3A3]">Possession</dt>
-                  <dd className="text-[#171717] dark:text-white">{lead.possession_pref || '—'}</dd>
+                  <dd className="text-[#16273A] dark:text-white">{lead.possession_pref || '—'}</dd>
                 </div>
                 {lead.requirement_remarks && (
                   <div className="col-span-2">
                     <dt className="text-[#737373] dark:text-[#A3A3A3]">Requirement Remarks</dt>
-                    <dd className="text-[#171717] dark:text-white mt-0.5">{lead.requirement_remarks}</dd>
+                    <dd className="text-[#16273A] dark:text-white mt-0.5">{lead.requirement_remarks}</dd>
                   </div>
                 )}
               </dl>
@@ -979,7 +979,7 @@ export const LeadDetailView: React.FC<LeadDetailViewProps> = ({
                       });
                       setEditingBooking(true);
                     }}
-                    className="text-xs font-medium text-[#B58A35] hover:underline"
+                    className="text-xs font-medium text-[#C99B56] hover:underline"
                   >
                     Correct (Admin)
                   </button>
@@ -992,26 +992,26 @@ export const LeadDetailView: React.FC<LeadDetailViewProps> = ({
                     type="text"
                     value={String(editDraft.booking_project_name || '')}
                     onChange={(e) => setEditDraft({ ...editDraft, booking_project_name: e.target.value })}
-                    className="w-full rounded border border-[#E5DEC9] px-2.5 py-1.5 dark:border-[#2E2E2E] dark:bg-[#111111] dark:text-white"
+                    className="w-full rounded border border-[#E2E8F0] px-2.5 py-1.5 dark:border-[#1E3349] dark:bg-[#0C141E] dark:text-white"
                   />
                   <div className="grid grid-cols-2 gap-2">
                     <input
                       type="number"
                       value={String(editDraft.final_transaction_amount ?? '')}
                       onChange={(e) => setEditDraft({ ...editDraft, final_transaction_amount: Number(e.target.value) })}
-                      className="rounded border border-[#E5DEC9] px-2.5 py-1.5 font-mono-tabular dark:border-[#2E2E2E] dark:bg-[#111111] dark:text-white"
+                      className="rounded border border-[#E2E8F0] px-2.5 py-1.5 font-mono-tabular dark:border-[#1E3349] dark:bg-[#0C141E] dark:text-white"
                     />
                     <input
                       type="number"
                       value={String(editDraft.brokerage_amount ?? '')}
                       onChange={(e) => setEditDraft({ ...editDraft, brokerage_amount: Number(e.target.value) })}
-                      className="rounded border border-[#E5DEC9] px-2.5 py-1.5 font-mono-tabular dark:border-[#2E2E2E] dark:bg-[#111111] dark:text-white"
+                      className="rounded border border-[#E2E8F0] px-2.5 py-1.5 font-mono-tabular dark:border-[#1E3349] dark:bg-[#0C141E] dark:text-white"
                     />
                   </div>
                   <select
                     value={String(editDraft.payment_status || 'Pending')}
                     onChange={(e) => setEditDraft({ ...editDraft, payment_status: e.target.value })}
-                    className="w-full rounded border border-[#E5DEC9] px-2.5 py-1.5 dark:border-[#2E2E2E] dark:bg-[#111111] dark:text-white"
+                    className="w-full rounded border border-[#E2E8F0] px-2.5 py-1.5 dark:border-[#1E3349] dark:bg-[#0C141E] dark:text-white"
                   >
                     <option value="Pending">Pending</option>
                     <option value="Partially Paid">Partially Paid</option>
@@ -1024,7 +1024,7 @@ export const LeadDetailView: React.FC<LeadDetailViewProps> = ({
                     <button
                       type="button"
                       onClick={() => saveEdit('booking')}
-                      className="px-3 py-1 rounded bg-[#171717] text-white text-xs dark:bg-[#B58A35] dark:text-[#171717]"
+                      className="px-3 py-1 rounded bg-[#16273A] text-white text-xs dark:bg-[#C99B56] dark:text-[#16273A]"
                     >
                       Save Booking
                     </button>
@@ -1034,15 +1034,15 @@ export const LeadDetailView: React.FC<LeadDetailViewProps> = ({
                 <dl className="grid grid-cols-2 gap-2.5 text-xs">
                   <div>
                     <dt className="text-[#737373]">Project</dt>
-                    <dd className="font-semibold text-[#171717] dark:text-white">{lead.booking_project_name}</dd>
+                    <dd className="font-semibold text-[#16273A] dark:text-white">{lead.booking_project_name}</dd>
                   </div>
                   <div>
                     <dt className="text-[#737373]">Booking Date</dt>
-                    <dd className="font-mono-tabular text-[#171717] dark:text-white">{lead.booking_date}</dd>
+                    <dd className="font-mono-tabular text-[#16273A] dark:text-white">{lead.booking_date}</dd>
                   </div>
                   <div>
                     <dt className="text-[#737373]">Final Amount</dt>
-                    <dd className="font-mono-tabular font-semibold text-[#171717] dark:text-white">
+                    <dd className="font-mono-tabular font-semibold text-[#16273A] dark:text-white">
                       {formatINR(lead.final_transaction_amount)}
                     </dd>
                   </div>
@@ -1054,12 +1054,12 @@ export const LeadDetailView: React.FC<LeadDetailViewProps> = ({
                   </div>
                   <div>
                     <dt className="text-[#737373]">Payment Status</dt>
-                    <dd className="font-medium text-[#171717] dark:text-white">{lead.payment_status}</dd>
+                    <dd className="font-medium text-[#16273A] dark:text-white">{lead.payment_status}</dd>
                   </div>
                   {lead.booking_remarks && (
                     <div className="col-span-2">
                       <dt className="text-[#737373]">Remarks</dt>
-                      <dd className="text-[#171717] dark:text-white">{lead.booking_remarks}</dd>
+                      <dd className="text-[#16273A] dark:text-white">{lead.booking_remarks}</dd>
                     </div>
                   )}
                 </dl>
@@ -1069,16 +1069,16 @@ export const LeadDetailView: React.FC<LeadDetailViewProps> = ({
 
           {/* Dead Details */}
           {lead.stage === 'Dead' && (
-            <div className="rounded-xl border border-[#E5DEC9] bg-neutral-100/70 p-5 dark:border-[#2A2A2A] dark:bg-[#1B1B1B]">
-              <h2 className="text-sm font-semibold text-[#171717] dark:text-white mb-2">Dead Lead Closure</h2>
+            <div className="rounded-xl border border-[#E2E8F0] bg-neutral-100/70 p-5 dark:border-[#1E3349] dark:bg-[#1B1B1B]">
+              <h2 className="text-sm font-semibold text-[#16273A] dark:text-white mb-2">Dead Lead Closure</h2>
               <dl className="space-y-1.5 text-xs">
                 <div>
                   <dt className="text-[#737373]">Reason</dt>
-                  <dd className="font-medium text-[#171717] dark:text-white">{lead.dead_reason}</dd>
+                  <dd className="font-medium text-[#16273A] dark:text-white">{lead.dead_reason}</dd>
                 </div>
                 <div>
                   <dt className="text-[#737373]">Remarks</dt>
-                  <dd className="text-[#171717] dark:text-white">{lead.dead_remarks || '—'}</dd>
+                  <dd className="text-[#16273A] dark:text-white">{lead.dead_remarks || '—'}</dd>
                 </div>
                 <div>
                   <dt className="text-[#737373]">Marked By &amp; Date</dt>
@@ -1094,9 +1094,9 @@ export const LeadDetailView: React.FC<LeadDetailViewProps> = ({
         {/* Right Column: Upcoming Activities, Quick Actions & Timeline/Audit Tabs */}
         <div className="lg:col-span-7 space-y-5">
           {/* Quick Action Buttons + Upcoming Activities */}
-          <div className="rounded-xl border border-[#E5DEC9] bg-white p-5 dark:border-[#2A2A2A] dark:bg-[#171717]">
+          <div className="rounded-xl border border-[#E2E8F0] bg-white p-5 dark:border-[#1E3349] dark:bg-[#121E2C]">
             <div className="flex flex-wrap items-center justify-between gap-2 mb-4">
-              <h2 className="text-sm font-semibold text-[#171717] dark:text-white">
+              <h2 className="text-sm font-semibold text-[#16273A] dark:text-white">
                 Upcoming Activities ({upcomingActivities.length})
               </h2>
               {lead.is_deleted === 0 && (
@@ -1108,7 +1108,7 @@ export const LeadDetailView: React.FC<LeadDetailViewProps> = ({
                         setShowActForm(!showActForm);
                         setShowCommForm(false);
                       }}
-                      className="inline-flex items-center gap-1.5 rounded-lg bg-[#171717] px-3 py-1.5 text-xs font-semibold text-white dark:bg-[#B58A35] dark:text-[#171717]"
+                      className="inline-flex items-center gap-1.5 rounded-lg bg-[#16273A] px-3 py-1.5 text-xs font-semibold text-white dark:bg-[#C99B56] dark:text-[#16273A]"
                     >
                       <CalendarPlus className="h-3.5 w-3.5" /> Schedule Activity
                     </button>
@@ -1119,7 +1119,7 @@ export const LeadDetailView: React.FC<LeadDetailViewProps> = ({
                       setShowCommForm(!showCommForm);
                       setShowActForm(false);
                     }}
-                    className="inline-flex items-center gap-1.5 rounded-lg border border-[#E5DEC9] px-3 py-1.5 text-xs font-medium text-[#171717] hover:bg-[#F3EBDD] dark:border-[#2E2E2E] dark:text-white dark:hover:bg-[#242424]"
+                    className="inline-flex items-center gap-1.5 rounded-lg border border-[#E2E8F0] px-3 py-1.5 text-xs font-medium text-[#16273A] hover:bg-[#FBF6EE] dark:border-[#1E3349] dark:text-white dark:hover:bg-[#1A2C40]"
                   >
                     <MessageSquarePlus className="h-3.5 w-3.5" /> Log Call / WhatsApp
                   </button>
@@ -1130,13 +1130,13 @@ export const LeadDetailView: React.FC<LeadDetailViewProps> = ({
             {showActForm && (
               <form
                 onSubmit={handleScheduleActivity}
-                className="mb-4 rounded-lg border border-[#E5DEC9] bg-[#F8F6F1] p-3.5 space-y-3 dark:border-[#2A2A2A] dark:bg-[#111111]"
+                className="mb-4 rounded-lg border border-[#E2E8F0] bg-[#F8FAFC] p-3.5 space-y-3 dark:border-[#1E3349] dark:bg-[#0C141E]"
               >
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 text-xs">
                   <select
                     value={actType}
                     onChange={(e) => setActType(e.target.value)}
-                    className="rounded-lg border border-[#E5DEC9] bg-white px-2.5 py-1.5 dark:border-[#2E2E2E] dark:bg-[#171717] dark:text-white"
+                    className="rounded-lg border border-[#E2E8F0] bg-white px-2.5 py-1.5 dark:border-[#1E3349] dark:bg-[#121E2C] dark:text-white"
                   >
                     <option value="Follow-up Call">Follow-up Call</option>
                     <option value="WhatsApp Follow-up">WhatsApp Follow-up</option>
@@ -1149,14 +1149,14 @@ export const LeadDetailView: React.FC<LeadDetailViewProps> = ({
                     required
                     value={actDate}
                     onChange={(e) => setActDate(e.target.value)}
-                    className="rounded-lg border border-[#E5DEC9] bg-white px-2.5 py-1.5 dark:border-[#2E2E2E] dark:bg-[#171717] dark:text-white"
+                    className="rounded-lg border border-[#E2E8F0] bg-white px-2.5 py-1.5 dark:border-[#1E3349] dark:bg-[#121E2C] dark:text-white"
                   />
                   <input
                     type="time"
                     required
                     value={actTime}
                     onChange={(e) => setActTime(e.target.value)}
-                    className="rounded-lg border border-[#E5DEC9] bg-white px-2.5 py-1.5 dark:border-[#2E2E2E] dark:bg-[#171717] dark:text-white"
+                    className="rounded-lg border border-[#E2E8F0] bg-white px-2.5 py-1.5 dark:border-[#1E3349] dark:bg-[#121E2C] dark:text-white"
                   />
                 </div>
                 <input
@@ -1164,7 +1164,7 @@ export const LeadDetailView: React.FC<LeadDetailViewProps> = ({
                   value={actDesc}
                   onChange={(e) => setActDesc(e.target.value)}
                   placeholder="Description / Agenda (e.g., Visit Skyview 4BHK sample flat)"
-                  className="w-full rounded-lg border border-[#E5DEC9] bg-white px-3 py-1.5 text-xs dark:border-[#2E2E2E] dark:bg-[#171717] dark:text-white"
+                  className="w-full rounded-lg border border-[#E2E8F0] bg-white px-3 py-1.5 text-xs dark:border-[#1E3349] dark:bg-[#121E2C] dark:text-white"
                 />
                 <div className="flex justify-end gap-2">
                   <button type="button" onClick={() => setShowActForm(false)} className="px-3 py-1 text-xs text-[#737373]">
@@ -1172,7 +1172,7 @@ export const LeadDetailView: React.FC<LeadDetailViewProps> = ({
                   </button>
                   <button
                     type="submit"
-                    className="rounded-lg bg-[#171717] px-3.5 py-1.5 text-xs font-semibold text-white dark:bg-[#B58A35] dark:text-[#171717]"
+                    className="rounded-lg bg-[#16273A] px-3.5 py-1.5 text-xs font-semibold text-white dark:bg-[#C99B56] dark:text-[#16273A]"
                   >
                     Save Activity
                   </button>
@@ -1183,13 +1183,13 @@ export const LeadDetailView: React.FC<LeadDetailViewProps> = ({
             {showCommForm && (
               <form
                 onSubmit={handleLogCommunication}
-                className="mb-4 rounded-lg border border-[#E5DEC9] bg-[#F8F6F1] p-3.5 space-y-2.5 dark:border-[#2A2A2A] dark:bg-[#111111]"
+                className="mb-4 rounded-lg border border-[#E2E8F0] bg-[#F8FAFC] p-3.5 space-y-2.5 dark:border-[#1E3349] dark:bg-[#0C141E]"
               >
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 text-xs">
                   <select
                     value={commType}
                     onChange={(e) => setCommType(e.target.value)}
-                    className="rounded-lg border border-[#E5DEC9] bg-white px-2.5 py-1.5 dark:border-[#2E2E2E] dark:bg-[#171717] dark:text-white"
+                    className="rounded-lg border border-[#E2E8F0] bg-white px-2.5 py-1.5 dark:border-[#1E3349] dark:bg-[#121E2C] dark:text-white"
                   >
                     <option value="Call Completed">Call Completed</option>
                     <option value="WhatsApp Message Sent">WhatsApp Message Sent</option>
@@ -1202,7 +1202,7 @@ export const LeadDetailView: React.FC<LeadDetailViewProps> = ({
                     value={commNextAction}
                     onChange={(e) => setCommNextAction(e.target.value)}
                     placeholder="Next Action / Follow-up Remarks (Optional)"
-                    className="rounded-lg border border-[#E5DEC9] bg-white px-2.5 py-1.5 dark:border-[#2E2E2E] dark:bg-[#171717] dark:text-white"
+                    className="rounded-lg border border-[#E2E8F0] bg-white px-2.5 py-1.5 dark:border-[#1E3349] dark:bg-[#121E2C] dark:text-white"
                   />
                 </div>
                 <textarea
@@ -1211,7 +1211,7 @@ export const LeadDetailView: React.FC<LeadDetailViewProps> = ({
                   value={commDesc}
                   onChange={(e) => setCommDesc(e.target.value)}
                   placeholder="Enter discussion summary or customer response..."
-                  className="w-full rounded-lg border border-[#E5DEC9] bg-white px-3 py-1.5 text-xs dark:border-[#2E2E2E] dark:bg-[#171717] dark:text-white"
+                  className="w-full rounded-lg border border-[#E2E8F0] bg-white px-3 py-1.5 text-xs dark:border-[#1E3349] dark:bg-[#121E2C] dark:text-white"
                 />
                 <div className="flex justify-end gap-2">
                   <button type="button" onClick={() => setShowCommForm(false)} className="px-3 py-1 text-xs text-[#737373]">
@@ -1219,7 +1219,7 @@ export const LeadDetailView: React.FC<LeadDetailViewProps> = ({
                   </button>
                   <button
                     type="submit"
-                    className="rounded-lg bg-[#171717] px-3.5 py-1.5 text-xs font-semibold text-white dark:bg-[#B58A35] dark:text-[#171717]"
+                    className="rounded-lg bg-[#16273A] px-3.5 py-1.5 text-xs font-semibold text-white dark:bg-[#C99B56] dark:text-[#16273A]"
                   >
                     Record Log
                   </button>
@@ -1237,19 +1237,19 @@ export const LeadDetailView: React.FC<LeadDetailViewProps> = ({
                     className={`rounded-lg border p-3 text-xs ${
                       act.is_overdue
                         ? 'border-red-500/40 bg-red-50/40 dark:bg-red-950/15'
-                        : 'border-[#E5DEC9] dark:border-[#2A2A2A]'
+                        : 'border-[#E2E8F0] dark:border-[#1E3349]'
                     }`}
                   >
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                       <div>
                         <div className="flex items-center gap-2">
-                          <span className="font-semibold text-[#171717] dark:text-white">{act.activity_type}</span>
+                          <span className="font-semibold text-[#16273A] dark:text-white">{act.activity_type}</span>
                           {act.is_overdue && (
                             <span className="rounded bg-red-600 px-1.5 py-0.5 text-[10px] font-semibold text-white">
                               Overdue
                             </span>
                           )}
-                          <span className="font-mono-tabular text-[#B58A35]">
+                          <span className="font-mono-tabular text-[#C99B56]">
                             {act.scheduled_date} {act.scheduled_time}
                           </span>
                         </div>
@@ -1277,7 +1277,7 @@ export const LeadDetailView: React.FC<LeadDetailViewProps> = ({
                               setReschedDate(act.scheduled_date);
                               setReschedTime(act.scheduled_time);
                             }}
-                            className="rounded border border-[#E5DEC9] px-2 py-1 text-[11px] font-medium text-[#171717] hover:bg-[#F3EBDD] dark:border-[#2E2E2E] dark:text-white"
+                            className="rounded border border-[#E2E8F0] px-2 py-1 text-[11px] font-medium text-[#16273A] hover:bg-[#FBF6EE] dark:border-[#1E3349] dark:text-white"
                           >
                             Reschedule
                           </button>
@@ -1313,7 +1313,7 @@ export const LeadDetailView: React.FC<LeadDetailViewProps> = ({
                   value={completionRemarks}
                   onChange={(e) => setCompletionRemarks(e.target.value)}
                   placeholder="Outcome / completion remarks..."
-                  className="w-full rounded border border-[#E5DEC9] bg-white px-2.5 py-1.5 text-xs dark:border-[#2E2E2E] dark:bg-[#171717] dark:text-white"
+                  className="w-full rounded border border-[#E2E8F0] bg-white px-2.5 py-1.5 text-xs dark:border-[#1E3349] dark:bg-[#121E2C] dark:text-white"
                 />
                 <div className="flex justify-end gap-2">
                   <button type="button" onClick={() => setCompletingAct(null)} className="text-xs text-[#737373]">
@@ -1329,9 +1329,9 @@ export const LeadDetailView: React.FC<LeadDetailViewProps> = ({
             {reschedulingAct && (
               <form
                 onSubmit={handleRescheduleActivity}
-                className="mt-3 rounded-lg border border-[#B58A35]/40 bg-[#F3EBDD]/40 p-3 space-y-2 dark:bg-[#221F1A]"
+                className="mt-3 rounded-lg border border-[#C99B56]/40 bg-[#FBF6EE]/40 p-3 space-y-2 dark:bg-[#2A2318]"
               >
-                <div className="text-xs font-semibold text-[#171717] dark:text-white">
+                <div className="text-xs font-semibold text-[#16273A] dark:text-white">
                   Reschedule {reschedulingAct.activity_type}
                 </div>
                 <div className="grid grid-cols-2 gap-2">
@@ -1340,14 +1340,14 @@ export const LeadDetailView: React.FC<LeadDetailViewProps> = ({
                     required
                     value={reschedDate}
                     onChange={(e) => setReschedDate(e.target.value)}
-                    className="rounded border border-[#E5DEC9] bg-white px-2.5 py-1.5 text-xs dark:border-[#2E2E2E] dark:bg-[#171717] dark:text-white"
+                    className="rounded border border-[#E2E8F0] bg-white px-2.5 py-1.5 text-xs dark:border-[#1E3349] dark:bg-[#121E2C] dark:text-white"
                   />
                   <input
                     type="time"
                     required
                     value={reschedTime}
                     onChange={(e) => setReschedTime(e.target.value)}
-                    className="rounded border border-[#E5DEC9] bg-white px-2.5 py-1.5 text-xs dark:border-[#2E2E2E] dark:bg-[#171717] dark:text-white"
+                    className="rounded border border-[#E2E8F0] bg-white px-2.5 py-1.5 text-xs dark:border-[#1E3349] dark:bg-[#121E2C] dark:text-white"
                   />
                 </div>
                 <div className="flex justify-end gap-2">
@@ -1356,7 +1356,7 @@ export const LeadDetailView: React.FC<LeadDetailViewProps> = ({
                   </button>
                   <button
                     type="submit"
-                    className="rounded bg-[#171717] px-3 py-1 text-xs font-semibold text-white dark:bg-[#B58A35] dark:text-[#171717]"
+                    className="rounded bg-[#16273A] px-3 py-1 text-xs font-semibold text-white dark:bg-[#C99B56] dark:text-[#16273A]"
                   >
                     Save New Schedule
                   </button>
@@ -1377,7 +1377,7 @@ export const LeadDetailView: React.FC<LeadDetailViewProps> = ({
                   value={cancelReason}
                   onChange={(e) => setCancelReason(e.target.value)}
                   placeholder="Cancellation reason (optional)"
-                  className="w-full rounded border border-[#E5DEC9] bg-white px-2.5 py-1.5 text-xs dark:border-[#2E2E2E] dark:bg-[#171717] dark:text-white"
+                  className="w-full rounded border border-[#E2E8F0] bg-white px-2.5 py-1.5 text-xs dark:border-[#1E3349] dark:bg-[#121E2C] dark:text-white"
                 />
                 <div className="flex justify-end gap-2">
                   <button type="button" onClick={() => setCancellingAct(null)} className="text-xs text-[#737373]">
@@ -1392,8 +1392,8 @@ export const LeadDetailView: React.FC<LeadDetailViewProps> = ({
           </div>
 
           {/* Chronological Timeline / All Activities / Communications / Immutable Audit History */}
-          <div className="rounded-xl border border-[#E5DEC9] bg-white p-5 dark:border-[#2A2A2A] dark:bg-[#171717]">
-            <div className="flex flex-wrap items-center gap-1 border-b border-[#E5DEC9] pb-3 mb-4 dark:border-[#2A2A2A]">
+          <div className="rounded-xl border border-[#E2E8F0] bg-white p-5 dark:border-[#1E3349] dark:bg-[#121E2C]">
+            <div className="flex flex-wrap items-center gap-1 border-b border-[#E2E8F0] pb-3 mb-4 dark:border-[#1E3349]">
               {[
                 { key: 'timeline', label: `Chronological Timeline (${timeline.length})` },
                 { key: 'activities', label: `All Activities (${activities.length})` },
@@ -1406,8 +1406,8 @@ export const LeadDetailView: React.FC<LeadDetailViewProps> = ({
                   onClick={() => setActiveTab(tab.key as typeof activeTab)}
                   className={`rounded-md px-3 py-1.5 text-xs font-medium whitespace-nowrap ${
                     activeTab === tab.key
-                      ? 'bg-[#171717] text-white dark:bg-[#B58A35] dark:text-[#171717]'
-                      : 'text-[#525252] hover:bg-[#F3EBDD]/60 dark:text-[#A3A3A3] dark:hover:bg-[#242424]'
+                      ? 'bg-[#16273A] text-white dark:bg-[#C99B56] dark:text-[#16273A]'
+                      : 'text-[#525252] hover:bg-[#FBF6EE]/60 dark:text-[#A3A3A3] dark:hover:bg-[#1A2C40]'
                   }`}
                 >
                   {tab.label}
@@ -1416,11 +1416,11 @@ export const LeadDetailView: React.FC<LeadDetailViewProps> = ({
             </div>
 
             {activeTab === 'timeline' && (
-              <div className="divide-y divide-[#E5DEC9]/60 dark:divide-[#242424]">
+              <div className="divide-y divide-[#E2E8F0]/60 dark:divide-[#1E3349]">
                 {timeline.map((ev) => (
                   <div key={ev.id} className="py-3 text-xs">
                     <div className="flex items-center justify-between gap-2">
-                      <span className="font-semibold text-[#171717] dark:text-white">{ev.event_type}</span>
+                      <span className="font-semibold text-[#16273A] dark:text-white">{ev.event_type}</span>
                       <span className="font-mono-tabular text-[11px] text-[#737373] dark:text-[#A3A3A3]">
                         {formatDateTime(ev.created_at)}
                       </span>
@@ -1433,14 +1433,14 @@ export const LeadDetailView: React.FC<LeadDetailViewProps> = ({
             )}
 
             {activeTab === 'activities' && (
-              <div className="divide-y divide-[#E5DEC9]/60 dark:divide-[#242424]">
+              <div className="divide-y divide-[#E2E8F0]/60 dark:divide-[#1E3349]">
                 {activities.length === 0 ? (
                   <p className="text-xs text-[#737373]">No activities recorded.</p>
                 ) : (
                   activities.map((a) => (
                     <div key={a.id} className="py-3 text-xs">
                       <div className="flex items-center justify-between gap-2">
-                        <span className="font-semibold text-[#171717] dark:text-white">
+                        <span className="font-semibold text-[#16273A] dark:text-white">
                           {a.activity_type} · {a.status}
                         </span>
                         <span className="font-mono-tabular text-[11px] text-[#737373]">
@@ -1462,19 +1462,19 @@ export const LeadDetailView: React.FC<LeadDetailViewProps> = ({
             )}
 
             {activeTab === 'communications' && (
-              <div className="divide-y divide-[#E5DEC9]/60 dark:divide-[#242424]">
+              <div className="divide-y divide-[#E2E8F0]/60 dark:divide-[#1E3349]">
                 {communications.length === 0 ? (
                   <p className="text-xs text-[#737373]">No manual communication logs recorded.</p>
                 ) : (
                   communications.map((c) => (
                     <div key={c.id} className="py-3 text-xs">
                       <div className="flex items-center justify-between gap-2">
-                        <span className="font-semibold text-[#171717] dark:text-white">{c.comm_type}</span>
+                        <span className="font-semibold text-[#16273A] dark:text-white">{c.comm_type}</span>
                         <span className="font-mono-tabular text-[11px] text-[#737373]">{formatDateTime(c.created_at)}</span>
                       </div>
                       <p className="mt-1 text-[#404040] dark:text-[#D4D4D4]">{c.description}</p>
                       {c.next_action_remarks && (
-                        <p className="mt-0.5 text-[11px] text-[#B58A35]">Next action: {c.next_action_remarks}</p>
+                        <p className="mt-0.5 text-[11px] text-[#C99B56]">Next action: {c.next_action_remarks}</p>
                       )}
                       <p className="mt-0.5 text-[11px] text-[#737373]">Logged by {c.employee_name}</p>
                     </div>
@@ -1487,7 +1487,7 @@ export const LeadDetailView: React.FC<LeadDetailViewProps> = ({
               <div className="overflow-x-auto">
                 <table className="w-full text-left text-xs">
                   <thead>
-                    <tr className="border-b border-[#E5DEC9] text-[#737373] dark:border-[#2A2A2A]">
+                    <tr className="border-b border-[#E2E8F0] text-[#737373] dark:border-[#1E3349]">
                       <th className="py-2 pr-3 font-medium">When</th>
                       <th className="py-2 pr-3 font-medium">Action</th>
                       <th className="py-2 pr-3 font-medium">Field</th>
@@ -1495,13 +1495,13 @@ export const LeadDetailView: React.FC<LeadDetailViewProps> = ({
                       <th className="py-2 font-medium">Employee</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-[#E5DEC9]/60 dark:divide-[#242424]">
+                  <tbody className="divide-y divide-[#E2E8F0]/60 dark:divide-[#1E3349]">
                     {auditLogs.map((al) => (
                       <tr key={al.id}>
                         <td className="py-2 pr-3 font-mono-tabular text-[11px] text-[#737373] whitespace-nowrap">
                           {formatDateTime(al.created_at)}
                         </td>
-                        <td className="py-2 pr-3 font-medium text-[#171717] dark:text-white whitespace-nowrap">{al.action_type}</td>
+                        <td className="py-2 pr-3 font-medium text-[#16273A] dark:text-white whitespace-nowrap">{al.action_type}</td>
                         <td className="py-2 pr-3 text-[#525252] dark:text-[#A3A3A3]">{al.field_name || '—'}</td>
                         <td className="py-2 pr-3 text-[#262626] dark:text-[#E5E5E5]">
                           {al.previous_value || '—'} → {al.new_value || '—'}

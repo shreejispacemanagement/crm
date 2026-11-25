@@ -129,7 +129,7 @@ export const MastersView: React.FC<{
     <div className="space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h1 className="text-xl font-bold tracking-tight text-[#171717] dark:text-white">Master Management</h1>
+          <h1 className="text-xl font-bold tracking-tight text-[#16273A] dark:text-white">Master Management</h1>
           <p className="text-xs text-[#737373] dark:text-[#A3A3A3]">
             Add, edit, reorder, and deactivate master values. Used values cannot be permanently deleted to preserve history.
           </p>
@@ -138,14 +138,14 @@ export const MastersView: React.FC<{
           type="button"
           disabled={seeding}
           onClick={handleSeedDefaults}
-          className="inline-flex items-center gap-1.5 rounded-lg border border-[#E5DEC9] bg-white px-3.5 py-2 text-xs font-semibold text-[#171717] hover:bg-[#F3EBDD] disabled:opacity-50 dark:border-[#2E2E2E] dark:bg-[#171717] dark:text-white dark:hover:bg-[#242424]"
+          className="inline-flex items-center gap-1.5 rounded-lg border border-[#E2E8F0] bg-white px-3.5 py-2 text-xs font-semibold text-[#16273A] hover:bg-[#FBF6EE] disabled:opacity-50 dark:border-[#1E3349] dark:bg-[#121E2C] dark:text-white dark:hover:bg-[#1A2C40]"
         >
-          <RotateCcw className="h-3.5 w-3.5 text-[#B58A35]" />
+          <RotateCcw className="h-3.5 w-3.5 text-[#C99B56]" />
           {seeding ? 'Seeding PRD Defaults...' : 'Load PRD Defaults'}
         </button>
       </div>
 
-      <div className="flex flex-wrap gap-1.5 rounded-xl border border-[#E5DEC9] bg-white p-2 dark:border-[#2A2A2A] dark:bg-[#171717]">
+      <div className="flex flex-wrap gap-1.5 rounded-xl border border-[#E2E8F0] bg-white p-2 dark:border-[#1E3349] dark:bg-[#121E2C]">
         {MASTER_CATEGORIES.map((c) => (
           <button
             key={c.key}
@@ -156,8 +156,8 @@ export const MastersView: React.FC<{
             }}
             className={`rounded-lg px-3 py-1.5 text-xs font-medium whitespace-nowrap ${
               selectedCat === c.key
-                ? 'bg-[#171717] text-white dark:bg-[#B58A35] dark:text-[#171717]'
-                : 'text-[#525252] hover:bg-[#F3EBDD]/70 dark:text-[#A3A3A3]'
+                ? 'bg-[#16273A] text-white dark:bg-[#C99B56] dark:text-[#16273A]'
+                : 'text-[#525252] hover:bg-[#FBF6EE]/70 dark:text-[#A3A3A3]'
             }`}
           >
             {c.label}
@@ -176,7 +176,7 @@ export const MastersView: React.FC<{
         </div>
       )}
 
-      <div className="rounded-xl border border-[#E5DEC9] bg-white p-4 dark:border-[#2A2A2A] dark:bg-[#171717]">
+      <div className="rounded-xl border border-[#E2E8F0] bg-white p-4 dark:border-[#1E3349] dark:bg-[#121E2C]">
         <form onSubmit={handleAdd} className="flex flex-wrap items-end gap-2.5">
           <div className="flex-1 min-w-[200px]">
             <label className="block text-xs font-medium text-[#404040] dark:text-[#D4D4D4] mb-1">New Value Name *</label>
@@ -186,7 +186,7 @@ export const MastersView: React.FC<{
               value={newName}
               onChange={(e) => setNewName(e.target.value)}
               placeholder={`Add ${MASTER_CATEGORIES.find((c) => c.key === selectedCat)?.label}...`}
-              className="w-full rounded-lg border border-[#E5DEC9] bg-white px-3 py-2 text-xs dark:border-[#2E2E2E] dark:bg-[#111111] dark:text-white"
+              className="w-full rounded-lg border border-[#E2E8F0] bg-white px-3 py-2 text-xs dark:border-[#1E3349] dark:bg-[#0C141E] dark:text-white"
             />
           </div>
           {selectedCat === 'property_subtype' && (
@@ -195,7 +195,7 @@ export const MastersView: React.FC<{
               <select
                 value={newParent}
                 onChange={(e) => setNewParent(e.target.value)}
-                className="rounded-lg border border-[#E5DEC9] bg-white px-3 py-2 text-xs dark:border-[#2E2E2E] dark:bg-[#111111] dark:text-white"
+                className="rounded-lg border border-[#E2E8F0] bg-white px-3 py-2 text-xs dark:border-[#1E3349] dark:bg-[#0C141E] dark:text-white"
               >
                 {propertyTypes.map((p) => (
                   <option key={p.id} value={p.name}>
@@ -212,21 +212,21 @@ export const MastersView: React.FC<{
               value={newOrder}
               onChange={(e) => setNewOrder(e.target.value)}
               placeholder="Auto"
-              className="w-full rounded-lg border border-[#E5DEC9] bg-white px-2.5 py-2 text-xs font-mono-tabular dark:border-[#2E2E2E] dark:bg-[#111111] dark:text-white"
+              className="w-full rounded-lg border border-[#E2E8F0] bg-white px-2.5 py-2 text-xs font-mono-tabular dark:border-[#1E3349] dark:bg-[#0C141E] dark:text-white"
             />
           </div>
           <button
             type="submit"
-            className="inline-flex items-center gap-1 rounded-lg bg-[#171717] px-4 py-2 text-xs font-semibold text-white dark:bg-[#B58A35] dark:text-[#171717]"
+            className="inline-flex items-center gap-1 rounded-lg bg-[#16273A] px-4 py-2 text-xs font-semibold text-white dark:bg-[#C99B56] dark:text-[#16273A]"
           >
             <Plus className="h-3.5 w-3.5" /> Add Value
           </button>
         </form>
       </div>
 
-      <div className="rounded-xl border border-[#E5DEC9] bg-white overflow-hidden dark:border-[#2A2A2A] dark:bg-[#171717]">
+      <div className="rounded-xl border border-[#E2E8F0] bg-white overflow-hidden dark:border-[#1E3349] dark:bg-[#121E2C]">
         <table className="w-full text-left text-xs">
-          <thead className="bg-[#F8F6F1] border-b border-[#E5DEC9] dark:bg-[#141414] dark:border-[#2A2A2A]">
+          <thead className="bg-[#F8FAFC] border-b border-[#E2E8F0] dark:bg-[#0F1926] dark:border-[#1E3349]">
             <tr>
               <th className="px-4 py-2.5 font-semibold">Order</th>
               <th className="px-4 py-2.5 font-semibold">Value Name</th>
@@ -235,7 +235,7 @@ export const MastersView: React.FC<{
               <th className="px-4 py-2.5 font-semibold text-right">Actions</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-[#E5DEC9]/60 dark:divide-[#242424]">
+          <tbody className="divide-y divide-[#E2E8F0]/60 dark:divide-[#1E3349]">
             {items.length === 0 ? (
               <tr>
                 <td colSpan={selectedCat === 'property_subtype' ? 5 : 4} className="px-4 py-8 text-center text-[#737373]">
@@ -251,19 +251,19 @@ export const MastersView: React.FC<{
                       type="number"
                       value={editOrder}
                       onChange={(e) => setEditOrder(e.target.value)}
-                      className="w-16 rounded border border-[#E5DEC9] px-2 py-1 text-xs font-mono-tabular dark:bg-[#111111] dark:text-white"
+                      className="w-16 rounded border border-[#E2E8F0] px-2 py-1 text-xs font-mono-tabular dark:bg-[#0C141E] dark:text-white"
                     />
                   ) : (
                     item.sort_order
                   )}
                 </td>
-                <td className="px-4 py-2.5 font-medium text-[#171717] dark:text-white">
+                <td className="px-4 py-2.5 font-medium text-[#16273A] dark:text-white">
                   {editingId === item.id ? (
                     <input
                       type="text"
                       value={editName}
                       onChange={(e) => setEditName(e.target.value)}
-                      className="rounded border border-[#E5DEC9] px-2.5 py-1 text-xs dark:bg-[#111111] dark:text-white"
+                      className="rounded border border-[#E2E8F0] px-2.5 py-1 text-xs dark:bg-[#0C141E] dark:text-white"
                     />
                   ) : (
                     <>
@@ -294,7 +294,7 @@ export const MastersView: React.FC<{
                       <button
                         type="button"
                         onClick={() => handleSaveEdit(item)}
-                        className="font-semibold text-[#B58A35] hover:underline"
+                        className="font-semibold text-[#C99B56] hover:underline"
                       >
                         Save
                       </button>
@@ -311,7 +311,7 @@ export const MastersView: React.FC<{
                           setEditName(item.name);
                           setEditOrder(String(item.sort_order));
                         }}
-                        className="text-[#B58A35] font-medium hover:underline"
+                        className="text-[#C99B56] font-medium hover:underline"
                       >
                         Edit
                       </button>
@@ -447,7 +447,7 @@ export const UsersView: React.FC<{
     <div className="space-y-4">
       <div className="flex items-center justify-between gap-3">
         <div>
-          <h1 className="text-xl font-bold tracking-tight text-[#171717] dark:text-white">Team &amp; Employee Management</h1>
+          <h1 className="text-xl font-bold tracking-tight text-[#16273A] dark:text-white">Team &amp; Employee Management</h1>
           <p className="text-xs text-[#737373] dark:text-[#A3A3A3]">
             Invite employees by their Google email, control roles, and manage deactivation with automatic lead reassignment.
           </p>
@@ -455,7 +455,7 @@ export const UsersView: React.FC<{
         <button
           type="button"
           onClick={() => setShowCreate(!showCreate)}
-          className="inline-flex items-center gap-1.5 rounded-lg bg-[#171717] px-3.5 py-2 text-xs font-semibold text-white dark:bg-[#B58A35] dark:text-[#171717]"
+          className="inline-flex items-center gap-1.5 rounded-lg bg-[#16273A] px-3.5 py-2 text-xs font-semibold text-white dark:bg-[#C99B56] dark:text-[#16273A]"
         >
           <UserPlus className="h-3.5 w-3.5" /> Invite Employee
         </button>
@@ -475,9 +475,9 @@ export const UsersView: React.FC<{
       {showCreate && (
         <form
           onSubmit={handleCreate}
-          className="rounded-xl border border-[#E5DEC9] bg-white p-5 space-y-3 dark:border-[#2A2A2A] dark:bg-[#171717]"
+          className="rounded-xl border border-[#E2E8F0] bg-white p-5 space-y-3 dark:border-[#1E3349] dark:bg-[#121E2C]"
         >
-          <h3 className="text-sm font-semibold text-[#171717] dark:text-white">Invite Employee via Google Email</h3>
+          <h3 className="text-sm font-semibold text-[#16273A] dark:text-white">Invite Employee via Google Email</h3>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
             <input
               type="text"
@@ -485,7 +485,7 @@ export const UsersView: React.FC<{
               value={fullName}
               onChange={(e) => setFullName(e.target.value)}
               placeholder="Full Name *"
-              className="rounded-lg border border-[#E5DEC9] px-3 py-2 dark:border-[#2E2E2E] dark:bg-[#111111] dark:text-white"
+              className="rounded-lg border border-[#E2E8F0] px-3 py-2 dark:border-[#1E3349] dark:bg-[#0C141E] dark:text-white"
             />
             <input
               type="email"
@@ -493,7 +493,7 @@ export const UsersView: React.FC<{
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="employee@gmail.com (Google Email) *"
-              className="rounded-lg border border-[#E5DEC9] px-3 py-2 dark:border-[#2E2E2E] dark:bg-[#111111] dark:text-white"
+              className="rounded-lg border border-[#E2E8F0] px-3 py-2 dark:border-[#1E3349] dark:bg-[#0C141E] dark:text-white"
             />
             <input
               type="tel"
@@ -501,19 +501,19 @@ export const UsersView: React.FC<{
               value={mobile}
               onChange={(e) => setMobile(e.target.value.replace(/\D/g, ''))}
               placeholder="10-Digit Mobile"
-              className="rounded-lg border border-[#E5DEC9] px-3 py-2 font-mono-tabular dark:border-[#2E2E2E] dark:bg-[#111111] dark:text-white"
+              className="rounded-lg border border-[#E2E8F0] px-3 py-2 font-mono-tabular dark:border-[#1E3349] dark:bg-[#0C141E] dark:text-white"
             />
             <input
               type="text"
               value={designation}
               onChange={(e) => setDesignation(e.target.value)}
               placeholder="Designation"
-              className="rounded-lg border border-[#E5DEC9] px-3 py-2 dark:border-[#2E2E2E] dark:bg-[#111111] dark:text-white"
+              className="rounded-lg border border-[#E2E8F0] px-3 py-2 dark:border-[#1E3349] dark:bg-[#0C141E] dark:text-white"
             />
             <select
               value={role}
               onChange={(e) => setRole(e.target.value as 'sales_executive' | 'super_admin')}
-              className="rounded-lg border border-[#E5DEC9] px-3 py-2 dark:border-[#2E2E2E] dark:bg-[#111111] dark:text-white"
+              className="rounded-lg border border-[#E2E8F0] px-3 py-2 dark:border-[#1E3349] dark:bg-[#0C141E] dark:text-white"
             >
               <option value="sales_executive">Sales Executive</option>
               <option value="super_admin">Super Admin</option>
@@ -525,7 +525,7 @@ export const UsersView: React.FC<{
             </button>
             <button
               type="submit"
-              className="rounded-lg bg-[#171717] px-4 py-1.5 text-xs font-semibold text-white dark:bg-[#B58A35] dark:text-[#171717]"
+              className="rounded-lg bg-[#16273A] px-4 py-1.5 text-xs font-semibold text-white dark:bg-[#C99B56] dark:text-[#16273A]"
             >
               Send Invite
             </button>
@@ -533,10 +533,10 @@ export const UsersView: React.FC<{
         </form>
       )}
 
-      <div className="rounded-xl border border-[#E5DEC9] bg-white overflow-hidden dark:border-[#2A2A2A] dark:bg-[#171717]">
+      <div className="rounded-xl border border-[#E2E8F0] bg-white overflow-hidden dark:border-[#1E3349] dark:bg-[#121E2C]">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs">
-            <thead className="bg-[#F8F6F1] border-b border-[#E5DEC9] dark:bg-[#141414] dark:border-[#2A2A2A]">
+            <thead className="bg-[#F8FAFC] border-b border-[#E2E8F0] dark:bg-[#0F1926] dark:border-[#1E3349]">
               <tr>
                 <th className="px-4 py-3 font-semibold">Employee</th>
                 <th className="px-4 py-3 font-semibold">Email</th>
@@ -547,18 +547,18 @@ export const UsersView: React.FC<{
                 <th className="px-4 py-3 font-semibold text-right">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-[#E5DEC9]/60 dark:divide-[#242424]">
+            <tbody className="divide-y divide-[#E2E8F0]/60 dark:divide-[#1E3349]">
               {users.map((u) => (
                 <tr key={u.id}>
                   <td className="px-4 py-3">
-                    <div className="font-semibold text-[#171717] dark:text-white">{u.full_name}</div>
+                    <div className="font-semibold text-[#16273A] dark:text-white">{u.full_name}</div>
                     <div className="text-[11px] text-[#737373]">{u.designation}</div>
                   </td>
                   <td className="px-4 py-3 text-[#262626] dark:text-[#E5E5E5]">{u.email}</td>
                   <td className="px-4 py-3 font-mono-tabular text-[#525252] dark:text-[#A3A3A3]">{u.mobile || '—'}</td>
                   <td className="px-4 py-3">
-                    <span className="inline-flex items-center gap-1 font-medium text-[#171717] dark:text-white">
-                      {u.role === 'super_admin' && <Shield className="h-3 w-3 text-[#B58A35]" />}
+                    <span className="inline-flex items-center gap-1 font-medium text-[#16273A] dark:text-white">
+                      {u.role === 'super_admin' && <Shield className="h-3 w-3 text-[#C99B56]" />}
                       {u.role === 'super_admin' ? 'Super Admin' : 'Sales Executive'}
                     </span>
                   </td>
@@ -594,7 +594,7 @@ export const UsersView: React.FC<{
                           role: u.role,
                         });
                       }}
-                      className="text-[#B58A35] font-medium hover:underline"
+                      className="text-[#C99B56] font-medium hover:underline"
                     >
                       Edit
                     </button>
@@ -633,16 +633,16 @@ export const UsersView: React.FC<{
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
           <form
             onSubmit={handleSaveEdit}
-            className="w-full max-w-md rounded-xl border border-[#E5DEC9] bg-white p-6 space-y-3 dark:border-[#2A2A2A] dark:bg-[#171717]"
+            className="w-full max-w-md rounded-xl border border-[#E2E8F0] bg-white p-6 space-y-3 dark:border-[#1E3349] dark:bg-[#121E2C]"
           >
-            <h3 className="text-base font-semibold text-[#171717] dark:text-white">Edit Employee: {editingUser.full_name}</h3>
+            <h3 className="text-base font-semibold text-[#16273A] dark:text-white">Edit Employee: {editingUser.full_name}</h3>
             <input
               type="text"
               required
               value={editDraft.full_name}
               onChange={(e) => setEditDraft({ ...editDraft, full_name: e.target.value })}
               placeholder="Full Name"
-              className="w-full rounded-lg border border-[#E5DEC9] px-3 py-2 text-xs dark:border-[#2E2E2E] dark:bg-[#111111] dark:text-white"
+              className="w-full rounded-lg border border-[#E2E8F0] px-3 py-2 text-xs dark:border-[#1E3349] dark:bg-[#0C141E] dark:text-white"
             />
             <input
               type="email"
@@ -650,7 +650,7 @@ export const UsersView: React.FC<{
               value={editDraft.email}
               onChange={(e) => setEditDraft({ ...editDraft, email: e.target.value })}
               placeholder="Login Email (changes logged)"
-              className="w-full rounded-lg border border-[#E5DEC9] px-3 py-2 text-xs dark:border-[#2E2E2E] dark:bg-[#111111] dark:text-white"
+              className="w-full rounded-lg border border-[#E2E8F0] px-3 py-2 text-xs dark:border-[#1E3349] dark:bg-[#0C141E] dark:text-white"
             />
             <input
               type="tel"
@@ -658,19 +658,19 @@ export const UsersView: React.FC<{
               value={editDraft.mobile}
               onChange={(e) => setEditDraft({ ...editDraft, mobile: e.target.value.replace(/\D/g, '') })}
               placeholder="Mobile"
-              className="w-full rounded-lg border border-[#E5DEC9] px-3 py-2 text-xs font-mono-tabular dark:border-[#2E2E2E] dark:bg-[#111111] dark:text-white"
+              className="w-full rounded-lg border border-[#E2E8F0] px-3 py-2 text-xs font-mono-tabular dark:border-[#1E3349] dark:bg-[#0C141E] dark:text-white"
             />
             <input
               type="text"
               value={editDraft.designation}
               onChange={(e) => setEditDraft({ ...editDraft, designation: e.target.value })}
               placeholder="Designation"
-              className="w-full rounded-lg border border-[#E5DEC9] px-3 py-2 text-xs dark:border-[#2E2E2E] dark:bg-[#111111] dark:text-white"
+              className="w-full rounded-lg border border-[#E2E8F0] px-3 py-2 text-xs dark:border-[#1E3349] dark:bg-[#0C141E] dark:text-white"
             />
             <select
               value={editDraft.role}
               onChange={(e) => setEditDraft({ ...editDraft, role: e.target.value as 'sales_executive' | 'super_admin' })}
-              className="w-full rounded-lg border border-[#E5DEC9] px-3 py-2 text-xs dark:border-[#2E2E2E] dark:bg-[#111111] dark:text-white"
+              className="w-full rounded-lg border border-[#E2E8F0] px-3 py-2 text-xs dark:border-[#1E3349] dark:bg-[#0C141E] dark:text-white"
             >
               <option value="sales_executive">Sales Executive</option>
               <option value="super_admin">Super Admin</option>
@@ -681,7 +681,7 @@ export const UsersView: React.FC<{
               </button>
               <button
                 type="submit"
-                className="rounded-lg bg-[#171717] px-4 py-1.5 text-xs font-semibold text-white dark:bg-[#B58A35] dark:text-[#171717]"
+                className="rounded-lg bg-[#16273A] px-4 py-1.5 text-xs font-semibold text-white dark:bg-[#C99B56] dark:text-[#16273A]"
               >
                 Save Changes
               </button>
@@ -696,9 +696,9 @@ export const UsersView: React.FC<{
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
           <form
             onSubmit={handleDeactivate}
-            className="w-full max-w-md rounded-xl border border-[#E5DEC9] bg-white p-6 space-y-3 dark:border-[#2A2A2A] dark:bg-[#171717]"
+            className="w-full max-w-md rounded-xl border border-[#E2E8F0] bg-white p-6 space-y-3 dark:border-[#1E3349] dark:bg-[#121E2C]"
           >
-            <h3 className="text-base font-semibold text-[#171717] dark:text-white flex items-center gap-2">
+            <h3 className="text-base font-semibold text-[#16273A] dark:text-white flex items-center gap-2">
               <UserMinus className="h-4 w-4 text-red-600" /> Deactivate {deactivateUser.full_name}
             </h3>
             {(deactivateUser.active_lead_count || 0) > 0 &&
@@ -711,7 +711,7 @@ export const UsersView: React.FC<{
                   required
                   value={reassignTargetId}
                   onChange={(e) => setReassignTargetId(e.target.value)}
-                  className="w-full rounded-lg border border-[#E5DEC9] px-3 py-2 text-xs dark:border-[#2E2E2E] dark:bg-[#111111] dark:text-white"
+                  className="w-full rounded-lg border border-[#E2E8F0] px-3 py-2 text-xs dark:border-[#1E3349] dark:bg-[#0C141E] dark:text-white"
                 >
                   {activeSalesExecs
                     .filter((x) => x.id !== deactivateUser.id)
@@ -774,16 +774,16 @@ export const DeletedLeadsView: React.FC<{
   return (
     <div className="space-y-4">
       <div>
-        <h1 className="text-xl font-bold tracking-tight text-[#171717] dark:text-white">Deleted Leads</h1>
+        <h1 className="text-xl font-bold tracking-tight text-[#16273A] dark:text-white">Deleted Leads</h1>
         <p className="text-xs text-[#737373] dark:text-[#A3A3A3]">
           Soft-deleted leads excluded from normal pipelines and dashboards. Sequential SSM IDs are never reused.
         </p>
       </div>
 
-      <div className="rounded-xl border border-[#E5DEC9] bg-white overflow-hidden dark:border-[#2A2A2A] dark:bg-[#171717]">
+      <div className="rounded-xl border border-[#E2E8F0] bg-white overflow-hidden dark:border-[#1E3349] dark:bg-[#121E2C]">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs">
-            <thead className="bg-[#F8F6F1] border-b border-[#E5DEC9] dark:bg-[#141414] dark:border-[#2A2A2A]">
+            <thead className="bg-[#F8FAFC] border-b border-[#E2E8F0] dark:bg-[#0F1926] dark:border-[#1E3349]">
               <tr>
                 <th className="px-4 py-3 font-semibold">Lead ID</th>
                 <th className="px-4 py-3 font-semibold">Customer</th>
@@ -794,7 +794,7 @@ export const DeletedLeadsView: React.FC<{
                 <th className="px-4 py-3 font-semibold text-right">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-[#E5DEC9]/60 dark:divide-[#242424]">
+            <tbody className="divide-y divide-[#E2E8F0]/60 dark:divide-[#1E3349]">
               {loading ? (
                 <tr>
                   <td colSpan={7} className="px-4 py-8 text-center text-[#737373]">
@@ -810,12 +810,12 @@ export const DeletedLeadsView: React.FC<{
               ) : (
                 leads.map((l) => (
                   <tr key={l.id}>
-                    <td className="px-4 py-3 font-mono-tabular font-semibold text-[#B58A35]">
+                    <td className="px-4 py-3 font-mono-tabular font-semibold text-[#C99B56]">
                       <button type="button" onClick={() => onOpenLead(l.id)} className="hover:underline">
                         {l.lead_code}
                       </button>
                     </td>
-                    <td className="px-4 py-3 font-medium text-[#171717] dark:text-white">{l.customer_name}</td>
+                    <td className="px-4 py-3 font-medium text-[#16273A] dark:text-white">{l.customer_name}</td>
                     <td className="px-4 py-3 font-mono-tabular">{l.mobile}</td>
                     <td className="px-4 py-3">{l.stage}</td>
                     <td className="px-4 py-3 text-[#737373]">{l.deleted_by_name || '—'}</td>
@@ -824,7 +824,7 @@ export const DeletedLeadsView: React.FC<{
                       <button
                         type="button"
                         onClick={() => handleRestore(l.id)}
-                        className="inline-flex items-center gap-1 rounded border border-[#B58A35] px-2.5 py-1 text-xs font-semibold text-[#B58A35] hover:bg-[#B58A35]/10"
+                        className="inline-flex items-center gap-1 rounded border border-[#C99B56] px-2.5 py-1 text-xs font-semibold text-[#C99B56] hover:bg-[#C99B56]/10"
                       >
                         <RotateCcw className="h-3 w-3" /> Restore
                       </button>
@@ -863,14 +863,14 @@ export const AuditLogsView: React.FC<{ user: UserProfile; onOpenLead: (id: strin
   return (
     <div className="space-y-4">
       <div>
-        <h1 className="text-xl font-bold tracking-tight text-[#171717] dark:text-white">Audit History &amp; System Logs</h1>
+        <h1 className="text-xl font-bold tracking-tight text-[#16273A] dark:text-white">Audit History &amp; System Logs</h1>
         <p className="text-xs text-[#737373] dark:text-[#A3A3A3]">
           Immutable field-level audit trail {isAdmin ? ', export activity log, and login/logout history' : 'for your assigned leads'}
         </p>
       </div>
 
       {isAdmin && (
-        <div className="inline-flex rounded-lg border border-[#E5DEC9] bg-white p-0.5 dark:border-[#2A2A2A] dark:bg-[#171717]">
+        <div className="inline-flex rounded-lg border border-[#E2E8F0] bg-white p-0.5 dark:border-[#1E3349] dark:bg-[#121E2C]">
           {[
             { key: 'audit', label: 'Immutable Audit Trail' },
             { key: 'exports', label: 'Export Activity Log' },
@@ -882,7 +882,7 @@ export const AuditLogsView: React.FC<{ user: UserProfile; onOpenLead: (id: strin
               onClick={() => setTab(t.key as typeof tab)}
               className={`rounded-md px-3 py-1.5 text-xs font-medium ${
                 tab === t.key
-                  ? 'bg-[#171717] text-white dark:bg-[#B58A35] dark:text-[#171717]'
+                  ? 'bg-[#16273A] text-white dark:bg-[#C99B56] dark:text-[#16273A]'
                   : 'text-[#525252] dark:text-[#A3A3A3]'
               }`}
             >
@@ -893,10 +893,10 @@ export const AuditLogsView: React.FC<{ user: UserProfile; onOpenLead: (id: strin
       )}
 
       {tab === 'audit' && (
-        <div className="rounded-xl border border-[#E5DEC9] bg-white overflow-hidden dark:border-[#2A2A2A] dark:bg-[#171717]">
+        <div className="rounded-xl border border-[#E2E8F0] bg-white overflow-hidden dark:border-[#1E3349] dark:bg-[#121E2C]">
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs">
-              <thead className="bg-[#F8F6F1] border-b border-[#E5DEC9] dark:bg-[#141414] dark:border-[#2A2A2A]">
+              <thead className="bg-[#F8FAFC] border-b border-[#E2E8F0] dark:bg-[#0F1926] dark:border-[#1E3349]">
                 <tr>
                   <th className="px-4 py-2.5 font-semibold">Timestamp</th>
                   <th className="px-4 py-2.5 font-semibold">Lead / Entity</th>
@@ -906,7 +906,7 @@ export const AuditLogsView: React.FC<{ user: UserProfile; onOpenLead: (id: strin
                   <th className="px-4 py-2.5 font-semibold">Employee</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-[#E5DEC9]/60 dark:divide-[#242424]">
+              <tbody className="divide-y divide-[#E2E8F0]/60 dark:divide-[#1E3349]">
                 {auditLogs.map((al) => (
                   <tr key={al.id}>
                     <td className="px-4 py-2.5 font-mono-tabular text-[11px] text-[#737373] whitespace-nowrap">
@@ -917,7 +917,7 @@ export const AuditLogsView: React.FC<{ user: UserProfile; onOpenLead: (id: strin
                         <button
                           type="button"
                           onClick={() => onOpenLead(al.lead_id!)}
-                          className="font-mono-tabular font-semibold text-[#B58A35] hover:underline"
+                          className="font-mono-tabular font-semibold text-[#C99B56] hover:underline"
                         >
                           {al.lead_code}
                         </button>
@@ -925,7 +925,7 @@ export const AuditLogsView: React.FC<{ user: UserProfile; onOpenLead: (id: strin
                         <span className="text-[#737373]">{al.entity_type}</span>
                       )}
                     </td>
-                    <td className="px-4 py-2.5 font-medium text-[#171717] dark:text-white">{al.action_type}</td>
+                    <td className="px-4 py-2.5 font-medium text-[#16273A] dark:text-white">{al.action_type}</td>
                     <td className="px-4 py-2.5 text-[#525252] dark:text-[#A3A3A3]">{al.field_name || '—'}</td>
                     <td className="px-4 py-2.5 text-[#262626] dark:text-[#E5E5E5] max-w-md">
                       <div>
@@ -943,9 +943,9 @@ export const AuditLogsView: React.FC<{ user: UserProfile; onOpenLead: (id: strin
       )}
 
       {tab === 'exports' && isAdmin && (
-        <div className="rounded-xl border border-[#E5DEC9] bg-white overflow-hidden dark:border-[#2A2A2A] dark:bg-[#171717]">
+        <div className="rounded-xl border border-[#E2E8F0] bg-white overflow-hidden dark:border-[#1E3349] dark:bg-[#121E2C]">
           <table className="w-full text-left text-xs">
-            <thead className="bg-[#F8F6F1] border-b border-[#E5DEC9] dark:bg-[#141414] dark:border-[#2A2A2A]">
+            <thead className="bg-[#F8FAFC] border-b border-[#E2E8F0] dark:bg-[#0F1926] dark:border-[#1E3349]">
               <tr>
                 <th className="px-4 py-2.5 font-semibold">Timestamp</th>
                 <th className="px-4 py-2.5 font-semibold">Employee</th>
@@ -954,7 +954,7 @@ export const AuditLogsView: React.FC<{ user: UserProfile; onOpenLead: (id: strin
                 <th className="px-4 py-2.5 font-semibold text-right">Records</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-[#E5DEC9]/60 dark:divide-[#242424]">
+            <tbody className="divide-y divide-[#E2E8F0]/60 dark:divide-[#1E3349]">
               {exportLogs.map((el) => (
                 <tr key={String(el.id)}>
                   <td className="px-4 py-2.5 font-mono-tabular text-[#737373]">{formatDateTime(String(el.created_at))}</td>
@@ -970,9 +970,9 @@ export const AuditLogsView: React.FC<{ user: UserProfile; onOpenLead: (id: strin
       )}
 
       {tab === 'logins' && isAdmin && (
-        <div className="rounded-xl border border-[#E5DEC9] bg-white overflow-hidden dark:border-[#2A2A2A] dark:bg-[#171717]">
+        <div className="rounded-xl border border-[#E2E8F0] bg-white overflow-hidden dark:border-[#1E3349] dark:bg-[#121E2C]">
           <table className="w-full text-left text-xs">
-            <thead className="bg-[#F8F6F1] border-b border-[#E5DEC9] dark:bg-[#141414] dark:border-[#2A2A2A]">
+            <thead className="bg-[#F8FAFC] border-b border-[#E2E8F0] dark:bg-[#0F1926] dark:border-[#1E3349]">
               <tr>
                 <th className="px-4 py-2.5 font-semibold">Timestamp</th>
                 <th className="px-4 py-2.5 font-semibold">User / Email</th>
@@ -981,12 +981,12 @@ export const AuditLogsView: React.FC<{ user: UserProfile; onOpenLead: (id: strin
                 <th className="px-4 py-2.5 font-semibold">Details</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-[#E5DEC9]/60 dark:divide-[#242424]">
+            <tbody className="divide-y divide-[#E2E8F0]/60 dark:divide-[#1E3349]">
               {loginHistory.map((lh) => (
                 <tr key={String(lh.id)}>
                   <td className="px-4 py-2.5 font-mono-tabular text-[#737373]">{formatDateTime(String(lh.created_at))}</td>
                   <td className="px-4 py-2.5">
-                    <div className="font-medium text-[#171717] dark:text-white">{String(lh.employee_name || lh.email)}</div>
+                    <div className="font-medium text-[#16273A] dark:text-white">{String(lh.employee_name || lh.email)}</div>
                     <div className="text-[11px] text-[#737373]">{String(lh.email)}</div>
                   </td>
                   <td className="px-4 py-2.5 capitalize">{String(lh.event_type).replace('_', ' ')}</td>
@@ -1082,7 +1082,7 @@ export const ProfileSettingsView: React.FC<{
   return (
     <div className="space-y-5 max-w-4xl">
       <div>
-        <h1 className="text-xl font-bold tracking-tight text-[#171717] dark:text-white">Profile &amp; Settings</h1>
+        <h1 className="text-xl font-bold tracking-tight text-[#16273A] dark:text-white">Profile &amp; Settings</h1>
         <p className="text-xs text-[#737373] dark:text-[#A3A3A3]">
           Manage your employee profile, Google sign-in security, and {user.role === 'super_admin' ? 'company branding' : 'display preferences'}.
         </p>
@@ -1102,23 +1102,23 @@ export const ProfileSettingsView: React.FC<{
       <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
         <form
           onSubmit={handleSaveProfile}
-          className="rounded-xl border border-[#E5DEC9] bg-white p-5 space-y-3.5 dark:border-[#2A2A2A] dark:bg-[#171717]"
+          className="rounded-xl border border-[#E2E8F0] bg-white p-5 space-y-3.5 dark:border-[#1E3349] dark:bg-[#121E2C]"
         >
-          <h2 className="text-sm font-semibold text-[#171717] dark:text-white">My Profile</h2>
+          <h2 className="text-sm font-semibold text-[#16273A] dark:text-white">My Profile</h2>
           <div className="flex items-center gap-3">
             {photo ? (
               <img
                 src={photo}
                 alt={user.full_name}
                 referrerPolicy="no-referrer"
-                className="h-12 w-12 rounded-full object-cover border border-[#E5DEC9]"
+                className="h-12 w-12 rounded-full object-cover border border-[#E2E8F0]"
               />
             ) : (
-              <div className="h-12 w-12 rounded-full bg-[#F3EBDD] flex items-center justify-center text-sm font-bold text-[#171717]">
+              <div className="h-12 w-12 rounded-full bg-[#FBF6EE] flex items-center justify-center text-sm font-bold text-[#16273A]">
                 {user.full_name.slice(0, 2).toUpperCase()}
               </div>
             )}
-            <label className="inline-flex items-center gap-1.5 rounded-lg border border-[#E5DEC9] px-3 py-1.5 text-xs font-medium cursor-pointer hover:bg-[#F3EBDD] dark:border-[#2E2E2E] dark:text-white">
+            <label className="inline-flex items-center gap-1.5 rounded-lg border border-[#E2E8F0] px-3 py-1.5 text-xs font-medium cursor-pointer hover:bg-[#FBF6EE] dark:border-[#1E3349] dark:text-white">
               <Upload className="h-3.5 w-3.5" /> Change Photo
               <input type="file" accept="image/*" onChange={handlePhotoUpload} className="hidden" />
             </label>
@@ -1130,7 +1130,7 @@ export const ProfileSettingsView: React.FC<{
               type="email"
               disabled
               value={user.email}
-              className="w-full rounded-lg border border-[#E5DEC9] bg-[#F8F6F1] px-3 py-2 text-xs text-[#737373] dark:border-[#2E2E2E] dark:bg-[#111111]"
+              className="w-full rounded-lg border border-[#E2E8F0] bg-[#F8FAFC] px-3 py-2 text-xs text-[#737373] dark:border-[#1E3349] dark:bg-[#0C141E]"
             />
           </div>
           <div>
@@ -1140,7 +1140,7 @@ export const ProfileSettingsView: React.FC<{
               required
               value={fullName}
               onChange={(e) => setFullName(e.target.value)}
-              className="w-full rounded-lg border border-[#E5DEC9] px-3 py-2 text-xs dark:border-[#2E2E2E] dark:bg-[#111111] dark:text-white"
+              className="w-full rounded-lg border border-[#E2E8F0] px-3 py-2 text-xs dark:border-[#1E3349] dark:bg-[#0C141E] dark:text-white"
             />
           </div>
           <div>
@@ -1150,25 +1150,25 @@ export const ProfileSettingsView: React.FC<{
               maxLength={10}
               value={mobile}
               onChange={(e) => setMobile(e.target.value.replace(/\D/g, ''))}
-              className="w-full rounded-lg border border-[#E5DEC9] px-3 py-2 text-xs font-mono-tabular dark:border-[#2E2E2E] dark:bg-[#111111] dark:text-white"
+              className="w-full rounded-lg border border-[#E2E8F0] px-3 py-2 text-xs font-mono-tabular dark:border-[#1E3349] dark:bg-[#0C141E] dark:text-white"
             />
           </div>
           <button
             type="submit"
-            className="rounded-lg bg-[#171717] px-4 py-2 text-xs font-semibold text-white dark:bg-[#B58A35] dark:text-[#171717]"
+            className="rounded-lg bg-[#16273A] px-4 py-2 text-xs font-semibold text-white dark:bg-[#C99B56] dark:text-[#16273A]"
           >
             Save Profile
           </button>
         </form>
 
         <div className="space-y-5">
-          <div className="rounded-xl border border-[#E5DEC9] bg-white p-5 space-y-2.5 dark:border-[#2A2A2A] dark:bg-[#171717]">
-            <h2 className="text-sm font-semibold text-[#171717] dark:text-white flex items-center gap-2">
-              <ShieldCheck className="h-4 w-4 text-[#B58A35]" /> Google Authentication
+          <div className="rounded-xl border border-[#E2E8F0] bg-white p-5 space-y-2.5 dark:border-[#1E3349] dark:bg-[#121E2C]">
+            <h2 className="text-sm font-semibold text-[#16273A] dark:text-white flex items-center gap-2">
+              <ShieldCheck className="h-4 w-4 text-[#C99B56]" /> Google Authentication
             </h2>
             <p className="text-xs text-[#525252] dark:text-[#A3A3A3]">
               Signed in with verified Google account{' '}
-              <span className="font-semibold text-[#171717] dark:text-white">{user.email}</span>.
+              <span className="font-semibold text-[#16273A] dark:text-white">{user.email}</span>.
             </p>
             <p className="text-[11px] text-[#737373] dark:text-[#A3A3A3]">
               Password and 2-step verification are managed through your Google Account. Sessions also enforce a 30-minute inactivity lock.
@@ -1176,23 +1176,30 @@ export const ProfileSettingsView: React.FC<{
           </div>
 
           {user.role === 'super_admin' && (
-            <div className="rounded-xl border border-[#E5DEC9] bg-white p-5 space-y-3 dark:border-[#2A2A2A] dark:bg-[#171717]">
-              <h2 className="text-sm font-semibold text-[#171717] dark:text-white">Company Branding Logo</h2>
+            <div className="rounded-xl border border-[#E2E8F0] bg-white p-5 space-y-3 dark:border-[#1E3349] dark:bg-[#121E2C]">
+              <h2 className="text-sm font-semibold text-[#16273A] dark:text-white">Company Branding Logo</h2>
               <p className="text-xs text-[#737373]">
                 Displayed on Login screen and application header. Falls back to SSM CRM monogram if removed.
               </p>
               <div className="flex items-center gap-3">
-                <label className="inline-flex items-center gap-1.5 rounded-lg bg-[#171717] px-3.5 py-2 text-xs font-semibold text-white cursor-pointer dark:bg-[#B58A35] dark:text-[#171717]">
-                  <Upload className="h-3.5 w-3.5" /> Upload Logo
+                <div className="h-12 w-16 rounded-lg bg-white p-1 border border-[#E2E8F0] dark:border-[#1E3349] flex items-center justify-center overflow-hidden shrink-0">
+                  <img
+                    src={settings.company_logo || '/assets/aistudio/image_b871e6e7.png'}
+                    alt="Current Logo"
+                    className="max-h-full max-w-full object-contain"
+                  />
+                </div>
+                <label className="inline-flex items-center gap-1.5 rounded-lg bg-[#16273A] px-3.5 py-2 text-xs font-semibold text-white cursor-pointer hover:bg-[#20364F] dark:bg-[#C99B56] dark:text-[#16273A]">
+                  <Upload className="h-3.5 w-3.5" /> Change Logo
                   <input type="file" accept="image/*" onChange={handleLogoUpload} className="hidden" />
                 </label>
                 {settings.company_logo && (
                   <button
                     type="button"
                     onClick={handleRemoveLogo}
-                    className="inline-flex items-center gap-1 rounded-lg border border-red-500/30 px-3 py-2 text-xs text-red-700 dark:text-red-400"
+                    className="inline-flex items-center gap-1 rounded-lg border border-red-500/30 px-3 py-2 text-xs text-red-700 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/20"
                   >
-                    <Trash2 className="h-3.5 w-3.5" /> Remove
+                    <Trash2 className="h-3.5 w-3.5" /> Reset Default
                   </button>
                 )}
               </div>

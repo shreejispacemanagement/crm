@@ -7,37 +7,27 @@ interface BrandMarkProps {
 }
 
 export const BrandMark: React.FC<BrandMarkProps> = ({ settings, compact = false }) => {
-  if (settings.company_logo) {
-    return (
-      <div className="flex items-center gap-2.5 min-w-0">
-        <img
-          src={settings.company_logo}
-          alt={settings.company_name}
-          referrerPolicy="no-referrer"
-          className="h-8 w-8 rounded-lg object-contain bg-white border border-[#E5DEC9] dark:border-[#2E2E2E] shrink-0"
-        />
-        {!compact && (
-          <span className="font-semibold text-sm tracking-tight text-[#171717] dark:text-white truncate">
-            {settings.short_name || 'SSM CRM'}
-          </span>
-        )}
-      </div>
-    );
-  }
+  const logoSrc = settings.company_logo || '/assets/aistudio/image_b871e6e7.png';
 
   return (
     <div className="flex items-center gap-2.5 min-w-0">
-      <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[#171717] border border-[#B58A35]/60 dark:bg-[#1E1E1E]">
-        <svg viewBox="0 0 32 32" className="h-5 w-5" fill="none">
-          <path d="M7 22V13L16 6L25 13V22" stroke="#B58A35" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
-          <path d="M12 22V15.5H20V22" stroke="#F3EBDD" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
-          <path d="M5 23.5H27" stroke="#B58A35" strokeWidth="2" strokeLinecap="round" />
-        </svg>
+      <div className="h-9 w-9 shrink-0 rounded-lg bg-white p-1 border border-[#E2E8F0] dark:border-[#1E3349] flex items-center justify-center overflow-hidden shadow-xs">
+        <img
+          src={logoSrc}
+          alt={settings.company_name || 'Shreeji Space'}
+          referrerPolicy="no-referrer"
+          className="h-full w-full object-contain"
+        />
       </div>
       {!compact && (
-        <span className="font-semibold text-sm tracking-tight text-[#171717] dark:text-white whitespace-nowrap truncate">
-          {settings.short_name || 'SSM CRM'}
-        </span>
+        <div className="flex flex-col min-w-0 leading-tight">
+          <span className="font-bold text-xs tracking-wider text-[#16273A] dark:text-white uppercase truncate">
+            {settings.short_name || 'Shreeji Space'}
+          </span>
+          <span className="text-[10px] font-semibold text-[#C99B56] tracking-wide truncate">
+            Management CRM
+          </span>
+        </div>
       )}
     </div>
   );

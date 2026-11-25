@@ -60,8 +60,8 @@ export default function App() {
   const [bootstrapFirebaseUser, setBootstrapFirebaseUser] = useState<User | null>(null);
   const [settings, setSettings] = useState<CompanySettings>({
     company_name: 'Shreeji Space Management CRM',
-    short_name: 'SSM CRM',
-    company_logo: null,
+    short_name: 'Shreeji Space',
+    company_logo: '/assets/aistudio/image_b871e6e7.png',
     default_table_columns: [],
   });
 
@@ -284,7 +284,7 @@ export default function App() {
 
   if (bootLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[#F8F6F1] dark:bg-[#111111]">
+      <div className="min-h-screen flex items-center justify-center bg-[#F8FAFC] dark:bg-[#0C141E]">
         <div className="text-xs font-medium text-[#737373]">Loading Shreeji Space Management CRM...</div>
       </div>
     );
@@ -347,10 +347,10 @@ export default function App() {
     : visibleNav.find((n) => n.key === activeNav)?.label || 'Dashboard';
 
   return (
-    <div className="min-h-screen flex bg-[#F8F6F1] text-[#171717] dark:bg-[#111111] dark:text-[#F5F2EB]">
+    <div className="min-h-screen flex bg-[#F8FAFC] text-[#16273A] dark:bg-[#0C141E] dark:text-[#F1F5F9]">
       {/* Desktop Sidebar */}
-      <aside className="hidden lg:flex lg:w-64 lg:flex-col lg:fixed lg:inset-y-0 border-r border-[#E5DEC9] bg-white dark:border-[#242424] dark:bg-[#171717]">
-        <div className="flex h-16 items-center px-5 border-b border-[#E5DEC9] dark:border-[#242424]">
+      <aside className="hidden lg:flex lg:w-64 lg:flex-col lg:fixed lg:inset-y-0 border-r border-[#E2E8F0] bg-white dark:border-[#1E3349] dark:bg-[#121E2C]">
+        <div className="flex h-16 items-center px-5 border-b border-[#E2E8F0] dark:border-[#1E3349]">
           <BrandMark settings={settings} />
         </div>
 
@@ -364,33 +364,33 @@ export default function App() {
                 onClick={() => navigateTo(item.key)}
                 className={`w-full flex items-center gap-2.5 rounded-lg px-3 py-2 text-xs font-medium whitespace-nowrap transition-colors ${
                   active
-                    ? 'bg-[#171717] text-white dark:bg-[#B58A35] dark:text-[#171717]'
-                    : 'text-[#404040] hover:bg-[#F3EBDD]/70 dark:text-[#D4D4D4] dark:hover:bg-[#242424]'
+                    ? 'bg-[#16273A] text-white dark:bg-[#C99B56] dark:text-[#16273A]'
+                    : 'text-[#404040] hover:bg-[#FBF6EE]/70 dark:text-[#D4D4D4] dark:hover:bg-[#1A2C40]'
                 }`}
               >
-                <span className={active ? 'text-[#B58A35] dark:text-[#171717]' : 'text-[#737373]'}>{item.icon}</span>
+                <span className={active ? 'text-[#C99B56] dark:text-[#16273A]' : 'text-[#737373]'}>{item.icon}</span>
                 <span>{item.label}</span>
               </button>
             );
           })}
         </nav>
 
-        <div className="border-t border-[#E5DEC9] p-4 dark:border-[#242424]">
+        <div className="border-t border-[#E2E8F0] p-4 dark:border-[#1E3349]">
           <div className="flex items-center gap-2.5">
             {user.profile_photo ? (
               <img
                 src={user.profile_photo}
                 alt={user.full_name}
                 referrerPolicy="no-referrer"
-                className="h-8 w-8 rounded-full object-cover border border-[#E5DEC9]"
+                className="h-8 w-8 rounded-full object-cover border border-[#E2E8F0]"
               />
             ) : (
-              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#F3EBDD] text-xs font-bold text-[#171717]">
+              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#FBF6EE] text-xs font-bold text-[#16273A]">
                 {user.full_name.slice(0, 2).toUpperCase()}
               </div>
             )}
             <div className="min-w-0 flex-1">
-              <div className="text-xs font-semibold text-[#171717] dark:text-white truncate">{user.full_name}</div>
+              <div className="text-xs font-semibold text-[#16273A] dark:text-white truncate">{user.full_name}</div>
               <div className="text-[11px] text-[#737373] truncate">
                 {isAdmin ? 'Super Admin' : 'Sales Executive'}
               </div>
@@ -399,7 +399,7 @@ export default function App() {
               type="button"
               onClick={() => handleLogout()}
               title="Sign Out"
-              className="rounded-lg p-1.5 text-[#737373] hover:bg-[#F3EBDD] hover:text-[#171717] dark:hover:bg-[#242424] dark:hover:text-white"
+              className="rounded-lg p-1.5 text-[#737373] hover:bg-[#FBF6EE] hover:text-[#16273A] dark:hover:bg-[#1A2C40] dark:hover:text-white"
             >
               <LogOut className="h-4 w-4" />
             </button>
@@ -411,8 +411,8 @@ export default function App() {
       {mobileMenuOpen && (
         <div className="fixed inset-0 z-50 lg:hidden flex">
           <div className="fixed inset-0 bg-black/50" onClick={() => setMobileMenuOpen(false)} />
-          <div className="relative z-10 w-64 max-w-[80vw] bg-white dark:bg-[#171717] flex flex-col h-full border-r border-[#E5DEC9] dark:border-[#242424]">
-            <div className="flex h-16 items-center justify-between px-4 border-b border-[#E5DEC9] dark:border-[#242424]">
+          <div className="relative z-10 w-64 max-w-[80vw] bg-white dark:bg-[#121E2C] flex flex-col h-full border-r border-[#E2E8F0] dark:border-[#1E3349]">
+            <div className="flex h-16 items-center justify-between px-4 border-b border-[#E2E8F0] dark:border-[#1E3349]">
               <BrandMark settings={settings} />
               <button type="button" onClick={() => setMobileMenuOpen(false)} className="p-1 text-[#737373]">
                 <X className="h-5 w-5" />
@@ -426,7 +426,7 @@ export default function App() {
                   onClick={() => navigateTo(item.key)}
                   className={`w-full flex items-center gap-2.5 rounded-lg px-3 py-2.5 text-xs font-medium ${
                     activeNav === item.key
-                      ? 'bg-[#171717] text-white dark:bg-[#B58A35] dark:text-[#171717]'
+                      ? 'bg-[#16273A] text-white dark:bg-[#C99B56] dark:text-[#16273A]'
                       : 'text-[#404040] dark:text-[#D4D4D4]'
                   }`}
                 >
@@ -435,11 +435,11 @@ export default function App() {
                 </button>
               ))}
             </nav>
-            <div className="p-4 border-t border-[#E5DEC9] dark:border-[#242424]">
+            <div className="p-4 border-t border-[#E2E8F0] dark:border-[#1E3349]">
               <button
                 type="button"
                 onClick={() => handleLogout()}
-                className="w-full flex items-center justify-center gap-2 rounded-lg border border-[#E5DEC9] py-2 text-xs font-medium dark:border-[#2E2E2E]"
+                className="w-full flex items-center justify-center gap-2 rounded-lg border border-[#E2E8F0] py-2 text-xs font-medium dark:border-[#1E3349]"
               >
                 <LogOut className="h-3.5 w-3.5" /> Sign Out ({user.full_name})
               </button>
@@ -451,12 +451,12 @@ export default function App() {
       {/* Main Content Area */}
       <div className="flex-1 lg:pl-64 flex flex-col min-w-0">
         {/* Top Bar */}
-        <header className="sticky top-0 z-30 flex h-16 items-center justify-between gap-4 border-b border-[#E5DEC9] bg-white/95 backdrop-blur px-4 sm:px-6 dark:border-[#242424] dark:bg-[#171717]/95">
+        <header className="sticky top-0 z-30 flex h-16 items-center justify-between gap-4 border-b border-[#E2E8F0] bg-white/95 backdrop-blur px-4 sm:px-6 dark:border-[#1E3349] dark:bg-[#121E2C]/95">
           <div className="flex items-center gap-3 min-w-0">
             <button
               type="button"
               onClick={() => setMobileMenuOpen(true)}
-              className="lg:hidden rounded-lg border border-[#E5DEC9] p-1.5 text-[#171717] dark:border-[#2E2E2E] dark:text-white"
+              className="lg:hidden rounded-lg border border-[#E2E8F0] p-1.5 text-[#16273A] dark:border-[#1E3349] dark:text-white"
               aria-label="Open navigation"
             >
               <Menu className="h-4 w-4" />
@@ -464,7 +464,7 @@ export default function App() {
             <div className="text-xs text-[#737373] dark:text-[#A3A3A3] truncate">
               <span>{settings.short_name || 'SSM CRM'}</span>
               <span className="mx-1.5">/</span>
-              <span className="font-semibold text-[#171717] dark:text-white">{currentTitle}</span>
+              <span className="font-semibold text-[#16273A] dark:text-white">{currentTitle}</span>
             </div>
           </div>
 
@@ -476,34 +476,34 @@ export default function App() {
               <button
                 type="button"
                 onClick={() => setShowNotifPanel(!showNotifPanel)}
-                className="relative inline-flex items-center justify-center rounded-lg border border-[#E5DEC9] p-2 text-[#171717] hover:bg-[#F3EBDD] dark:border-[#2E2E2E] dark:text-white dark:hover:bg-[#242424]"
+                className="relative inline-flex items-center justify-center rounded-lg border border-[#E2E8F0] p-2 text-[#16273A] hover:bg-[#FBF6EE] dark:border-[#1E3349] dark:text-white dark:hover:bg-[#1A2C40]"
                 aria-label="Notifications"
               >
                 <Bell className="h-4 w-4" />
                 {unreadCount > 0 && (
-                  <span className="absolute -top-1 -right-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-[#B58A35] px-1 text-[10px] font-bold font-mono-tabular text-[#171717]">
+                  <span className="absolute -top-1 -right-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-[#C99B56] px-1 text-[10px] font-bold font-mono-tabular text-[#16273A]">
                     {unreadCount}
                   </span>
                 )}
               </button>
 
               {showNotifPanel && (
-                <div className="absolute right-0 mt-2 w-80 sm:w-96 rounded-xl border border-[#E5DEC9] bg-white shadow-xl z-40 dark:border-[#2A2A2A] dark:bg-[#171717]">
-                  <div className="flex items-center justify-between px-4 py-3 border-b border-[#E5DEC9] dark:border-[#242424]">
-                    <span className="text-xs font-semibold text-[#171717] dark:text-white">
+                <div className="absolute right-0 mt-2 w-80 sm:w-96 rounded-xl border border-[#E2E8F0] bg-white shadow-xl z-40 dark:border-[#1E3349] dark:bg-[#121E2C]">
+                  <div className="flex items-center justify-between px-4 py-3 border-b border-[#E2E8F0] dark:border-[#1E3349]">
+                    <span className="text-xs font-semibold text-[#16273A] dark:text-white">
                       In-App Notifications ({unreadCount} unread)
                     </span>
                     {unreadCount > 0 && (
                       <button
                         type="button"
                         onClick={markAllRead}
-                        className="text-[11px] font-semibold text-[#B58A35] hover:underline"
+                        className="text-[11px] font-semibold text-[#C99B56] hover:underline"
                       >
                         Mark all read
                       </button>
                     )}
                   </div>
-                  <div className="max-h-96 overflow-y-auto divide-y divide-[#E5DEC9]/60 dark:divide-[#242424]">
+                  <div className="max-h-96 overflow-y-auto divide-y divide-[#E2E8F0]/60 dark:divide-[#1E3349]">
                     {notifications.length === 0 ? (
                       <div className="p-6 text-center text-xs text-[#737373]">No notifications yet.</div>
                     ) : (
@@ -512,15 +512,15 @@ export default function App() {
                           key={n.id}
                           type="button"
                           onClick={() => markNotifRead(n)}
-                          className={`w-full text-left px-4 py-3 hover:bg-[#F3EBDD]/40 dark:hover:bg-[#202020] ${
-                            n.is_read === 0 ? 'bg-[#F3EBDD]/30 dark:bg-[#221F1A]/50' : ''
+                          className={`w-full text-left px-4 py-3 hover:bg-[#FBF6EE]/40 dark:hover:bg-[#1A2C40] ${
+                            n.is_read === 0 ? 'bg-[#FBF6EE]/30 dark:bg-[#2A2318]/50' : ''
                           }`}
                         >
                           <div className="flex items-center justify-between gap-2 text-[11px]">
-                            <span className="font-semibold text-[#B58A35]">{n.notif_type}</span>
+                            <span className="font-semibold text-[#C99B56]">{n.notif_type}</span>
                             <span className="font-mono-tabular text-[#737373]">{formatDateTime(n.created_at)}</span>
                           </div>
-                          <div className="mt-0.5 text-xs font-medium text-[#171717] dark:text-white">{n.title}</div>
+                          <div className="mt-0.5 text-xs font-medium text-[#16273A] dark:text-white">{n.title}</div>
                           <div className="mt-0.5 text-[11px] text-[#525252] dark:text-[#A3A3A3]">{n.message}</div>
                         </button>
                       ))
@@ -533,16 +533,16 @@ export default function App() {
             <button
               type="button"
               onClick={handleToggleTheme}
-              className="inline-flex items-center justify-center rounded-lg border border-[#E5DEC9] p-2 text-[#171717] hover:bg-[#F3EBDD] dark:border-[#2E2E2E] dark:text-white dark:hover:bg-[#242424]"
+              className="inline-flex items-center justify-center rounded-lg border border-[#E2E8F0] p-2 text-[#16273A] hover:bg-[#FBF6EE] dark:border-[#1E3349] dark:text-white dark:hover:bg-[#1A2C40]"
               aria-label="Toggle Light/Dark mode"
             >
-              {theme === 'dark' ? <Sun className="h-4 w-4 text-[#B58A35]" /> : <Moon className="h-4 w-4" />}
+              {theme === 'dark' ? <Sun className="h-4 w-4 text-[#C99B56]" /> : <Moon className="h-4 w-4" />}
             </button>
 
             <button
               type="button"
               onClick={() => setShowCreateLead(true)}
-              className="inline-flex items-center gap-1.5 rounded-lg bg-[#171717] px-3 py-2 text-xs font-semibold text-white hover:bg-[#2E2E2E] dark:bg-[#B58A35] dark:text-[#171717] whitespace-nowrap shrink-0"
+              className="inline-flex items-center gap-1.5 rounded-lg bg-[#16273A] px-3 py-2 text-xs font-semibold text-white hover:bg-[#20364F] dark:bg-[#C99B56] dark:text-[#16273A] whitespace-nowrap shrink-0"
             >
               <Plus className="h-3.5 w-3.5" /> New Lead
             </button>

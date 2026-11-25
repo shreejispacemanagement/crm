@@ -276,7 +276,7 @@ export const LeadsView: React.FC<LeadsViewProps> = ({
       case 'lead_code':
         return (
           <div className="flex items-center gap-1.5">
-            <span className="font-mono-tabular font-semibold text-[#B58A35]">{lead.lead_code}</span>
+            <span className="font-mono-tabular font-semibold text-[#C99B56]">{lead.lead_code}</span>
             {lead.is_inactive === 1 && (
               <span className="rounded bg-amber-100 px-1.5 py-0.5 text-[10px] font-semibold text-amber-900 dark:bg-amber-950/60 dark:text-amber-300">
                 Inactive
@@ -287,7 +287,7 @@ export const LeadsView: React.FC<LeadsViewProps> = ({
       case 'customer_name':
         return (
           <div>
-            <div className="font-medium text-[#171717] dark:text-white">{lead.customer_name}</div>
+            <div className="font-medium text-[#16273A] dark:text-white">{lead.customer_name}</div>
             {lead.company_name && <div className="text-[11px] text-[#737373] dark:text-[#A3A3A3]">{lead.company_name}</div>}
           </div>
         );
@@ -303,7 +303,7 @@ export const LeadsView: React.FC<LeadsViewProps> = ({
         return <span className="text-[#525252] dark:text-[#A3A3A3]">{lead.localities.join(', ')}</span>;
       case 'budget':
         return (
-          <span className="font-mono-tabular text-[#171717] dark:text-white">
+          <span className="font-mono-tabular text-[#16273A] dark:text-white">
             {formatBudgetRange(lead.budget_from, lead.budget_to)}
           </span>
         );
@@ -315,7 +315,7 @@ export const LeadsView: React.FC<LeadsViewProps> = ({
                 ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300'
                 : lead.stage === 'Dead'
                 ? 'bg-neutral-200 text-neutral-700 dark:bg-neutral-800 dark:text-neutral-300'
-                : 'bg-[#F3EBDD] text-[#171717] dark:bg-[#26211A] dark:text-[#F3EBDD]'
+                : 'bg-[#FBF6EE] text-[#16273A] dark:bg-[#2A2318] dark:text-[#FBF6EE]'
             }`}
           >
             {lead.stage}
@@ -343,22 +343,22 @@ export const LeadsView: React.FC<LeadsViewProps> = ({
       {/* Toolbar */}
       <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3">
         <div>
-          <h1 className="text-xl font-bold tracking-tight text-[#171717] dark:text-white">Leads Pipeline</h1>
+          <h1 className="text-xl font-bold tracking-tight text-[#16273A] dark:text-white">Leads Pipeline</h1>
           <p className="text-xs text-[#737373] dark:text-[#A3A3A3]">
-            <span className="font-mono-tabular font-semibold text-[#171717] dark:text-white">{total}</span> matching lead
+            <span className="font-mono-tabular font-semibold text-[#16273A] dark:text-white">{total}</span> matching lead
             {total === 1 ? '' : 's'}
           </p>
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
           {/* View Toggle */}
-          <div className="inline-flex rounded-lg border border-[#E5DEC9] bg-white p-0.5 dark:border-[#2A2A2A] dark:bg-[#171717]">
+          <div className="inline-flex rounded-lg border border-[#E2E8F0] bg-white p-0.5 dark:border-[#1E3349] dark:bg-[#121E2C]">
             <button
               type="button"
               onClick={() => handleSwitchView('table')}
               className={`inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-medium whitespace-nowrap ${
                 viewMode === 'table'
-                  ? 'bg-[#171717] text-white dark:bg-[#B58A35] dark:text-[#171717]'
+                  ? 'bg-[#16273A] text-white dark:bg-[#C99B56] dark:text-[#16273A]'
                   : 'text-[#525252] dark:text-[#A3A3A3]'
               }`}
             >
@@ -369,7 +369,7 @@ export const LeadsView: React.FC<LeadsViewProps> = ({
               onClick={() => handleSwitchView('kanban')}
               className={`inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-medium whitespace-nowrap ${
                 viewMode === 'kanban'
-                  ? 'bg-[#171717] text-white dark:bg-[#B58A35] dark:text-[#171717]'
+                  ? 'bg-[#16273A] text-white dark:bg-[#C99B56] dark:text-[#16273A]'
                   : 'text-[#525252] dark:text-[#A3A3A3]'
               }`}
             >
@@ -381,7 +381,7 @@ export const LeadsView: React.FC<LeadsViewProps> = ({
             <button
               type="button"
               onClick={() => setShowColumnPanel(!showColumnPanel)}
-              className="inline-flex items-center gap-1.5 rounded-lg border border-[#E5DEC9] bg-white px-3 py-1.5 text-xs font-medium text-[#171717] hover:bg-[#F3EBDD]/60 dark:border-[#2A2A2A] dark:bg-[#171717] dark:text-white whitespace-nowrap"
+              className="inline-flex items-center gap-1.5 rounded-lg border border-[#E2E8F0] bg-white px-3 py-1.5 text-xs font-medium text-[#16273A] hover:bg-[#FBF6EE]/60 dark:border-[#1E3349] dark:bg-[#121E2C] dark:text-white whitespace-nowrap"
             >
               <Columns3 className="h-3.5 w-3.5" /> Columns
             </button>
@@ -392,37 +392,37 @@ export const LeadsView: React.FC<LeadsViewProps> = ({
             <button
               type="button"
               onClick={() => setShowExportMenu(!showExportMenu)}
-              className="inline-flex items-center gap-1.5 rounded-lg border border-[#E5DEC9] bg-white px-3 py-1.5 text-xs font-medium text-[#171717] hover:bg-[#F3EBDD]/60 dark:border-[#2A2A2A] dark:bg-[#171717] dark:text-white whitespace-nowrap"
+              className="inline-flex items-center gap-1.5 rounded-lg border border-[#E2E8F0] bg-white px-3 py-1.5 text-xs font-medium text-[#16273A] hover:bg-[#FBF6EE]/60 dark:border-[#1E3349] dark:bg-[#121E2C] dark:text-white whitespace-nowrap"
             >
               <Download className="h-3.5 w-3.5" /> Export
             </button>
             {showExportMenu && (
-              <div className="absolute right-0 mt-1.5 w-52 rounded-lg border border-[#E5DEC9] bg-white p-1.5 shadow-lg z-30 dark:border-[#2A2A2A] dark:bg-[#171717]">
+              <div className="absolute right-0 mt-1.5 w-52 rounded-lg border border-[#E2E8F0] bg-white p-1.5 shadow-lg z-30 dark:border-[#1E3349] dark:bg-[#121E2C]">
                 <button
                   type="button"
                   onClick={() => handleExport('xlsx', 'basic')}
-                  className="w-full text-left rounded-md px-3 py-1.5 text-xs hover:bg-[#F3EBDD]/70 dark:text-white dark:hover:bg-[#242424]"
+                  className="w-full text-left rounded-md px-3 py-1.5 text-xs hover:bg-[#FBF6EE]/70 dark:text-white dark:hover:bg-[#1A2C40]"
                 >
                   Basic Export (Excel .xlsx)
                 </button>
                 <button
                   type="button"
                   onClick={() => handleExport('csv', 'basic')}
-                  className="w-full text-left rounded-md px-3 py-1.5 text-xs hover:bg-[#F3EBDD]/70 dark:text-white dark:hover:bg-[#242424]"
+                  className="w-full text-left rounded-md px-3 py-1.5 text-xs hover:bg-[#FBF6EE]/70 dark:text-white dark:hover:bg-[#1A2C40]"
                 >
                   Basic Export (CSV .csv)
                 </button>
                 <button
                   type="button"
                   onClick={() => handleExport('xlsx', 'detailed')}
-                  className="w-full text-left rounded-md px-3 py-1.5 text-xs hover:bg-[#F3EBDD]/70 dark:text-white dark:hover:bg-[#242424]"
+                  className="w-full text-left rounded-md px-3 py-1.5 text-xs hover:bg-[#FBF6EE]/70 dark:text-white dark:hover:bg-[#1A2C40]"
                 >
                   Detailed Export (Excel .xlsx)
                 </button>
                 <button
                   type="button"
                   onClick={() => handleExport('csv', 'detailed')}
-                  className="w-full text-left rounded-md px-3 py-1.5 text-xs hover:bg-[#F3EBDD]/70 dark:text-white dark:hover:bg-[#242424]"
+                  className="w-full text-left rounded-md px-3 py-1.5 text-xs hover:bg-[#FBF6EE]/70 dark:text-white dark:hover:bg-[#1A2C40]"
                 >
                   Detailed Export (CSV .csv)
                 </button>
@@ -433,7 +433,7 @@ export const LeadsView: React.FC<LeadsViewProps> = ({
           <button
             type="button"
             onClick={onCreateLead}
-            className="inline-flex items-center gap-1.5 rounded-lg bg-[#171717] px-3.5 py-1.5 text-xs font-semibold text-white hover:bg-[#2E2E2E] dark:bg-[#B58A35] dark:text-[#171717] whitespace-nowrap"
+            className="inline-flex items-center gap-1.5 rounded-lg bg-[#16273A] px-3.5 py-1.5 text-xs font-semibold text-white hover:bg-[#20364F] dark:bg-[#C99B56] dark:text-[#16273A] whitespace-nowrap"
           >
             <Plus className="h-3.5 w-3.5" /> New Lead
           </button>
@@ -450,7 +450,7 @@ export const LeadsView: React.FC<LeadsViewProps> = ({
       )}
 
       {/* Search + Sort + Filter Toggle Bar */}
-      <div className="rounded-xl border border-[#E5DEC9] bg-white p-3.5 dark:border-[#2A2A2A] dark:bg-[#171717] space-y-3">
+      <div className="rounded-xl border border-[#E2E8F0] bg-white p-3.5 dark:border-[#1E3349] dark:bg-[#121E2C] space-y-3">
         <div className="flex flex-col md:flex-row gap-2.5">
           <div className="relative flex-1">
             <Search className="absolute left-3 top-2.5 h-4 w-4 text-[#737373]" />
@@ -462,7 +462,7 @@ export const LeadsView: React.FC<LeadsViewProps> = ({
                 setPage(1);
               }}
               placeholder="Search Lead ID (SSM-...), customer name, mobile, alt/WhatsApp, company, or booked project..."
-              className="w-full rounded-lg border border-[#E5DEC9] bg-[#F8F6F1] py-2 pl-9 pr-3 text-xs text-[#171717] focus:border-[#B58A35] focus:outline-none dark:border-[#2E2E2E] dark:bg-[#111111] dark:text-white"
+              className="w-full rounded-lg border border-[#E2E8F0] bg-[#F8FAFC] py-2 pl-9 pr-3 text-xs text-[#16273A] focus:border-[#C99B56] focus:outline-none dark:border-[#1E3349] dark:bg-[#0C141E] dark:text-white"
             />
           </div>
 
@@ -470,7 +470,7 @@ export const LeadsView: React.FC<LeadsViewProps> = ({
             <select
               value={sort}
               onChange={(e) => setSort(e.target.value as 'newest' | 'oldest' | 'updated')}
-              className="rounded-lg border border-[#E5DEC9] bg-white px-3 py-2 text-xs text-[#171717] dark:border-[#2E2E2E] dark:bg-[#111111] dark:text-white"
+              className="rounded-lg border border-[#E2E8F0] bg-white px-3 py-2 text-xs text-[#16273A] dark:border-[#1E3349] dark:bg-[#0C141E] dark:text-white"
             >
               <option value="newest">Sort: Newest Created</option>
               <option value="oldest">Sort: Oldest Created</option>
@@ -482,20 +482,20 @@ export const LeadsView: React.FC<LeadsViewProps> = ({
               onClick={() => setShowFilters(!showFilters)}
               className={`inline-flex items-center gap-1.5 rounded-lg border px-3 py-2 text-xs font-medium whitespace-nowrap ${
                 showFilters
-                  ? 'border-[#B58A35] bg-[#F3EBDD] text-[#171717] dark:bg-[#26211A] dark:text-[#F3EBDD]'
-                  : 'border-[#E5DEC9] bg-white text-[#171717] dark:border-[#2E2E2E] dark:bg-[#111111] dark:text-white'
+                  ? 'border-[#C99B56] bg-[#FBF6EE] text-[#16273A] dark:bg-[#2A2318] dark:text-[#FBF6EE]'
+                  : 'border-[#E2E8F0] bg-white text-[#16273A] dark:border-[#1E3349] dark:bg-[#0C141E] dark:text-white'
               }`}
             >
               <Filter className="h-3.5 w-3.5" /> Filters
             </button>
 
             {viewMode === 'kanban' && (
-              <label className="inline-flex items-center gap-1.5 rounded-lg border border-[#E5DEC9] px-3 py-2 text-xs text-[#171717] dark:border-[#2E2E2E] dark:text-white cursor-pointer">
+              <label className="inline-flex items-center gap-1.5 rounded-lg border border-[#E2E8F0] px-3 py-2 text-xs text-[#16273A] dark:border-[#1E3349] dark:text-white cursor-pointer">
                 <input
                   type="checkbox"
                   checked={showClosedKanban}
                   onChange={(e) => setShowClosedKanban(e.target.checked)}
-                  className="accent-[#B58A35]"
+                  className="accent-[#C99B56]"
                 />
                 Show Booking Done &amp; Dead
               </label>
@@ -504,14 +504,14 @@ export const LeadsView: React.FC<LeadsViewProps> = ({
         </div>
 
         {showFilters && (
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2.5 pt-3 border-t border-[#E5DEC9] dark:border-[#242424]">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2.5 pt-3 border-t border-[#E2E8F0] dark:border-[#1E3349]">
             <select
               value={stageFilter}
               onChange={(e) => {
                 setStageFilter(e.target.value);
                 setPage(1);
               }}
-              className="rounded-lg border border-[#E5DEC9] bg-white px-2.5 py-1.5 text-xs dark:border-[#2E2E2E] dark:bg-[#111111] dark:text-white"
+              className="rounded-lg border border-[#E2E8F0] bg-white px-2.5 py-1.5 text-xs dark:border-[#1E3349] dark:bg-[#0C141E] dark:text-white"
             >
               <option value="all">All Stages</option>
               {stages.map((s) => (
@@ -527,7 +527,7 @@ export const LeadsView: React.FC<LeadsViewProps> = ({
                 setSourceFilter(e.target.value);
                 setPage(1);
               }}
-              className="rounded-lg border border-[#E5DEC9] bg-white px-2.5 py-1.5 text-xs dark:border-[#2E2E2E] dark:bg-[#111111] dark:text-white"
+              className="rounded-lg border border-[#E2E8F0] bg-white px-2.5 py-1.5 text-xs dark:border-[#1E3349] dark:bg-[#0C141E] dark:text-white"
             >
               <option value="all">All Sources</option>
               {sources.map((s) => (
@@ -544,7 +544,7 @@ export const LeadsView: React.FC<LeadsViewProps> = ({
                   setAssignedToFilter(e.target.value);
                   setPage(1);
                 }}
-                className="rounded-lg border border-[#E5DEC9] bg-white px-2.5 py-1.5 text-xs dark:border-[#2E2E2E] dark:bg-[#111111] dark:text-white"
+                className="rounded-lg border border-[#E2E8F0] bg-white px-2.5 py-1.5 text-xs dark:border-[#1E3349] dark:bg-[#0C141E] dark:text-white"
               >
                 <option value="all">All Employees</option>
                 {users.map((u) => (
@@ -561,7 +561,7 @@ export const LeadsView: React.FC<LeadsViewProps> = ({
                 setPropertyTypeFilter(e.target.value);
                 setPage(1);
               }}
-              className="rounded-lg border border-[#E5DEC9] bg-white px-2.5 py-1.5 text-xs dark:border-[#2E2E2E] dark:bg-[#111111] dark:text-white"
+              className="rounded-lg border border-[#E2E8F0] bg-white px-2.5 py-1.5 text-xs dark:border-[#1E3349] dark:bg-[#0C141E] dark:text-white"
             >
               <option value="all">All Property Types</option>
               {propertyTypes.map((p) => (
@@ -577,7 +577,7 @@ export const LeadsView: React.FC<LeadsViewProps> = ({
                 setTransactionTypeFilter(e.target.value);
                 setPage(1);
               }}
-              className="rounded-lg border border-[#E5DEC9] bg-white px-2.5 py-1.5 text-xs dark:border-[#2E2E2E] dark:bg-[#111111] dark:text-white"
+              className="rounded-lg border border-[#E2E8F0] bg-white px-2.5 py-1.5 text-xs dark:border-[#1E3349] dark:bg-[#0C141E] dark:text-white"
             >
               <option value="all">Sale &amp; Rent</option>
               {transactionTypes.map((t) => (
@@ -593,7 +593,7 @@ export const LeadsView: React.FC<LeadsViewProps> = ({
                 setLocalityFilter(e.target.value);
                 setPage(1);
               }}
-              className="rounded-lg border border-[#E5DEC9] bg-white px-2.5 py-1.5 text-xs dark:border-[#2E2E2E] dark:bg-[#111111] dark:text-white"
+              className="rounded-lg border border-[#E2E8F0] bg-white px-2.5 py-1.5 text-xs dark:border-[#1E3349] dark:bg-[#0C141E] dark:text-white"
             >
               <option value="all">All Localities</option>
               {localities.map((l) => (
@@ -609,7 +609,7 @@ export const LeadsView: React.FC<LeadsViewProps> = ({
                 setDatePreset(e.target.value);
                 setPage(1);
               }}
-              className="rounded-lg border border-[#E5DEC9] bg-white px-2.5 py-1.5 text-xs dark:border-[#2E2E2E] dark:bg-[#111111] dark:text-white"
+              className="rounded-lg border border-[#E2E8F0] bg-white px-2.5 py-1.5 text-xs dark:border-[#1E3349] dark:bg-[#0C141E] dark:text-white"
             >
               <option value="all_time">All Time</option>
               <option value="today">Today</option>
@@ -627,18 +627,18 @@ export const LeadsView: React.FC<LeadsViewProps> = ({
                   type="date"
                   value={customStart}
                   onChange={(e) => setCustomStart(e.target.value)}
-                  className="rounded-lg border border-[#E5DEC9] bg-white px-2.5 py-1.5 text-xs dark:border-[#2E2E2E] dark:bg-[#111111] dark:text-white"
+                  className="rounded-lg border border-[#E2E8F0] bg-white px-2.5 py-1.5 text-xs dark:border-[#1E3349] dark:bg-[#0C141E] dark:text-white"
                 />
                 <input
                   type="date"
                   value={customEnd}
                   onChange={(e) => setCustomEnd(e.target.value)}
-                  className="rounded-lg border border-[#E5DEC9] bg-white px-2.5 py-1.5 text-xs dark:border-[#2E2E2E] dark:bg-[#111111] dark:text-white"
+                  className="rounded-lg border border-[#E2E8F0] bg-white px-2.5 py-1.5 text-xs dark:border-[#1E3349] dark:bg-[#0C141E] dark:text-white"
                 />
               </>
             )}
 
-            <label className="inline-flex items-center gap-1.5 text-xs text-[#171717] dark:text-white cursor-pointer px-1">
+            <label className="inline-flex items-center gap-1.5 text-xs text-[#16273A] dark:text-white cursor-pointer px-1">
               <input
                 type="checkbox"
                 checked={inactiveOnly}
@@ -646,7 +646,7 @@ export const LeadsView: React.FC<LeadsViewProps> = ({
                   setInactiveOnly(e.target.checked);
                   setPage(1);
                 }}
-                className="accent-[#B58A35]"
+                className="accent-[#C99B56]"
               />
               Inactive (15d+) only
             </label>
@@ -665,7 +665,7 @@ export const LeadsView: React.FC<LeadsViewProps> = ({
                 setSearch('');
                 setPage(1);
               }}
-              className="inline-flex items-center gap-1 text-xs font-medium text-[#B58A35] hover:underline"
+              className="inline-flex items-center gap-1 text-xs font-medium text-[#C99B56] hover:underline"
             >
               <RotateCcw className="h-3 w-3" /> Reset Filters
             </button>
@@ -675,16 +675,16 @@ export const LeadsView: React.FC<LeadsViewProps> = ({
 
       {/* Customizable Columns Panel (PRD 10.2) */}
       {showColumnPanel && viewMode === 'table' && (
-        <div className="rounded-xl border border-[#E5DEC9] bg-white p-4 dark:border-[#2A2A2A] dark:bg-[#171717]">
+        <div className="rounded-xl border border-[#E2E8F0] bg-white p-4 dark:border-[#1E3349] dark:bg-[#121E2C]">
           <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
-            <h3 className="text-xs font-semibold text-[#171717] dark:text-white">
+            <h3 className="text-xs font-semibold text-[#16273A] dark:text-white">
               Customize Table Columns (Show / Hide / Reorder)
             </h3>
             <div className="flex flex-wrap items-center gap-2">
               <button
                 type="button"
                 onClick={restoreDefaultColumns}
-                className="rounded-md border border-[#E5DEC9] px-2.5 py-1 text-xs text-[#525252] hover:bg-[#F3EBDD] dark:border-[#2E2E2E] dark:text-[#A3A3A3]"
+                className="rounded-md border border-[#E2E8F0] px-2.5 py-1 text-xs text-[#525252] hover:bg-[#FBF6EE] dark:border-[#1E3349] dark:text-[#A3A3A3]"
               >
                 Restore Defaults
               </button>
@@ -692,7 +692,7 @@ export const LeadsView: React.FC<LeadsViewProps> = ({
                 <button
                   type="button"
                   onClick={saveCompanyDefaultColumns}
-                  className="rounded-md border border-[#B58A35] px-2.5 py-1 text-xs font-medium text-[#B58A35] hover:bg-[#B58A35]/10"
+                  className="rounded-md border border-[#C99B56] px-2.5 py-1 text-xs font-medium text-[#C99B56] hover:bg-[#C99B56]/10"
                 >
                   Save as Company Default
                 </button>
@@ -700,7 +700,7 @@ export const LeadsView: React.FC<LeadsViewProps> = ({
               <button
                 type="button"
                 onClick={savePersonalColumns}
-                className="rounded-md bg-[#171717] px-3 py-1 text-xs font-semibold text-white dark:bg-[#B58A35] dark:text-[#171717]"
+                className="rounded-md bg-[#16273A] px-3 py-1 text-xs font-semibold text-white dark:bg-[#C99B56] dark:text-[#16273A]"
               >
                 Save My Preferences
               </button>
@@ -714,17 +714,17 @@ export const LeadsView: React.FC<LeadsViewProps> = ({
               return (
                 <div
                   key={key}
-                  className="flex items-center justify-between rounded-lg border border-[#E5DEC9] px-2.5 py-1.5 text-xs dark:border-[#2A2A2A]"
+                  className="flex items-center justify-between rounded-lg border border-[#E2E8F0] px-2.5 py-1.5 text-xs dark:border-[#1E3349]"
                 >
                   <label className="flex items-center gap-2 cursor-pointer">
-                    <input type="checkbox" checked onChange={() => toggleColumn(key)} className="accent-[#B58A35]" />
-                    <span className="font-medium text-[#171717] dark:text-white">{meta.label}</span>
+                    <input type="checkbox" checked onChange={() => toggleColumn(key)} className="accent-[#C99B56]" />
+                    <span className="font-medium text-[#16273A] dark:text-white">{meta.label}</span>
                   </label>
                   <div className="flex items-center gap-1">
-                    <button type="button" onClick={() => moveColumn(key, -1)} className="p-0.5 text-[#737373] hover:text-[#171717]">
+                    <button type="button" onClick={() => moveColumn(key, -1)} className="p-0.5 text-[#737373] hover:text-[#16273A]">
                       <ArrowUp className="h-3 w-3" />
                     </button>
-                    <button type="button" onClick={() => moveColumn(key, 1)} className="p-0.5 text-[#737373] hover:text-[#171717]">
+                    <button type="button" onClick={() => moveColumn(key, 1)} className="p-0.5 text-[#737373] hover:text-[#16273A]">
                       <ArrowDown className="h-3 w-3" />
                     </button>
                   </div>
@@ -734,9 +734,9 @@ export const LeadsView: React.FC<LeadsViewProps> = ({
             {ALL_TABLE_COLUMNS.filter((c) => !columns.includes(c.key)).map((c) => (
               <label
                 key={c.key}
-                className="flex items-center gap-2 rounded-lg border border-dashed border-[#E5DEC9] px-2.5 py-1.5 text-xs text-[#737373] cursor-pointer dark:border-[#2A2A2A]"
+                className="flex items-center gap-2 rounded-lg border border-dashed border-[#E2E8F0] px-2.5 py-1.5 text-xs text-[#737373] cursor-pointer dark:border-[#1E3349]"
               >
-                <input type="checkbox" checked={false} onChange={() => toggleColumn(c.key)} className="accent-[#B58A35]" />
+                <input type="checkbox" checked={false} onChange={() => toggleColumn(c.key)} className="accent-[#C99B56]" />
                 <span>{c.label}</span>
               </label>
             ))}
@@ -746,10 +746,10 @@ export const LeadsView: React.FC<LeadsViewProps> = ({
 
       {/* TABLE VIEW */}
       {viewMode === 'table' ? (
-        <div className="rounded-xl border border-[#E5DEC9] bg-white dark:border-[#2A2A2A] dark:bg-[#171717] overflow-hidden">
+        <div className="rounded-xl border border-[#E2E8F0] bg-white dark:border-[#1E3349] dark:bg-[#121E2C] overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs">
-              <thead className="bg-[#F8F6F1] border-b border-[#E5DEC9] dark:bg-[#141414] dark:border-[#2A2A2A]">
+              <thead className="bg-[#F8FAFC] border-b border-[#E2E8F0] dark:bg-[#0F1926] dark:border-[#1E3349]">
                 <tr>
                   {columns.map((key) => {
                     const meta = ALL_TABLE_COLUMNS.find((c) => c.key === key);
@@ -761,12 +761,12 @@ export const LeadsView: React.FC<LeadsViewProps> = ({
                   })}
                 </tr>
               </thead>
-              <tbody className="divide-y divide-[#E5DEC9]/70 dark:divide-[#242424]">
+              <tbody className="divide-y divide-[#E2E8F0]/70 dark:divide-[#1E3349]">
                 {loading ? (
                   Array.from({ length: 5 }).map((_, i) => (
                     <tr key={i}>
                       <td colSpan={columns.length} className="px-4 py-3.5">
-                        <div className="h-4 rounded bg-[#F3EBDD]/60 dark:bg-[#242424]" />
+                        <div className="h-4 rounded bg-[#FBF6EE]/60 dark:bg-[#242424]" />
                       </td>
                     </tr>
                   ))
@@ -781,7 +781,7 @@ export const LeadsView: React.FC<LeadsViewProps> = ({
                     <tr
                       key={lead.id}
                       onClick={() => onOpenLead(lead.id)}
-                      className="cursor-pointer hover:bg-[#F3EBDD]/40 dark:hover:bg-[#202020] transition-colors"
+                      className="cursor-pointer hover:bg-[#FBF6EE]/40 dark:hover:bg-[#1A2C40] transition-colors"
                     >
                       {columns.map((key) => (
                         <td key={key} className="px-4 py-3 whitespace-nowrap">
@@ -796,13 +796,13 @@ export const LeadsView: React.FC<LeadsViewProps> = ({
           </div>
 
           {/* Pagination Footer (10/25/50/100) */}
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-3 px-4 py-3 border-t border-[#E5DEC9] bg-[#F8F6F1]/60 dark:border-[#2A2A2A] dark:bg-[#141414] text-xs">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-3 px-4 py-3 border-t border-[#E2E8F0] bg-[#F8FAFC]/60 dark:border-[#1E3349] dark:bg-[#0F1926] text-xs">
             <div className="flex items-center gap-2 text-[#525252] dark:text-[#A3A3A3]">
               <span>Rows per page:</span>
               <select
                 value={pageSize}
                 onChange={(e) => handleChangePageSize(Number(e.target.value))}
-                className="rounded border border-[#E5DEC9] bg-white px-2 py-1 text-xs font-mono-tabular dark:border-[#2E2E2E] dark:bg-[#171717] dark:text-white"
+                className="rounded border border-[#E2E8F0] bg-white px-2 py-1 text-xs font-mono-tabular dark:border-[#1E3349] dark:bg-[#121E2C] dark:text-white"
               >
                 {[10, 25, 50, 100].map((n) => (
                   <option key={n} value={n}>
@@ -821,7 +821,7 @@ export const LeadsView: React.FC<LeadsViewProps> = ({
                   type="button"
                   disabled={page <= 1}
                   onClick={() => setPage((p) => Math.max(1, p - 1))}
-                  className="rounded border border-[#E5DEC9] bg-white px-2.5 py-1 text-xs font-medium disabled:opacity-40 dark:border-[#2E2E2E] dark:bg-[#171717] dark:text-white"
+                  className="rounded border border-[#E2E8F0] bg-white px-2.5 py-1 text-xs font-medium disabled:opacity-40 dark:border-[#1E3349] dark:bg-[#121E2C] dark:text-white"
                 >
                   Prev
                 </button>
@@ -829,7 +829,7 @@ export const LeadsView: React.FC<LeadsViewProps> = ({
                   type="button"
                   disabled={page >= totalPages}
                   onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-                  className="rounded border border-[#E5DEC9] bg-white px-2.5 py-1 text-xs font-medium disabled:opacity-40 dark:border-[#2E2E2E] dark:bg-[#171717] dark:text-white"
+                  className="rounded border border-[#E2E8F0] bg-white px-2.5 py-1 text-xs font-medium disabled:opacity-40 dark:border-[#1E3349] dark:bg-[#121E2C] dark:text-white"
                 >
                   Next
                 </button>
@@ -852,11 +852,11 @@ export const LeadsView: React.FC<LeadsViewProps> = ({
                     setDraggedLead(null);
                   }
                 }}
-                className="w-72 shrink-0 rounded-xl border border-[#E5DEC9] bg-[#F8F6F1] p-3 dark:border-[#2A2A2A] dark:bg-[#151515]"
+                className="w-72 shrink-0 rounded-xl border border-[#E2E8F0] bg-[#F8FAFC] p-3 dark:border-[#1E3349] dark:bg-[#151515]"
               >
-                <div className="flex items-center justify-between px-1 pb-2.5 mb-2.5 border-b border-[#E5DEC9] dark:border-[#262626]">
-                  <span className="text-xs font-semibold text-[#171717] dark:text-white truncate">{stage.name}</span>
-                  <span className="font-mono-tabular text-xs font-semibold text-[#B58A35]">{stageLeads.length}</span>
+                <div className="flex items-center justify-between px-1 pb-2.5 mb-2.5 border-b border-[#E2E8F0] dark:border-[#1E3349]">
+                  <span className="text-xs font-semibold text-[#16273A] dark:text-white truncate">{stage.name}</span>
+                  <span className="font-mono-tabular text-xs font-semibold text-[#C99B56]">{stageLeads.length}</span>
                 </div>
 
                 <div className="space-y-2.5 min-h-[180px]">
@@ -866,17 +866,17 @@ export const LeadsView: React.FC<LeadsViewProps> = ({
                       draggable={!(stage.is_terminal === 1)}
                       onDragStart={() => setDraggedLead(lead)}
                       onClick={() => onOpenLead(lead.id)}
-                      className="cursor-pointer rounded-lg border border-[#E5DEC9] bg-white p-3 hover:border-[#B58A35] dark:border-[#2A2A2A] dark:bg-[#1B1B1B] dark:hover:border-[#B58A35] transition-colors"
+                      className="cursor-pointer rounded-lg border border-[#E2E8F0] bg-white p-3 hover:border-[#C99B56] dark:border-[#1E3349] dark:bg-[#1B1B1B] dark:hover:border-[#C99B56] transition-colors"
                     >
                       <div className="flex items-center justify-between gap-2 text-[11px]">
-                        <span className="font-mono-tabular font-semibold text-[#B58A35]">{lead.lead_code}</span>
+                        <span className="font-mono-tabular font-semibold text-[#C99B56]">{lead.lead_code}</span>
                         {lead.is_inactive === 1 && (
                           <span className="rounded bg-amber-100 px-1.5 py-0.5 text-[10px] font-semibold text-amber-900 dark:bg-amber-950/60 dark:text-amber-300">
                             Inactive
                           </span>
                         )}
                       </div>
-                      <div className="mt-1 text-xs font-semibold text-[#171717] dark:text-white truncate">
+                      <div className="mt-1 text-xs font-semibold text-[#16273A] dark:text-white truncate">
                         {lead.customer_name}
                       </div>
                       <div className="mt-1 text-[11px] text-[#525252] dark:text-[#A3A3A3] truncate">
@@ -885,8 +885,8 @@ export const LeadsView: React.FC<LeadsViewProps> = ({
                       <div className="mt-1 text-[11px] text-[#737373] dark:text-[#A3A3A3] truncate">
                         {lead.localities.join(', ')}
                       </div>
-                      <div className="mt-2 pt-2 border-t border-[#E5DEC9]/60 dark:border-[#262626] flex items-center justify-between text-[11px]">
-                        <span className="font-mono-tabular font-medium text-[#171717] dark:text-white">
+                      <div className="mt-2 pt-2 border-t border-[#E2E8F0]/60 dark:border-[#1E3349] flex items-center justify-between text-[11px]">
+                        <span className="font-mono-tabular font-medium text-[#16273A] dark:text-white">
                           {formatBudgetRange(lead.budget_from, lead.budget_to)}
                         </span>
                         <span className="text-[#737373] dark:text-[#A3A3A3] truncate max-w-[100px]">

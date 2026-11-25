@@ -120,7 +120,7 @@ export const ImportView: React.FC<{ onImported: () => void }> = ({ onImported })
     <div className="space-y-5">
       <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3">
         <div>
-          <h1 className="text-xl font-bold tracking-tight text-[#171717] dark:text-white">Excel / CSV Lead Import</h1>
+          <h1 className="text-xl font-bold tracking-tight text-[#16273A] dark:text-white">Excel / CSV Lead Import</h1>
           <p className="text-xs text-[#737373] dark:text-[#A3A3A3]">
             Super Admin only · Partial import support, row-level duplicate decisions, and error report re-upload
           </p>
@@ -130,29 +130,29 @@ export const ImportView: React.FC<{ onImported: () => void }> = ({ onImported })
           <button
             type="button"
             onClick={() => apiDownload('/api/import/template?format=xlsx', 'SSM_Lead_Import_Template.xlsx')}
-            className="inline-flex items-center gap-1.5 rounded-lg border border-[#E5DEC9] bg-white px-3 py-1.5 text-xs font-medium text-[#171717] hover:bg-[#F3EBDD] dark:border-[#2A2A2A] dark:bg-[#171717] dark:text-white"
+            className="inline-flex items-center gap-1.5 rounded-lg border border-[#E2E8F0] bg-white px-3 py-1.5 text-xs font-medium text-[#16273A] hover:bg-[#FBF6EE] dark:border-[#1E3349] dark:bg-[#121E2C] dark:text-white"
           >
-            <Download className="h-3.5 w-3.5 text-[#B58A35]" /> Template (.xlsx)
+            <Download className="h-3.5 w-3.5 text-[#C99B56]" /> Template (.xlsx)
           </button>
           <button
             type="button"
             onClick={() => apiDownload('/api/import/template?format=csv', 'SSM_Lead_Import_Template.csv')}
-            className="inline-flex items-center gap-1.5 rounded-lg border border-[#E5DEC9] bg-white px-3 py-1.5 text-xs font-medium text-[#171717] hover:bg-[#F3EBDD] dark:border-[#2A2A2A] dark:bg-[#171717] dark:text-white"
+            className="inline-flex items-center gap-1.5 rounded-lg border border-[#E2E8F0] bg-white px-3 py-1.5 text-xs font-medium text-[#16273A] hover:bg-[#FBF6EE] dark:border-[#1E3349] dark:bg-[#121E2C] dark:text-white"
           >
-            <Download className="h-3.5 w-3.5 text-[#B58A35]" /> Template (.csv)
+            <Download className="h-3.5 w-3.5 text-[#C99B56]" /> Template (.csv)
           </button>
         </div>
       </div>
 
       {/* Upload Box */}
-      <div className="rounded-xl border border-[#E5DEC9] bg-white p-5 dark:border-[#2A2A2A] dark:bg-[#171717] space-y-4">
+      <div className="rounded-xl border border-[#E2E8F0] bg-white p-5 dark:border-[#1E3349] dark:bg-[#121E2C] space-y-4">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
           <div className="md:col-span-2">
             <label className="block text-xs font-medium text-[#404040] dark:text-[#D4D4D4] mb-1.5">
               Upload Filled Lead Template (.xlsx or .csv)
             </label>
-            <label className="flex items-center justify-center gap-2 rounded-lg border border-dashed border-[#B58A35]/60 bg-[#F8F6F1] px-4 py-6 text-xs font-medium text-[#171717] cursor-pointer hover:bg-[#F3EBDD]/60 dark:bg-[#111111] dark:text-white">
-              <Upload className="h-4 w-4 text-[#B58A35]" />
+            <label className="flex items-center justify-center gap-2 rounded-lg border border-dashed border-[#C99B56]/60 bg-[#F8FAFC] px-4 py-6 text-xs font-medium text-[#16273A] cursor-pointer hover:bg-[#FBF6EE]/60 dark:bg-[#0C141E] dark:text-white">
+              <Upload className="h-4 w-4 text-[#C99B56]" />
               <span>{loading ? 'Processing spreadsheet...' : 'Click to choose .xlsx or .csv file'}</span>
               <input type="file" accept=".xlsx,.csv" onChange={handleFileUpload} className="hidden" />
             </label>
@@ -166,7 +166,7 @@ export const ImportView: React.FC<{ onImported: () => void }> = ({ onImported })
               value={retryBatchRef}
               onChange={(e) => setRetryBatchRef(e.target.value)}
               placeholder="e.g., IMP-20261125-A1B2C3"
-              className="w-full rounded-lg border border-[#E5DEC9] bg-white px-3 py-2 text-xs font-mono-tabular dark:border-[#2E2E2E] dark:bg-[#111111] dark:text-white"
+              className="w-full rounded-lg border border-[#E2E8F0] bg-white px-3 py-2 text-xs font-mono-tabular dark:border-[#1E3349] dark:bg-[#0C141E] dark:text-white"
             />
           </div>
         </div>
@@ -180,11 +180,11 @@ export const ImportView: React.FC<{ onImported: () => void }> = ({ onImported })
 
       {/* Preview & Duplicate Decision Table */}
       {previewRows.length > 0 && (
-        <div className="rounded-xl border border-[#E5DEC9] bg-white p-5 space-y-4 dark:border-[#2A2A2A] dark:bg-[#171717]">
+        <div className="rounded-xl border border-[#E2E8F0] bg-white p-5 space-y-4 dark:border-[#1E3349] dark:bg-[#121E2C]">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div>
-              <h2 className="text-sm font-semibold text-[#171717] dark:text-white">
-                Preview: {filename} · Batch <span className="font-mono-tabular text-[#B58A35]">{batchRef}</span>
+              <h2 className="text-sm font-semibold text-[#16273A] dark:text-white">
+                Preview: {filename} · Batch <span className="font-mono-tabular text-[#C99B56]">{batchRef}</span>
               </h2>
               <p className="text-xs text-[#737373] mt-0.5">
                 Total: <strong className="font-mono-tabular">{previewRows.length}</strong> · Valid:{' '}
@@ -197,7 +197,7 @@ export const ImportView: React.FC<{ onImported: () => void }> = ({ onImported })
               type="button"
               disabled={loading || validCount === 0}
               onClick={handleCommit}
-              className="rounded-lg bg-[#171717] px-4 py-2 text-xs font-semibold text-white hover:bg-[#2E2E2E] disabled:opacity-40 dark:bg-[#B58A35] dark:text-[#171717]"
+              className="rounded-lg bg-[#16273A] px-4 py-2 text-xs font-semibold text-white hover:bg-[#20364F] disabled:opacity-40 dark:bg-[#C99B56] dark:text-[#16273A]"
             >
               {loading ? 'Importing...' : `Import Valid Rows (${validCount})`}
             </button>
@@ -205,7 +205,7 @@ export const ImportView: React.FC<{ onImported: () => void }> = ({ onImported })
 
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs">
-              <thead className="bg-[#F8F6F1] border-b border-[#E5DEC9] dark:bg-[#141414] dark:border-[#2A2A2A]">
+              <thead className="bg-[#F8FAFC] border-b border-[#E2E8F0] dark:bg-[#0F1926] dark:border-[#1E3349]">
                 <tr>
                   <th className="px-3 py-2 font-semibold">Row</th>
                   <th className="px-3 py-2 font-semibold">Customer &amp; Mobile</th>
@@ -214,12 +214,12 @@ export const ImportView: React.FC<{ onImported: () => void }> = ({ onImported })
                   <th className="px-3 py-2 font-semibold">Decision</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-[#E5DEC9]/60 dark:divide-[#242424]">
+              <tbody className="divide-y divide-[#E2E8F0]/60 dark:divide-[#1E3349]">
                 {previewRows.map((row) => (
                   <tr key={row.rowNumber}>
                     <td className="px-3 py-2.5 font-mono-tabular text-[#737373]">{row.rowNumber}</td>
                     <td className="px-3 py-2.5">
-                      <div className="font-medium text-[#171717] dark:text-white">{row.raw['Customer Name'] || '—'}</div>
+                      <div className="font-medium text-[#16273A] dark:text-white">{row.raw['Customer Name'] || '—'}</div>
                       <div className="font-mono-tabular text-[11px] text-[#737373]">{row.raw['Mobile'] || '—'}</div>
                     </td>
                     <td className="px-3 py-2.5 text-[#525252] dark:text-[#A3A3A3]">
@@ -239,7 +239,7 @@ export const ImportView: React.FC<{ onImported: () => void }> = ({ onImported })
                           </div>
                           {row.duplicates.map((d) => (
                             <div key={d.id} className="text-[11px] text-[#525252] dark:text-[#A3A3A3]">
-                              <span className="font-mono-tabular text-[#B58A35]">{d.lead_code}</span> · {d.customer_name} ·{' '}
+                              <span className="font-mono-tabular text-[#C99B56]">{d.lead_code}</span> · {d.customer_name} ·{' '}
                               {d.requirement_summary} · {d.stage} · {d.assigned_to_name}
                             </div>
                           ))}
@@ -262,7 +262,7 @@ export const ImportView: React.FC<{ onImported: () => void }> = ({ onImported })
                               [String(row.rowNumber)]: e.target.value as 'skip' | 'separate',
                             }))
                           }
-                          className="rounded border border-amber-500/50 bg-white px-2 py-1 text-xs dark:bg-[#111111] dark:text-white"
+                          className="rounded border border-amber-500/50 bg-white px-2 py-1 text-xs dark:bg-[#0C141E] dark:text-white"
                         >
                           <option value="skip">Skip Duplicate</option>
                           <option value="separate">Import as Separate Lead</option>
@@ -281,11 +281,11 @@ export const ImportView: React.FC<{ onImported: () => void }> = ({ onImported })
 
       {/* Commit Result + Error Report Download */}
       {commitResult && (
-        <div className="rounded-xl border border-[#B58A35]/40 bg-[#F3EBDD]/40 p-5 dark:bg-[#221F1A]">
+        <div className="rounded-xl border border-[#C99B56]/40 bg-[#FBF6EE]/40 p-5 dark:bg-[#2A2318]">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div>
-              <h3 className="text-sm font-semibold text-[#171717] dark:text-white">
-                Import Batch <span className="font-mono-tabular text-[#B58A35]">{commitResult.batchRef}</span> Completed
+              <h3 className="text-sm font-semibold text-[#16273A] dark:text-white">
+                Import Batch <span className="font-mono-tabular text-[#C99B56]">{commitResult.batchRef}</span> Completed
               </h3>
               <p className="text-xs text-[#525252] dark:text-[#D4D4D4] mt-1 font-mono-tabular">
                 Total: {commitResult.total} · Imported: {commitResult.successCount} · Skipped Duplicates: {commitResult.skippedCount} · Failed: {commitResult.failedCount}
@@ -296,14 +296,14 @@ export const ImportView: React.FC<{ onImported: () => void }> = ({ onImported })
                 <button
                   type="button"
                   onClick={() => downloadErrorReport(commitResult.errors, 'xlsx')}
-                  className="inline-flex items-center gap-1.5 rounded-lg bg-[#171717] px-3 py-1.5 text-xs font-semibold text-white dark:bg-[#B58A35] dark:text-[#171717]"
+                  className="inline-flex items-center gap-1.5 rounded-lg bg-[#16273A] px-3 py-1.5 text-xs font-semibold text-white dark:bg-[#C99B56] dark:text-[#16273A]"
                 >
                   <Download className="h-3.5 w-3.5" /> Error Report (.xlsx)
                 </button>
                 <button
                   type="button"
                   onClick={() => downloadErrorReport(commitResult.errors, 'csv')}
-                  className="inline-flex items-center gap-1.5 rounded-lg border border-[#E5DEC9] bg-white px-3 py-1.5 text-xs font-medium text-[#171717]"
+                  className="inline-flex items-center gap-1.5 rounded-lg border border-[#E2E8F0] bg-white px-3 py-1.5 text-xs font-medium text-[#16273A]"
                 >
                   <Download className="h-3.5 w-3.5" /> Error Report (.csv)
                 </button>
@@ -314,14 +314,14 @@ export const ImportView: React.FC<{ onImported: () => void }> = ({ onImported })
       )}
 
       {/* Import History */}
-      <div className="rounded-xl border border-[#E5DEC9] bg-white overflow-hidden dark:border-[#2A2A2A] dark:bg-[#171717]">
-        <div className="px-4 py-3 border-b border-[#E5DEC9] dark:border-[#2A2A2A] flex items-center gap-2">
-          <FileSpreadsheet className="h-4 w-4 text-[#B58A35]" />
-          <h2 className="text-sm font-semibold text-[#171717] dark:text-white">Import History</h2>
+      <div className="rounded-xl border border-[#E2E8F0] bg-white overflow-hidden dark:border-[#1E3349] dark:bg-[#121E2C]">
+        <div className="px-4 py-3 border-b border-[#E2E8F0] dark:border-[#1E3349] flex items-center gap-2">
+          <FileSpreadsheet className="h-4 w-4 text-[#C99B56]" />
+          <h2 className="text-sm font-semibold text-[#16273A] dark:text-white">Import History</h2>
         </div>
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs">
-            <thead className="bg-[#F8F6F1] border-b border-[#E5DEC9] dark:bg-[#141414] dark:border-[#2A2A2A]">
+            <thead className="bg-[#F8FAFC] border-b border-[#E2E8F0] dark:bg-[#0F1926] dark:border-[#1E3349]">
               <tr>
                 <th className="px-4 py-2.5 font-semibold">Batch Ref</th>
                 <th className="px-4 py-2.5 font-semibold">Filename</th>
@@ -334,7 +334,7 @@ export const ImportView: React.FC<{ onImported: () => void }> = ({ onImported })
                 <th className="px-4 py-2.5 font-semibold">Errors</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-[#E5DEC9]/60 dark:divide-[#242424]">
+            <tbody className="divide-y divide-[#E2E8F0]/60 dark:divide-[#1E3349]">
               {history.length === 0 ? (
                 <tr>
                   <td colSpan={9} className="px-4 py-8 text-center text-[#737373]">
@@ -344,8 +344,8 @@ export const ImportView: React.FC<{ onImported: () => void }> = ({ onImported })
               ) : (
                 history.map((b) => (
                   <tr key={b.id}>
-                    <td className="px-4 py-2.5 font-mono-tabular font-semibold text-[#B58A35]">{b.batch_ref}</td>
-                    <td className="px-4 py-2.5 text-[#171717] dark:text-white">{b.filename}</td>
+                    <td className="px-4 py-2.5 font-mono-tabular font-semibold text-[#C99B56]">{b.batch_ref}</td>
+                    <td className="px-4 py-2.5 text-[#16273A] dark:text-white">{b.filename}</td>
                     <td className="px-4 py-2.5 text-[#525252] dark:text-[#A3A3A3]">{b.uploaded_by_name}</td>
                     <td className="px-4 py-2.5 font-mono-tabular text-[#737373]">{formatDateTime(b.created_at)}</td>
                     <td className="px-4 py-2.5 text-right font-mono-tabular">{b.total_count}</td>
@@ -359,7 +359,7 @@ export const ImportView: React.FC<{ onImported: () => void }> = ({ onImported })
                         <button
                           type="button"
                           onClick={() => downloadErrorReport(b.errors, 'xlsx')}
-                          className="text-xs font-medium text-[#B58A35] hover:underline"
+                          className="text-xs font-medium text-[#C99B56] hover:underline"
                         >
                           Download
                         </button>

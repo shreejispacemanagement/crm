@@ -101,7 +101,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
       {/* Header & Date Filter Bar */}
       <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
         <div>
-          <h1 className="text-xl font-bold tracking-tight text-[#171717] dark:text-white">
+          <h1 className="text-xl font-bold tracking-tight text-[#16273A] dark:text-white">
             {isAdmin ? 'Dashboard' : 'My Sales Workspace'}
           </h1>
           <p className="text-xs text-[#737373] dark:text-[#A3A3A3] mt-0.5">
@@ -112,7 +112,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
-          <div className="flex flex-wrap items-center gap-1 rounded-lg border border-[#E5DEC9] bg-white p-1 dark:border-[#2A2A2A] dark:bg-[#171717]">
+          <div className="flex flex-wrap items-center gap-1 rounded-lg border border-[#E2E8F0] bg-white p-1 dark:border-[#1E3349] dark:bg-[#121E2C]">
             {DATE_PRESETS.map((p) => (
               <button
                 key={p.value}
@@ -120,8 +120,8 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                 onClick={() => setDatePreset(p.value)}
                 className={`rounded-md px-2.5 py-1 text-xs font-medium whitespace-nowrap shrink-0 transition-colors ${
                   datePreset === p.value
-                    ? 'bg-[#171717] text-white dark:bg-[#B58A35] dark:text-[#171717]'
-                    : 'text-[#525252] hover:bg-[#F3EBDD]/60 dark:text-[#A3A3A3] dark:hover:bg-[#242424]'
+                    ? 'bg-[#16273A] text-white dark:bg-[#C99B56] dark:text-[#16273A]'
+                    : 'text-[#525252] hover:bg-[#FBF6EE]/60 dark:text-[#A3A3A3] dark:hover:bg-[#1A2C40]'
                 }`}
               >
                 {p.label}
@@ -134,14 +134,14 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                 type="date"
                 value={customStart}
                 onChange={(e) => setCustomStart(e.target.value)}
-                className="rounded-lg border border-[#E5DEC9] bg-white px-2.5 py-1.5 text-xs dark:border-[#2A2A2A] dark:bg-[#171717] dark:text-white"
+                className="rounded-lg border border-[#E2E8F0] bg-white px-2.5 py-1.5 text-xs dark:border-[#1E3349] dark:bg-[#121E2C] dark:text-white"
               />
               <span className="text-xs text-[#737373]">to</span>
               <input
                 type="date"
                 value={customEnd}
                 onChange={(e) => setCustomEnd(e.target.value)}
-                className="rounded-lg border border-[#E5DEC9] bg-white px-2.5 py-1.5 text-xs dark:border-[#2A2A2A] dark:bg-[#171717] dark:text-white"
+                className="rounded-lg border border-[#E2E8F0] bg-white px-2.5 py-1.5 text-xs dark:border-[#1E3349] dark:bg-[#121E2C] dark:text-white"
               />
             </div>
           )}
@@ -159,16 +159,16 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
         ].map((card) => (
           <div
             key={card.label}
-            className="rounded-xl border border-[#E5DEC9] bg-white p-4 dark:border-[#2A2A2A] dark:bg-[#171717]"
+            className="rounded-xl border border-[#E2E8F0] bg-white p-4 dark:border-[#1E3349] dark:bg-[#121E2C]"
           >
             <div className="text-xs font-medium text-[#737373] dark:text-[#A3A3A3]">{card.label}</div>
             <div
               className={`mt-2 text-2xl font-bold font-mono-tabular ${
                 card.accent
-                  ? 'text-[#B58A35]'
+                  ? 'text-[#C99B56]'
                   : card.tone === 'emerald'
                   ? 'text-emerald-700 dark:text-emerald-400'
-                  : 'text-[#171717] dark:text-white'
+                  : 'text-[#16273A] dark:text-white'
               }`}
             >
               {loading ? '—' : card.val}
@@ -178,15 +178,15 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
       </div>
 
       {data && data.cards.totalLeads === 0 && (
-        <div className="rounded-xl border border-[#E5DEC9] bg-white p-8 text-center dark:border-[#2A2A2A] dark:bg-[#171717]">
-          <p className="text-sm font-medium text-[#171717] dark:text-white">No leads recorded for this date filter.</p>
+        <div className="rounded-xl border border-[#E2E8F0] bg-white p-8 text-center dark:border-[#1E3349] dark:bg-[#121E2C]">
+          <p className="text-sm font-medium text-[#16273A] dark:text-white">No leads recorded for this date filter.</p>
           <p className="text-xs text-[#737373] dark:text-[#A3A3A3] mt-1">
             Switch to All Time or create a new property requirement lead.
           </p>
           <button
             type="button"
             onClick={onCreateLead}
-            className="mt-4 inline-flex items-center gap-1.5 rounded-lg bg-[#171717] px-4 py-2 text-xs font-semibold text-white hover:bg-[#2E2E2E] dark:bg-[#B58A35] dark:text-[#171717]"
+            className="mt-4 inline-flex items-center gap-1.5 rounded-lg bg-[#16273A] px-4 py-2 text-xs font-semibold text-white hover:bg-[#20364F] dark:bg-[#C99B56] dark:text-[#16273A]"
           >
             <Plus className="h-3.5 w-3.5" /> Create First Lead
           </button>
@@ -197,8 +197,8 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
       {data && (
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
           {/* Pipeline Stages */}
-          <div className="lg:col-span-7 rounded-xl border border-[#E5DEC9] bg-white p-5 dark:border-[#2A2A2A] dark:bg-[#171717]">
-            <h2 className="text-sm font-semibold text-[#171717] dark:text-white mb-4">
+          <div className="lg:col-span-7 rounded-xl border border-[#E2E8F0] bg-white p-5 dark:border-[#1E3349] dark:bg-[#121E2C]">
+            <h2 className="text-sm font-semibold text-[#16273A] dark:text-white mb-4">
               {isAdmin ? 'Lead Stage Distribution' : 'My Pipeline'}
             </h2>
             <div className="space-y-2.5">
@@ -210,19 +210,19 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                     <div className="col-span-5 sm:col-span-4 truncate font-medium text-[#262626] dark:text-[#E5E5E5]">
                       {s.name}
                     </div>
-                    <div className="col-span-5 sm:col-span-6 h-2 rounded-full bg-[#F3EBDD] dark:bg-[#262626] overflow-hidden">
+                    <div className="col-span-5 sm:col-span-6 h-2 rounded-full bg-[#FBF6EE] dark:bg-[#262626] overflow-hidden">
                       <div
                         className={`h-full rounded-full ${
                           s.name === 'Booking Done'
                             ? 'bg-emerald-600'
                             : s.name === 'Dead'
                             ? 'bg-neutral-400 dark:bg-neutral-600'
-                            : 'bg-[#B58A35]'
+                            : 'bg-[#C99B56]'
                         }`}
                         style={{ width: `${pct}%` }}
                       />
                     </div>
-                    <div className="col-span-2 text-right font-mono-tabular font-semibold text-[#171717] dark:text-white">
+                    <div className="col-span-2 text-right font-mono-tabular font-semibold text-[#16273A] dark:text-white">
                       {s.count}
                     </div>
                   </div>
@@ -232,18 +232,18 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
           </div>
 
           {/* Right Column: Source Distribution (Admin) OR Upcoming Visits & Meetings (Exec) */}
-          <div className="lg:col-span-5 rounded-xl border border-[#E5DEC9] bg-white p-5 dark:border-[#2A2A2A] dark:bg-[#171717]">
+          <div className="lg:col-span-5 rounded-xl border border-[#E2E8F0] bg-white p-5 dark:border-[#1E3349] dark:bg-[#121E2C]">
             {isAdmin ? (
               <>
-                <h2 className="text-sm font-semibold text-[#171717] dark:text-white mb-4">Lead Source Distribution</h2>
+                <h2 className="text-sm font-semibold text-[#16273A] dark:text-white mb-4">Lead Source Distribution</h2>
                 {data.sourceDistribution.length === 0 ? (
                   <p className="text-xs text-[#737373]">No lead sources in selected range.</p>
                 ) : (
-                  <div className="divide-y divide-[#E5DEC9]/60 dark:divide-[#242424]">
+                  <div className="divide-y divide-[#E2E8F0]/60 dark:divide-[#1E3349]">
                     {data.sourceDistribution.map((src) => (
                       <div key={src.name} className="flex items-center justify-between py-2 text-xs">
                         <span className="text-[#262626] dark:text-[#E5E5E5]">{src.name}</span>
-                        <span className="font-mono-tabular font-semibold text-[#171717] dark:text-white">{src.count}</span>
+                        <span className="font-mono-tabular font-semibold text-[#16273A] dark:text-white">{src.count}</span>
                       </div>
                     ))}
                   </div>
@@ -251,7 +251,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
               </>
             ) : (
               <>
-                <h2 className="text-sm font-semibold text-[#171717] dark:text-white mb-4">
+                <h2 className="text-sm font-semibold text-[#16273A] dark:text-white mb-4">
                   Upcoming Site Visits & Meetings
                 </h2>
                 {data.upcomingVisitsAndMeetings.length === 0 ? (
@@ -263,17 +263,17 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                         key={act.id}
                         type="button"
                         onClick={() => onOpenLead(act.lead_id)}
-                        className="w-full text-left flex items-start justify-between gap-3 rounded-lg border border-[#E5DEC9] p-3 hover:border-[#B58A35] dark:border-[#2A2A2A] dark:hover:border-[#B58A35] transition-colors"
+                        className="w-full text-left flex items-start justify-between gap-3 rounded-lg border border-[#E2E8F0] p-3 hover:border-[#C99B56] dark:border-[#1E3349] dark:hover:border-[#C99B56] transition-colors"
                       >
                         <div className="min-w-0">
-                          <div className="text-xs font-semibold text-[#171717] dark:text-white truncate">
+                          <div className="text-xs font-semibold text-[#16273A] dark:text-white truncate">
                             {act.activity_type} · {act.customer_name}
                           </div>
                           <div className="text-[11px] text-[#737373] dark:text-[#A3A3A3] mt-0.5 truncate">
                             {act.lead_code} · {act.description || 'Scheduled'}
                           </div>
                         </div>
-                        <span className="text-[11px] font-mono-tabular text-[#B58A35] whitespace-nowrap shrink-0">
+                        <span className="text-[11px] font-mono-tabular text-[#C99B56] whitespace-nowrap shrink-0">
                           {act.scheduled_date} {act.scheduled_time}
                         </span>
                       </button>
@@ -288,12 +288,12 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
 
       {/* Employee-wise Lead Allocation (Super Admin) */}
       {isAdmin && data && (
-        <div className="rounded-xl border border-[#E5DEC9] bg-white p-5 dark:border-[#2A2A2A] dark:bg-[#171717]">
-          <h2 className="text-sm font-semibold text-[#171717] dark:text-white mb-3">Employee-wise Lead Allocation</h2>
+        <div className="rounded-xl border border-[#E2E8F0] bg-white p-5 dark:border-[#1E3349] dark:bg-[#121E2C]">
+          <h2 className="text-sm font-semibold text-[#16273A] dark:text-white mb-3">Employee-wise Lead Allocation</h2>
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs">
               <thead>
-                <tr className="border-b border-[#E5DEC9] text-[#737373] dark:border-[#2A2A2A] dark:text-[#A3A3A3]">
+                <tr className="border-b border-[#E2E8F0] text-[#737373] dark:border-[#1E3349] dark:text-[#A3A3A3]">
                   <th className="py-2 pr-4 font-medium">Employee</th>
                   <th className="py-2 pr-4 font-medium">Designation</th>
                   <th className="py-2 px-4 font-medium text-right">Total Leads</th>
@@ -301,13 +301,13 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                   <th className="py-2 pl-4 font-medium text-right">Booking Done</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-[#E5DEC9]/60 dark:divide-[#242424]">
+              <tbody className="divide-y divide-[#E2E8F0]/60 dark:divide-[#1E3349]">
                 {data.employeeAllocation.map((emp) => (
                   <tr key={emp.id}>
-                    <td className="py-2.5 pr-4 font-medium text-[#171717] dark:text-white">{emp.full_name}</td>
+                    <td className="py-2.5 pr-4 font-medium text-[#16273A] dark:text-white">{emp.full_name}</td>
                     <td className="py-2.5 pr-4 text-[#737373] dark:text-[#A3A3A3]">{emp.designation}</td>
-                    <td className="py-2.5 px-4 text-right font-mono-tabular text-[#171717] dark:text-white">{emp.total_leads}</td>
-                    <td className="py-2.5 px-4 text-right font-mono-tabular font-semibold text-[#B58A35]">{emp.active_leads}</td>
+                    <td className="py-2.5 px-4 text-right font-mono-tabular text-[#16273A] dark:text-white">{emp.total_leads}</td>
+                    <td className="py-2.5 px-4 text-right font-mono-tabular font-semibold text-[#C99B56]">{emp.active_leads}</td>
                     <td className="py-2.5 pl-4 text-right font-mono-tabular text-emerald-700 dark:text-emerald-400">
                       {emp.won_leads}
                     </td>
@@ -323,10 +323,10 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
       {data && (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
           {/* Today's Follow-ups, Site Visits & Meetings */}
-          <div className="rounded-xl border border-[#E5DEC9] bg-white p-5 dark:border-[#2A2A2A] dark:bg-[#171717]">
+          <div className="rounded-xl border border-[#E2E8F0] bg-white p-5 dark:border-[#1E3349] dark:bg-[#121E2C]">
             <div className="flex items-center justify-between mb-3">
-              <h2 className="text-sm font-semibold text-[#171717] dark:text-white flex items-center gap-2">
-                <CalendarClock className="h-4 w-4 text-[#B58A35]" />
+              <h2 className="text-sm font-semibold text-[#16273A] dark:text-white flex items-center gap-2">
+                <CalendarClock className="h-4 w-4 text-[#C99B56]" />
                 Today&apos;s Schedule
               </h2>
               <span className="font-mono-tabular text-xs font-semibold text-[#737373]">{data.todaysActivities.length}</span>
@@ -340,11 +340,11 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                     key={act.id}
                     type="button"
                     onClick={() => onOpenLead(act.lead_id)}
-                    className="w-full text-left rounded-lg border border-[#E5DEC9] p-2.5 hover:border-[#B58A35] dark:border-[#2A2A2A] transition-colors"
+                    className="w-full text-left rounded-lg border border-[#E2E8F0] p-2.5 hover:border-[#C99B56] dark:border-[#1E3349] transition-colors"
                   >
                     <div className="flex items-center justify-between gap-2">
-                      <span className="text-xs font-semibold text-[#171717] dark:text-white truncate">{act.customer_name}</span>
-                      <span className="text-[11px] font-mono-tabular text-[#B58A35] shrink-0">{act.scheduled_time}</span>
+                      <span className="text-xs font-semibold text-[#16273A] dark:text-white truncate">{act.customer_name}</span>
+                      <span className="text-[11px] font-mono-tabular text-[#C99B56] shrink-0">{act.scheduled_time}</span>
                     </div>
                     <div className="text-[11px] text-[#737373] dark:text-[#A3A3A3] mt-0.5 truncate">
                       {act.activity_type} · {act.lead_code} {isAdmin ? `· ${act.assigned_to_name}` : ''}
@@ -356,9 +356,9 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
           </div>
 
           {/* Overdue Activities */}
-          <div className="rounded-xl border border-[#E5DEC9] bg-white p-5 dark:border-[#2A2A2A] dark:bg-[#171717]">
+          <div className="rounded-xl border border-[#E2E8F0] bg-white p-5 dark:border-[#1E3349] dark:bg-[#121E2C]">
             <div className="flex items-center justify-between mb-3">
-              <h2 className="text-sm font-semibold text-[#171717] dark:text-white flex items-center gap-2">
+              <h2 className="text-sm font-semibold text-[#16273A] dark:text-white flex items-center gap-2">
                 <Clock className="h-4 w-4 text-red-600" />
                 Overdue Activities
               </h2>
@@ -376,7 +376,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                     className="w-full text-left rounded-lg border border-red-500/30 bg-red-50/40 p-2.5 hover:border-red-500 dark:bg-red-950/20 transition-colors"
                   >
                     <div className="flex items-center justify-between gap-2">
-                      <span className="text-xs font-semibold text-[#171717] dark:text-white truncate">{act.customer_name}</span>
+                      <span className="text-xs font-semibold text-[#16273A] dark:text-white truncate">{act.customer_name}</span>
                       <span className="text-[11px] font-mono-tabular text-red-600 dark:text-red-400 shrink-0">
                         {act.scheduled_date}
                       </span>
@@ -391,16 +391,16 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
           </div>
 
           {/* Inactive Leads (15+ Days) */}
-          <div className="rounded-xl border border-[#E5DEC9] bg-white p-5 dark:border-[#2A2A2A] dark:bg-[#171717]">
+          <div className="rounded-xl border border-[#E2E8F0] bg-white p-5 dark:border-[#1E3349] dark:bg-[#121E2C]">
             <div className="flex items-center justify-between mb-3">
-              <h2 className="text-sm font-semibold text-[#171717] dark:text-white flex items-center gap-2">
+              <h2 className="text-sm font-semibold text-[#16273A] dark:text-white flex items-center gap-2">
                 <AlertCircle className="h-4 w-4 text-amber-600" />
                 Inactive Leads (15+ Days)
               </h2>
               <button
                 type="button"
                 onClick={onOpenInactiveReport}
-                className="inline-flex items-center gap-0.5 text-[11px] font-semibold text-[#B58A35] hover:underline"
+                className="inline-flex items-center gap-0.5 text-[11px] font-semibold text-[#C99B56] hover:underline"
               >
                 Report <ArrowUpRight className="h-3 w-3" />
               </button>
@@ -421,7 +421,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                       className="w-full text-left rounded-lg border border-amber-500/30 bg-amber-50/40 p-2.5 hover:border-amber-500 dark:bg-amber-950/20 transition-colors"
                     >
                       <div className="flex items-center justify-between gap-2">
-                        <span className="text-xs font-semibold text-[#171717] dark:text-white truncate">{lead.customer_name}</span>
+                        <span className="text-xs font-semibold text-[#16273A] dark:text-white truncate">{lead.customer_name}</span>
                         <span className="text-[11px] font-mono-tabular font-semibold text-amber-700 dark:text-amber-400 shrink-0">
                           {days}d idle
                         </span>
@@ -440,23 +440,23 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
 
       {/* Recent Lead Activity / Recently Updated Leads */}
       {data && (
-        <div className="rounded-xl border border-[#E5DEC9] bg-white p-5 dark:border-[#2A2A2A] dark:bg-[#171717]">
-          <h2 className="text-sm font-semibold text-[#171717] dark:text-white mb-3">
+        <div className="rounded-xl border border-[#E2E8F0] bg-white p-5 dark:border-[#1E3349] dark:bg-[#121E2C]">
+          <h2 className="text-sm font-semibold text-[#16273A] dark:text-white mb-3">
             {isAdmin ? 'Recent Lead Activity' : 'Recently Updated Leads'}
           </h2>
           {isAdmin ? (
-            <div className="divide-y divide-[#E5DEC9]/60 dark:divide-[#242424]">
+            <div className="divide-y divide-[#E2E8F0]/60 dark:divide-[#1E3349]">
               {data.recentActivity.map((ev) => (
                 <div key={ev.id} className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 py-2.5 text-xs">
                   <div className="min-w-0">
                     <button
                       type="button"
                       onClick={() => onOpenLead(ev.lead_id)}
-                      className="font-mono-tabular font-semibold text-[#B58A35] hover:underline mr-2"
+                      className="font-mono-tabular font-semibold text-[#C99B56] hover:underline mr-2"
                     >
                       {ev.lead_code}
                     </button>
-                    <span className="font-medium text-[#171717] dark:text-white mr-1.5">{ev.customer_name}</span>
+                    <span className="font-medium text-[#16273A] dark:text-white mr-1.5">{ev.customer_name}</span>
                     <span className="text-[#525252] dark:text-[#A3A3A3]">— {ev.description}</span>
                   </div>
                   <div className="text-[11px] text-[#737373] dark:text-[#A3A3A3] whitespace-nowrap shrink-0">
@@ -466,18 +466,18 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
               ))}
             </div>
           ) : (
-            <div className="divide-y divide-[#E5DEC9]/60 dark:divide-[#242424]">
+            <div className="divide-y divide-[#E2E8F0]/60 dark:divide-[#1E3349]">
               {data.recentlyUpdatedLeads.map((l) => (
                 <div key={l.id} className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 py-2.5 text-xs">
                   <div className="min-w-0">
                     <button
                       type="button"
                       onClick={() => onOpenLead(l.id)}
-                      className="font-mono-tabular font-semibold text-[#B58A35] hover:underline mr-2"
+                      className="font-mono-tabular font-semibold text-[#C99B56] hover:underline mr-2"
                     >
                       {l.lead_code}
                     </button>
-                    <span className="font-medium text-[#171717] dark:text-white mr-2">{l.customer_name}</span>
+                    <span className="font-medium text-[#16273A] dark:text-white mr-2">{l.customer_name}</span>
                     <span className="text-[#737373] dark:text-[#A3A3A3]">
                       {l.property_subtype} · {l.localities.join(', ')}
                     </span>

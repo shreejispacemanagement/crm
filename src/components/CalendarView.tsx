@@ -76,7 +76,7 @@ export const CalendarView: React.FC<CalendarViewProps> = ({ user, users, onOpenL
     <div className="space-y-4">
       <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3">
         <div>
-          <h1 className="text-xl font-bold tracking-tight text-[#171717] dark:text-white">Calendar &amp; Scheduling</h1>
+          <h1 className="text-xl font-bold tracking-tight text-[#16273A] dark:text-white">Calendar &amp; Scheduling</h1>
           <p className="text-xs text-[#737373] dark:text-[#A3A3A3]">
             {user.role === 'super_admin'
               ? 'Company-wide follow-up calls, WhatsApp follow-ups, site visits, and meetings'
@@ -84,7 +84,7 @@ export const CalendarView: React.FC<CalendarViewProps> = ({ user, users, onOpenL
           </p>
         </div>
 
-        <div className="inline-flex rounded-lg border border-[#E5DEC9] bg-white p-0.5 dark:border-[#2A2A2A] dark:bg-[#171717]">
+        <div className="inline-flex rounded-lg border border-[#E2E8F0] bg-white p-0.5 dark:border-[#1E3349] dark:bg-[#121E2C]">
           {(['day', 'week', 'month', 'agenda'] as CalMode[]).map((m) => (
             <button
               key={m}
@@ -92,7 +92,7 @@ export const CalendarView: React.FC<CalendarViewProps> = ({ user, users, onOpenL
               onClick={() => setCalMode(m)}
               className={`rounded-md px-3 py-1.5 text-xs font-medium capitalize ${
                 calMode === m
-                  ? 'bg-[#171717] text-white dark:bg-[#B58A35] dark:text-[#171717]'
+                  ? 'bg-[#16273A] text-white dark:bg-[#C99B56] dark:text-[#16273A]'
                   : 'text-[#525252] dark:text-[#A3A3A3]'
               }`}
             >
@@ -103,12 +103,12 @@ export const CalendarView: React.FC<CalendarViewProps> = ({ user, users, onOpenL
       </div>
 
       {/* Filters & Date Navigation */}
-      <div className="rounded-xl border border-[#E5DEC9] bg-white p-3.5 flex flex-wrap items-center justify-between gap-3 dark:border-[#2A2A2A] dark:bg-[#171717]">
+      <div className="rounded-xl border border-[#E2E8F0] bg-white p-3.5 flex flex-wrap items-center justify-between gap-3 dark:border-[#1E3349] dark:bg-[#121E2C]">
         <div className="flex flex-wrap items-center gap-2">
           <button
             type="button"
             onClick={() => shiftDate(calMode === 'month' ? -30 : calMode === 'week' ? -7 : -1)}
-            className="rounded-lg border border-[#E5DEC9] p-1.5 hover:bg-[#F3EBDD] dark:border-[#2E2E2E] dark:text-white"
+            className="rounded-lg border border-[#E2E8F0] p-1.5 hover:bg-[#FBF6EE] dark:border-[#1E3349] dark:text-white"
           >
             <ChevronLeft className="h-4 w-4" />
           </button>
@@ -116,19 +116,19 @@ export const CalendarView: React.FC<CalendarViewProps> = ({ user, users, onOpenL
             type="date"
             value={cursorDate}
             onChange={(e) => setCursorDate(e.target.value)}
-            className="rounded-lg border border-[#E5DEC9] bg-white px-2.5 py-1.5 text-xs font-mono-tabular dark:border-[#2E2E2E] dark:bg-[#111111] dark:text-white"
+            className="rounded-lg border border-[#E2E8F0] bg-white px-2.5 py-1.5 text-xs font-mono-tabular dark:border-[#1E3349] dark:bg-[#0C141E] dark:text-white"
           />
           <button
             type="button"
             onClick={() => shiftDate(calMode === 'month' ? 30 : calMode === 'week' ? 7 : 1)}
-            className="rounded-lg border border-[#E5DEC9] p-1.5 hover:bg-[#F3EBDD] dark:border-[#2E2E2E] dark:text-white"
+            className="rounded-lg border border-[#E2E8F0] p-1.5 hover:bg-[#FBF6EE] dark:border-[#1E3349] dark:text-white"
           >
             <ChevronRight className="h-4 w-4" />
           </button>
           <button
             type="button"
             onClick={() => setCursorDate(new Date().toISOString().slice(0, 10))}
-            className="rounded-lg border border-[#E5DEC9] px-2.5 py-1.5 text-xs font-medium dark:border-[#2E2E2E] dark:text-white"
+            className="rounded-lg border border-[#E2E8F0] px-2.5 py-1.5 text-xs font-medium dark:border-[#1E3349] dark:text-white"
           >
             Today
           </button>
@@ -139,7 +139,7 @@ export const CalendarView: React.FC<CalendarViewProps> = ({ user, users, onOpenL
             <select
               value={employeeFilter}
               onChange={(e) => setEmployeeFilter(e.target.value)}
-              className="rounded-lg border border-[#E5DEC9] bg-white px-2.5 py-1.5 text-xs dark:border-[#2E2E2E] dark:bg-[#111111] dark:text-white"
+              className="rounded-lg border border-[#E2E8F0] bg-white px-2.5 py-1.5 text-xs dark:border-[#1E3349] dark:bg-[#0C141E] dark:text-white"
             >
               <option value="all">All Employees</option>
               {users.map((u) => (
@@ -153,7 +153,7 @@ export const CalendarView: React.FC<CalendarViewProps> = ({ user, users, onOpenL
           <select
             value={typeFilter}
             onChange={(e) => setTypeFilter(e.target.value)}
-            className="rounded-lg border border-[#E5DEC9] bg-white px-2.5 py-1.5 text-xs dark:border-[#2E2E2E] dark:bg-[#111111] dark:text-white"
+            className="rounded-lg border border-[#E2E8F0] bg-white px-2.5 py-1.5 text-xs dark:border-[#1E3349] dark:bg-[#0C141E] dark:text-white"
           >
             <option value="all">All Activity Types</option>
             <option value="Follow-up Call">Follow-up Call</option>
@@ -166,7 +166,7 @@ export const CalendarView: React.FC<CalendarViewProps> = ({ user, users, onOpenL
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
-            className="rounded-lg border border-[#E5DEC9] bg-white px-2.5 py-1.5 text-xs dark:border-[#2E2E2E] dark:bg-[#111111] dark:text-white"
+            className="rounded-lg border border-[#E2E8F0] bg-white px-2.5 py-1.5 text-xs dark:border-[#1E3349] dark:bg-[#0C141E] dark:text-white"
           >
             <option value="all">All Statuses</option>
             <option value="Pending">Pending</option>
@@ -178,12 +178,12 @@ export const CalendarView: React.FC<CalendarViewProps> = ({ user, users, onOpenL
 
       {/* Views */}
       {loading ? (
-        <div className="rounded-xl border border-[#E5DEC9] bg-white p-8 text-xs text-[#737373] dark:border-[#2A2A2A] dark:bg-[#171717]">
+        <div className="rounded-xl border border-[#E2E8F0] bg-white p-8 text-xs text-[#737373] dark:border-[#1E3349] dark:bg-[#121E2C]">
           Loading schedule...
         </div>
       ) : calMode === 'day' ? (
-        <div className="rounded-xl border border-[#E5DEC9] bg-white p-5 dark:border-[#2A2A2A] dark:bg-[#171717]">
-          <h2 className="text-sm font-semibold text-[#171717] dark:text-white mb-3 font-mono-tabular">
+        <div className="rounded-xl border border-[#E2E8F0] bg-white p-5 dark:border-[#1E3349] dark:bg-[#121E2C]">
+          <h2 className="text-sm font-semibold text-[#16273A] dark:text-white mb-3 font-mono-tabular">
             Schedule for {cursorDate}
           </h2>
           {activities.filter((a) => a.scheduled_date === cursorDate).length === 0 ? (
@@ -197,10 +197,10 @@ export const CalendarView: React.FC<CalendarViewProps> = ({ user, users, onOpenL
                     key={a.id}
                     type="button"
                     onClick={() => onOpenLead(a.lead_id)}
-                    className="w-full text-left flex items-center justify-between gap-3 rounded-lg border border-[#E5DEC9] p-3 hover:border-[#B58A35] dark:border-[#2A2A2A]"
+                    className="w-full text-left flex items-center justify-between gap-3 rounded-lg border border-[#E2E8F0] p-3 hover:border-[#C99B56] dark:border-[#1E3349]"
                   >
                     <div>
-                      <div className="text-xs font-semibold text-[#171717] dark:text-white">
+                      <div className="text-xs font-semibold text-[#16273A] dark:text-white">
                         {a.activity_type} · {a.customer_name} ({a.lead_code})
                       </div>
                       <div className="text-[11px] text-[#737373] mt-0.5">
@@ -208,7 +208,7 @@ export const CalendarView: React.FC<CalendarViewProps> = ({ user, users, onOpenL
                       </div>
                     </div>
                     <div className="text-right shrink-0">
-                      <div className="font-mono-tabular text-xs font-semibold text-[#B58A35]">{a.scheduled_time}</div>
+                      <div className="font-mono-tabular text-xs font-semibold text-[#C99B56]">{a.scheduled_time}</div>
                       <div className="text-[11px] text-[#737373]">{a.is_overdue ? 'Overdue' : a.status}</div>
                     </div>
                   </button>
@@ -223,9 +223,9 @@ export const CalendarView: React.FC<CalendarViewProps> = ({ user, users, onOpenL
             return (
               <div
                 key={d}
-                className="rounded-xl border border-[#E5DEC9] bg-white p-3 min-h-[200px] dark:border-[#2A2A2A] dark:bg-[#171717]"
+                className="rounded-xl border border-[#E2E8F0] bg-white p-3 min-h-[200px] dark:border-[#1E3349] dark:bg-[#121E2C]"
               >
-                <div className="font-mono-tabular text-xs font-semibold text-[#171717] dark:text-white pb-2 mb-2 border-b border-[#E5DEC9] dark:border-[#262626]">
+                <div className="font-mono-tabular text-xs font-semibold text-[#16273A] dark:text-white pb-2 mb-2 border-b border-[#E2E8F0] dark:border-[#1E3349]">
                   {d}
                 </div>
                 <div className="space-y-2">
@@ -234,14 +234,14 @@ export const CalendarView: React.FC<CalendarViewProps> = ({ user, users, onOpenL
                       key={a.id}
                       type="button"
                       onClick={() => onOpenLead(a.lead_id)}
-                      className={`w-full text-left rounded-md border p-2 text-[11px] hover:border-[#B58A35] ${
+                      className={`w-full text-left rounded-md border p-2 text-[11px] hover:border-[#C99B56] ${
                         a.is_overdue
                           ? 'border-red-500/40 bg-red-50/40 dark:bg-red-950/20'
-                          : 'border-[#E5DEC9] dark:border-[#2A2A2A]'
+                          : 'border-[#E2E8F0] dark:border-[#1E3349]'
                       }`}
                     >
-                      <div className="font-mono-tabular font-semibold text-[#B58A35]">{a.scheduled_time}</div>
-                      <div className="font-medium text-[#171717] dark:text-white truncate">{a.customer_name}</div>
+                      <div className="font-mono-tabular font-semibold text-[#C99B56]">{a.scheduled_time}</div>
+                      <div className="font-medium text-[#16273A] dark:text-white truncate">{a.customer_name}</div>
                       <div className="text-[#737373] truncate">{a.activity_type}</div>
                     </button>
                   ))}
@@ -251,7 +251,7 @@ export const CalendarView: React.FC<CalendarViewProps> = ({ user, users, onOpenL
           })}
         </div>
       ) : calMode === 'month' ? (
-        <div className="rounded-xl border border-[#E5DEC9] bg-white p-4 dark:border-[#2A2A2A] dark:bg-[#171717]">
+        <div className="rounded-xl border border-[#E2E8F0] bg-white p-4 dark:border-[#1E3349] dark:bg-[#121E2C]">
           <div className="grid grid-cols-7 gap-2 text-center text-[11px] font-semibold text-[#737373] pb-2">
             {['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map((d) => (
               <div key={d}>{d}</div>
@@ -259,12 +259,12 @@ export const CalendarView: React.FC<CalendarViewProps> = ({ user, users, onOpenL
           </div>
           <div className="grid grid-cols-7 gap-2">
             {monthGrid.map((dateStr, idx) => {
-              if (!dateStr) return <div key={idx} className="min-h-[92px] rounded-lg bg-[#F8F6F1]/50 dark:bg-[#141414]" />;
+              if (!dateStr) return <div key={idx} className="min-h-[92px] rounded-lg bg-[#F8FAFC]/50 dark:bg-[#0F1926]" />;
               const dayActs = activities.filter((a) => a.scheduled_date === dateStr);
               return (
                 <div
                   key={dateStr}
-                  className="min-h-[92px] rounded-lg border border-[#E5DEC9] p-1.5 dark:border-[#262626]"
+                  className="min-h-[92px] rounded-lg border border-[#E2E8F0] p-1.5 dark:border-[#1E3349]"
                 >
                   <div className="font-mono-tabular text-[11px] font-semibold text-[#525252] dark:text-[#A3A3A3] mb-1">
                     {dateStr.slice(8)}
@@ -275,7 +275,7 @@ export const CalendarView: React.FC<CalendarViewProps> = ({ user, users, onOpenL
                         key={a.id}
                         type="button"
                         onClick={() => onOpenLead(a.lead_id)}
-                        className="block w-full text-left truncate rounded bg-[#F3EBDD] px-1.5 py-0.5 text-[10px] font-medium text-[#171717] hover:bg-[#B58A35]/30 dark:bg-[#26211A] dark:text-[#F3EBDD]"
+                        className="block w-full text-left truncate rounded bg-[#FBF6EE] px-1.5 py-0.5 text-[10px] font-medium text-[#16273A] hover:bg-[#C99B56]/30 dark:bg-[#2A2318] dark:text-[#FBF6EE]"
                       >
                         {a.scheduled_time} {a.customer_name}
                       </button>
@@ -291,10 +291,10 @@ export const CalendarView: React.FC<CalendarViewProps> = ({ user, users, onOpenL
         </div>
       ) : (
         /* AGENDA VIEW */
-        <div className="rounded-xl border border-[#E5DEC9] bg-white overflow-hidden dark:border-[#2A2A2A] dark:bg-[#171717]">
+        <div className="rounded-xl border border-[#E2E8F0] bg-white overflow-hidden dark:border-[#1E3349] dark:bg-[#121E2C]">
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs">
-              <thead className="bg-[#F8F6F1] border-b border-[#E5DEC9] dark:bg-[#141414] dark:border-[#2A2A2A]">
+              <thead className="bg-[#F8FAFC] border-b border-[#E2E8F0] dark:bg-[#0F1926] dark:border-[#1E3349]">
                 <tr>
                   <th className="px-4 py-3 font-semibold text-[#525252]">Date &amp; Time</th>
                   <th className="px-4 py-3 font-semibold text-[#525252]">Activity</th>
@@ -304,7 +304,7 @@ export const CalendarView: React.FC<CalendarViewProps> = ({ user, users, onOpenL
                   <th className="px-4 py-3 font-semibold text-[#525252]">Remarks</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-[#E5DEC9]/60 dark:divide-[#242424]">
+              <tbody className="divide-y divide-[#E2E8F0]/60 dark:divide-[#1E3349]">
                 {activities.length === 0 ? (
                   <tr>
                     <td colSpan={6} className="px-4 py-8 text-center text-[#737373]">
@@ -316,17 +316,17 @@ export const CalendarView: React.FC<CalendarViewProps> = ({ user, users, onOpenL
                     <tr
                       key={a.id}
                       onClick={() => onOpenLead(a.lead_id)}
-                      className="cursor-pointer hover:bg-[#F3EBDD]/40 dark:hover:bg-[#202020]"
+                      className="cursor-pointer hover:bg-[#FBF6EE]/40 dark:hover:bg-[#1A2C40]"
                     >
-                      <td className="px-4 py-3 font-mono-tabular whitespace-nowrap text-[#171717] dark:text-white">
+                      <td className="px-4 py-3 font-mono-tabular whitespace-nowrap text-[#16273A] dark:text-white">
                         {a.scheduled_date} {a.scheduled_time}
                       </td>
-                      <td className="px-4 py-3 font-medium text-[#171717] dark:text-white whitespace-nowrap">
+                      <td className="px-4 py-3 font-medium text-[#16273A] dark:text-white whitespace-nowrap">
                         {a.activity_type}
                       </td>
                       <td className="px-4 py-3 whitespace-nowrap">
-                        <span className="font-mono-tabular font-semibold text-[#B58A35] mr-1.5">{a.lead_code}</span>
-                        <span className="text-[#171717] dark:text-white">{a.customer_name}</span>
+                        <span className="font-mono-tabular font-semibold text-[#C99B56] mr-1.5">{a.lead_code}</span>
+                        <span className="text-[#16273A] dark:text-white">{a.customer_name}</span>
                       </td>
                       <td className="px-4 py-3 text-[#525252] dark:text-[#A3A3A3] whitespace-nowrap">
                         {a.assigned_to_name}

@@ -633,8 +633,8 @@ async function allocateLeadCodes(count: number, user: UserProfile): Promise<stri
       if (!snap.exists()) {
         tx.set(ref, {
           company_name: 'Shreeji Space Management CRM',
-          short_name: 'SSM CRM',
-          company_logo: null,
+          short_name: 'Shreeji Space',
+          company_logo: '/assets/aistudio/image_b871e6e7.png',
           default_table_columns: [
             'lead_code',
             'customer_name',

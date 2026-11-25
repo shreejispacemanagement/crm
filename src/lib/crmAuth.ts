@@ -53,8 +53,8 @@ export function mapSettingsDoc(data: Record<string, unknown> | undefined): Compa
   if (!data) {
     return {
       company_name: 'Shreeji Space Management CRM',
-      short_name: 'SSM CRM',
-      company_logo: null,
+      short_name: 'Shreeji Space',
+      company_logo: '/assets/aistudio/image_b871e6e7.png',
       default_table_columns: [
         'lead_code',
         'customer_name',
@@ -71,8 +71,8 @@ export function mapSettingsDoc(data: Record<string, unknown> | undefined): Compa
   }
   return {
     company_name: String(data.company_name || 'Shreeji Space Management CRM'),
-    short_name: String(data.short_name || 'SSM CRM'),
-    company_logo: data.company_logo ? String(data.company_logo) : null,
+    short_name: String(data.short_name || 'Shreeji Space'),
+    company_logo: data.company_logo ? String(data.company_logo) : '/assets/aistudio/image_b871e6e7.png',
     default_table_columns: Array.isArray(data.default_table_columns) ? (data.default_table_columns as string[]) : [],
     lead_seq: Number(data.lead_seq || 0),
   };

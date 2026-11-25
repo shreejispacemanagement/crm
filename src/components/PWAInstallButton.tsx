@@ -13,9 +13,9 @@ export const PWAInstallButton: React.FC = () => {
       <button
         type="button"
         onClick={install}
-        className="inline-flex items-center gap-1.5 rounded-lg border border-[#B58A35]/40 bg-[#F3EBDD] px-3 py-1.5 text-xs font-semibold text-[#171717] hover:bg-[#B58A35]/20 dark:border-[#B58A35]/40 dark:bg-[#221F1A] dark:text-[#F3EBDD] whitespace-nowrap shrink-0 transition-colors"
+        className="inline-flex items-center gap-1.5 rounded-lg border border-[#C99B56]/40 bg-[#FBF6EE] px-3 py-1.5 text-xs font-semibold text-[#16273A] hover:bg-[#C99B56]/20 dark:border-[#C99B56]/40 dark:bg-[#2A2318] dark:text-[#FBF6EE] whitespace-nowrap shrink-0 transition-colors"
       >
-        <Download className="h-3.5 w-3.5 text-[#B58A35]" />
+        <Download className="h-3.5 w-3.5 text-[#C99B56]" />
         Install App
       </button>
     );
@@ -27,16 +27,16 @@ export const PWAInstallButton: React.FC = () => {
         <button
           type="button"
           onClick={() => setShowIOSGuide(true)}
-          className="inline-flex items-center gap-1.5 rounded-lg border border-[#E5DEC9] px-3 py-1.5 text-xs font-medium text-[#171717] hover:bg-[#F3EBDD] dark:border-[#2E2E2E] dark:text-[#F3EBDD] dark:hover:bg-[#242424] whitespace-nowrap shrink-0 transition-colors"
+          className="inline-flex items-center gap-1.5 rounded-lg border border-[#E2E8F0] px-3 py-1.5 text-xs font-medium text-[#16273A] hover:bg-[#FBF6EE] dark:border-[#1E3349] dark:text-[#FBF6EE] dark:hover:bg-[#1A2C40] whitespace-nowrap shrink-0 transition-colors"
         >
-          <Download className="h-3.5 w-3.5 text-[#B58A35]" />
+          <Download className="h-3.5 w-3.5 text-[#C99B56]" />
           Install App
         </button>
 
         {showIOSGuide && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-            <div className="w-full max-w-sm rounded-xl border border-[#E5DEC9] bg-white p-6 dark:border-[#2A2A2A] dark:bg-[#171717]">
-              <h3 className="text-base font-semibold text-[#171717] dark:text-white">Install SSM CRM on iOS</h3>
+            <div className="w-full max-w-sm rounded-xl border border-[#E2E8F0] bg-white p-6 dark:border-[#1E3349] dark:bg-[#121E2C]">
+              <h3 className="text-base font-semibold text-[#16273A] dark:text-white">Install SSM CRM on iOS</h3>
               <p className="mt-2 text-sm text-[#525252] dark:text-[#A3A3A3]">
                 1. Tap the <strong>Share</strong> button in the Safari toolbar.
                 <br />
@@ -45,7 +45,7 @@ export const PWAInstallButton: React.FC = () => {
               <button
                 type="button"
                 onClick={() => setShowIOSGuide(false)}
-                className="mt-4 w-full rounded-lg bg-[#171717] py-2 text-sm font-medium text-white hover:bg-[#2E2E2E] dark:bg-[#B58A35] dark:text-[#171717]"
+                className="mt-4 w-full rounded-lg bg-[#16273A] py-2 text-sm font-medium text-white hover:bg-[#20364F] dark:bg-[#C99B56] dark:text-[#16273A]"
               >
                 Close
               </button>
