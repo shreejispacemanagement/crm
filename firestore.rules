@@ -1,0 +1,826 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Global Safety Net (Default Deny)
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // ==================== PRIMITIVE HELPERS ====================
+    function isValidId(id) {
+      return id is string && id.size() >= 1 && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isEmailVerified() {
+      return isSignedIn() && request.auth.token.email_verified == true && request.auth.token.email is string;
+    }
+
+    function authEmail() {
+      return request.auth.token.email.lower();
+    }
+
+    function isBootstrappedAdmin() {
+      return isEmailVerified() && authEmail() == 'shreejispacemanagement@gmail.com';
+    }
+
+    function isOwner(userId) {
+      return isEmailVerified() && request.auth.uid == userId;
+    }
+
+    function isActiveUser() {
+      return isEmailVerified()
+        && exists(/databases/$(database)/documents/users/$(request.auth.uid))
+        && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.status == 'active';
+    }
+
+    function isSuperAdmin() {
+      return isEmailVerified() && (
+        isBootstrappedAdmin()
+        || (
+          exists(/databases/$(database)/documents/admins/$(request.auth.uid))
+          && isActiveUser()
+          && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'super_admin'
+        )
+      );
+    }
+
+    function isOptionalString(data, key, maxLen) {
+      return !(key in data) || data[key] == null || (data[key] is string && data[key].size() <= maxLen);
+    }
+
+    function isOptionalNumber(data, key) {
+      return !(key in data) || data[key] == null || (data[key] is number);
+    }
+
+    function isStringList(data, key, minLen, maxLen) {
+      return data[key] is list
+        && data[key].size() >= minLen
+        && data[key].size() <= maxLen
+        && (data[key].size() == 0 || data[key][0] is string);
+    }
+
+    function hasValidInviteFor(data) {
+      return 'invite_id' in data
+        && isValidId(data.invite_id)
+        && exists(/databases/$(database)/documents/employeeInvites/$(data.invite_id))
+        && get(/databases/$(database)/documents/employeeInvites/$(data.invite_id)).data.email == authEmail()
+        && get(/databases/$(database)/documents/employeeInvites/$(data.invite_id)).data.status == 'active'
+        && data.role == get(/databases/$(database)/documents/employeeInvites/$(data.invite_id)).data.role
+        && data.status == 'active';
+    }
+
+    // ==================== ENTITY VALIDATORS ====================
+
+    function isValidWorkspaceSettings(data) {
+      return data.keys().hasAll(['company_name', 'short_name', 'default_table_columns', 'lead_seq', 'createdAt', 'updatedAt'])
+        && data.keys().hasOnly(['company_name', 'short_name', 'company_logo', 'default_table_columns', 'lead_seq', 'createdAt', 'updatedAt'])
+        && data.company_name is string && data.company_name.size() >= 1 && data.company_name.size() <= 120
+        && data.short_name is string && data.short_name.size() >= 1 && data.short_name.size() <= 40
+        && isOptionalString(data, 'company_logo', 400000)
+        && isStringList(data, 'default_table_columns', 1, 20)
+        && data.lead_seq is number && data.lead_seq >= 0
+        && data.createdAt is timestamp
+        && data.updatedAt is timestamp;
+    }
+
+    function isValidAdminRecord(data, userId) {
+      return data.keys().hasAll(['uid', 'email', 'grantedBy', 'createdAt'])
+        && data.keys().hasOnly(['uid', 'email', 'grantedBy', 'createdAt'])
+        && data.uid == userId
+        && data.email is string && data.email.size() >= 3 && data.email.size() <= 200
+        && data.grantedBy is string && data.grantedBy.size() >= 1 && data.grantedBy.size() <= 128
+        && data.createdAt == request.time;
+    }
+
+    function isValidUserProfile(data, userId) {
+      return data.keys().hasAll([
+          'uid', 'email', 'full_name', 'mobile', 'designation', 'role', 'status',
+          'theme_preference', 'lead_view_preference', 'page_size_preference', 'createdAt', 'updatedAt'
+        ])
+        && data.keys().hasOnly([
+          'uid', 'email', 'full_name', 'mobile', 'designation', 'role', 'status',
+          'profile_photo', 'theme_preference', 'lead_view_preference', 'page_size_preference',
+          'table_columns_preference', 'invite_id', 'createdAt', 'updatedAt'
+        ])
+        && data.uid == userId
+        && data.email is string && data.email.size() >= 3 && data.email.size() <= 200
+        && data.full_name is string && data.full_name.size() >= 1 && data.full_name.size() <= 120
+        && data.mobile is string && data.mobile.size() <= 20 && data.mobile.matches('^(|[6-9][0-9]{9})$')
+        && data.designation is string && data.designation.size() >= 1 && data.designation.size() <= 100
+        && data.role in ['super_admin', 'sales_executive']
+        && data.status in ['active', 'inactive']
+        && isOptionalString(data, 'profile_photo', 300000)
+        && data.theme_preference in ['light', 'dark']
+        && data.lead_view_preference in ['table', 'kanban']
+        && data.page_size_preference in [10, 25, 50, 100]
+        && (!('table_columns_preference' in data) || data.table_columns_preference == null || isStringList(data, 'table_columns_preference', 0, 20))
+        && isOptionalString(data, 'invite_id', 128)
+        && data.createdAt is timestamp
+        && data.updatedAt is timestamp;
+    }
+
+    function isValidEmployeeInvite(data, inviteId) {
+      return data.keys().hasAll(['id', 'email', 'full_name', 'mobile', 'designation', 'role', 'status', 'createdBy', 'createdAt', 'updatedAt'])
+        && data.keys().hasOnly(['id', 'email', 'full_name', 'mobile', 'designation', 'role', 'status', 'claimed_uid', 'createdBy', 'createdAt', 'updatedAt'])
+        && data.id == inviteId
+        && data.email is string && data.email.size() >= 3 && data.email.size() <= 200
+        && data.full_name is string && data.full_name.size() >= 1 && data.full_name.size() <= 120
+        && data.mobile is string && data.mobile.size() <= 20 && data.mobile.matches('^(|[6-9][0-9]{9})$')
+        && data.designation is string && data.designation.size() >= 1 && data.designation.size() <= 100
+        && data.role in ['super_admin', 'sales_executive']
+        && data.status in ['active', 'inactive']
+        && isOptionalString(data, 'claimed_uid', 128)
+        && data.createdBy is string && data.createdBy.size() >= 1 && data.createdBy.size() <= 128
+        && data.createdAt is timestamp
+        && data.updatedAt is timestamp;
+    }
+
+    function isValidDirectoryEntry(data, entryId) {
+      return data.keys().hasAll(['id', 'email_key', 'full_name', 'designation', 'role', 'status', 'createdAt', 'updatedAt'])
+        && data.keys().hasOnly(['id', 'uid', 'email_key', 'full_name', 'designation', 'role', 'status', 'createdAt', 'updatedAt'])
+        && data.id == entryId
+        && isOptionalString(data, 'uid', 128)
+        && data.email_key is string && data.email_key.size() >= 3 && data.email_key.size() <= 200
+        && data.full_name is string && data.full_name.size() >= 1 && data.full_name.size() <= 120
+        && data.designation is string && data.designation.size() >= 1 && data.designation.size() <= 100
+        && data.role in ['super_admin', 'sales_executive']
+        && data.status in ['active', 'inactive']
+        && data.createdAt is timestamp
+        && data.updatedAt is timestamp;
+    }
+
+    function isValidMasterItem(data, masterId) {
+      return data.keys().hasAll(['id', 'category', 'name', 'sort_order', 'is_active', 'is_terminal', 'createdAt', 'updatedAt'])
+        && data.keys().hasOnly(['id', 'category', 'name', 'parent_value', 'sort_order', 'is_active', 'is_terminal', 'terminal_outcome', 'system_key', 'createdAt', 'updatedAt'])
+        && data.id == masterId
+        && data.category in ['lead_source', 'lead_stage', 'property_type', 'property_subtype', 'transaction_type', 'locality', 'bhk_config', 'dead_reason', 'furnishing_type', 'possession_pref']
+        && data.name is string && data.name.size() >= 1 && data.name.size() <= 120
+        && isOptionalString(data, 'parent_value', 120)
+        && data.sort_order is number
+        && data.is_active is bool
+        && data.is_terminal is bool
+        && (!('terminal_outcome' in data) || data.terminal_outcome == null || data.terminal_outcome in ['won', 'lost'])
+        && isOptionalString(data, 'system_key', 60)
+        && data.createdAt is timestamp
+        && data.updatedAt is timestamp;
+    }
+
+    function isValidLeadKeys(data) {
+      return data.keys().hasAll([
+          'id', 'lead_code', 'customer_name', 'mobile', 'lead_source', 'property_type', 'property_subtype',
+          'transaction_type', 'localities', 'stage', 'is_terminal_stage', 'created_by', 'assigned_to',
+          'assigned_to_email', 'assigned_to_name', 'is_deleted', 'is_inactive', 'last_qualifying_interaction_at',
+          'inactivity_notified_15', 'inactivity_escalated_22', 'created_date_iso', 'createdAt', 'updatedAt'
+        ])
+        && data.keys().hasOnly([
+          'id', 'lead_code', 'customer_name', 'mobile', 'alternate_mobile', 'whatsapp', 'email', 'company_name',
+          'customer_remarks', 'lead_source', 'property_type', 'property_subtype', 'transaction_type', 'localities',
+          'budget_from', 'budget_to', 'min_area', 'max_area', 'area_unit', 'bhk_config', 'commercial_config',
+          'furnishing_type', 'preferred_floor', 'possession_pref', 'required_workstations', 'required_cabins',
+          'requirement_remarks', 'stage', 'is_terminal_stage', 'created_by', 'created_by_name', 'assigned_to',
+          'assigned_to_uid', 'assigned_to_email', 'assigned_to_name', 'is_deleted', 'deleted_at', 'deleted_by',
+          'deleted_by_name', 'is_inactive', 'inactive_since', 'last_qualifying_interaction_at',
+          'last_interaction_type', 'last_interaction_remarks', 'inactivity_notified_15', 'inactivity_escalated_22',
+          'booking_date', 'booking_project_name', 'final_transaction_amount', 'brokerage_amount',
+          'brokerage_percentage', 'payment_status', 'booking_remarks', 'dead_reason', 'dead_remarks',
+          'dead_by', 'dead_by_name', 'dead_at', 'import_batch_ref', 'created_date_iso', 'createdAt', 'updatedAt'
+        ]);
+    }
+
+    function isValidLeadIdentity(data, leadId) {
+      return data.id == leadId
+        && data.lead_code is string && data.lead_code.size() <= 20 && data.lead_code.matches('^SSM-[0-9]{6,}$')
+        && data.customer_name is string && data.customer_name.size() >= 1 && data.customer_name.size() <= 150
+        && data.mobile is string && data.mobile.size() == 10 && data.mobile.matches('^[6-9][0-9]{9}$')
+        && isOptionalString(data, 'alternate_mobile', 20)
+        && isOptionalString(data, 'whatsapp', 20)
+        && isOptionalString(data, 'email', 200)
+        && isOptionalString(data, 'company_name', 150)
+        && isOptionalString(data, 'customer_remarks', 2000)
+        && data.lead_source is string && data.lead_source.size() >= 1 && data.lead_source.size() <= 120;
+    }
+
+    function isValidLeadRequirements(data) {
+      return data.property_type is string && data.property_type.size() >= 1 && data.property_type.size() <= 120
+        && data.property_subtype is string && data.property_subtype.size() >= 1 && data.property_subtype.size() <= 120
+        && data.transaction_type is string && data.transaction_type.size() >= 1 && data.transaction_type.size() <= 120
+        && isStringList(data, 'localities', 1, 30)
+        && isOptionalNumber(data, 'budget_from')
+        && isOptionalNumber(data, 'budget_to')
+        && isOptionalNumber(data, 'min_area')
+        && isOptionalNumber(data, 'max_area')
+        && isOptionalString(data, 'area_unit', 40)
+        && isOptionalString(data, 'bhk_config', 60)
+        && isOptionalString(data, 'commercial_config', 200)
+        && isOptionalString(data, 'furnishing_type', 60)
+        && isOptionalString(data, 'preferred_floor', 60)
+        && isOptionalString(data, 'possession_pref', 60)
+        && isOptionalNumber(data, 'required_workstations')
+        && isOptionalNumber(data, 'required_cabins')
+        && isOptionalString(data, 'requirement_remarks', 2000);
+    }
+
+    function isValidLeadLifecycle(data) {
+      return data.stage is string && data.stage.size() >= 1 && data.stage.size() <= 120
+        && data.is_terminal_stage is bool
+        && data.created_by is string && data.created_by.size() >= 1 && data.created_by.size() <= 128
+        && isOptionalString(data, 'created_by_name', 120)
+        && data.assigned_to is string && data.assigned_to.size() >= 1 && data.assigned_to.size() <= 128
+        && isOptionalString(data, 'assigned_to_uid', 128)
+        && data.assigned_to_email is string && data.assigned_to_email.size() >= 3 && data.assigned_to_email.size() <= 200
+        && data.assigned_to_name is string && data.assigned_to_name.size() >= 1 && data.assigned_to_name.size() <= 120
+        && data.is_deleted is bool
+        && isOptionalString(data, 'deleted_at', 50)
+        && isOptionalString(data, 'deleted_by', 128)
+        && isOptionalString(data, 'deleted_by_name', 120)
+        && data.is_inactive is bool
+        && isOptionalString(data, 'inactive_since', 50)
+        && data.last_qualifying_interaction_at is string && data.last_qualifying_interaction_at.size() <= 50
+        && isOptionalString(data, 'last_interaction_type', 120)
+        && isOptionalString(data, 'last_interaction_remarks', 1000)
+        && data.inactivity_notified_15 is bool
+        && data.inactivity_escalated_22 is bool
+        && isOptionalString(data, 'booking_date', 30)
+        && isOptionalString(data, 'booking_project_name', 200)
+        && isOptionalNumber(data, 'final_transaction_amount')
+        && isOptionalNumber(data, 'brokerage_amount')
+        && isOptionalNumber(data, 'brokerage_percentage')
+        && (!('payment_status' in data) || data.payment_status == null || data.payment_status in ['Pending', 'Partially Paid', 'Paid'])
+        && isOptionalString(data, 'booking_remarks', 2000)
+        && isOptionalString(data, 'dead_reason', 120)
+        && isOptionalString(data, 'dead_remarks', 2000)
+        && isOptionalString(data, 'dead_by', 128)
+        && isOptionalString(data, 'dead_by_name', 120)
+        && isOptionalString(data, 'dead_at', 50)
+        && isOptionalString(data, 'import_batch_ref', 80)
+        && data.created_date_iso is string && data.created_date_iso.size() <= 50
+        && data.createdAt is timestamp
+        && data.updatedAt is timestamp;
+    }
+
+    function isValidLead(data, leadId) {
+      return isValidLeadKeys(data)
+        && isValidLeadIdentity(data, leadId)
+        && isValidLeadRequirements(data)
+        && isValidLeadLifecycle(data);
+    }
+
+    function isValidMobileMatch(data, mobile, leadId) {
+      return data.keys().hasAll([
+          'lead_id', 'lead_code', 'mobile', 'customer_name', 'requirement_summary',
+          'stage', 'assigned_to', 'assigned_to_name', 'is_deleted', 'createdAt', 'updatedAt'
+        ])
+        && data.keys().hasOnly([
+          'lead_id', 'lead_code', 'mobile', 'customer_name', 'requirement_summary',
+          'stage', 'assigned_to', 'assigned_to_name', 'is_deleted', 'createdAt', 'updatedAt'
+        ])
+        && data.lead_id == leadId
+        && data.mobile == mobile
+        && data.lead_code is string && data.lead_code.size() <= 20
+        && data.customer_name is string && data.customer_name.size() >= 1 && data.customer_name.size() <= 150
+        && data.requirement_summary is string && data.requirement_summary.size() <= 250
+        && data.stage is string && data.stage.size() >= 1 && data.stage.size() <= 120
+        && data.assigned_to is string && data.assigned_to.size() >= 1 && data.assigned_to.size() <= 128
+        && data.assigned_to_name is string && data.assigned_to_name.size() >= 1 && data.assigned_to_name.size() <= 120
+        && data.is_deleted is bool
+        && data.createdAt is timestamp
+        && data.updatedAt is timestamp;
+    }
+
+    function isValidActivity(data, actId) {
+      return data.keys().hasAll([
+          'id', 'lead_id', 'lead_code', 'customer_name', 'lead_is_deleted', 'activity_type',
+          'scheduled_date', 'scheduled_time', 'scheduled_at', 'assigned_to', 'assigned_to_email',
+          'assigned_to_name', 'status', 'reschedule_count', 'reminded_30', 'reminded_15',
+          'reminded_overdue', 'created_by', 'createdAt', 'updatedAt'
+        ])
+        && data.keys().hasOnly([
+          'id', 'lead_id', 'lead_code', 'customer_name', 'customer_mobile', 'lead_stage',
+          'lead_is_deleted', 'activity_type', 'scheduled_date', 'scheduled_time', 'scheduled_at',
+          'assigned_to', 'assigned_to_uid', 'assigned_to_email', 'assigned_to_name', 'description',
+          'status', 'completed_by', 'completed_by_name', 'completed_at', 'completion_remarks',
+          'cancelled_by', 'cancelled_by_name', 'cancelled_at', 'cancel_reason', 'reschedule_count',
+          'previous_schedule_history', 'reminded_30', 'reminded_15', 'reminded_overdue',
+          'created_by', 'created_by_name', 'createdAt', 'updatedAt'
+        ])
+        && data.id == actId
+        && isValidId(data.lead_id)
+        && data.lead_code is string && data.lead_code.size() <= 20
+        && data.customer_name is string && data.customer_name.size() >= 1 && data.customer_name.size() <= 150
+        && isOptionalString(data, 'customer_mobile', 20)
+        && isOptionalString(data, 'lead_stage', 120)
+        && data.lead_is_deleted is bool
+        && data.activity_type in ['Follow-up Call', 'WhatsApp Follow-up', 'Site Visit', 'Meeting', 'Other']
+        && data.scheduled_date is string && data.scheduled_date.size() == 10
+        && data.scheduled_time is string && data.scheduled_time.size() >= 5 && data.scheduled_time.size() <= 8
+        && data.scheduled_at is string && data.scheduled_at.size() <= 50
+        && data.assigned_to is string && data.assigned_to.size() >= 1 && data.assigned_to.size() <= 128
+        && isOptionalString(data, 'assigned_to_uid', 128)
+        && data.assigned_to_email is string && data.assigned_to_email.size() >= 3 && data.assigned_to_email.size() <= 200
+        && data.assigned_to_name is string && data.assigned_to_name.size() >= 1 && data.assigned_to_name.size() <= 120
+        && isOptionalString(data, 'description', 1000)
+        && data.status in ['Pending', 'Completed', 'Cancelled']
+        && isOptionalString(data, 'completed_by', 128)
+        && isOptionalString(data, 'completed_by_name', 120)
+        && isOptionalString(data, 'completed_at', 50)
+        && isOptionalString(data, 'completion_remarks', 1000)
+        && isOptionalString(data, 'cancelled_by', 128)
+        && isOptionalString(data, 'cancelled_by_name', 120)
+        && isOptionalString(data, 'cancelled_at', 50)
+        && isOptionalString(data, 'cancel_reason', 1000)
+        && data.reschedule_count is number && data.reschedule_count >= 0
+        && (!('previous_schedule_history' in data) || data.previous_schedule_history == null || (data.previous_schedule_history is list && data.previous_schedule_history.size() <= 50))
+        && data.reminded_30 is bool
+        && data.reminded_15 is bool
+        && data.reminded_overdue is bool
+        && data.created_by is string && data.created_by.size() >= 1 && data.created_by.size() <= 128
+        && isOptionalString(data, 'created_by_name', 120)
+        && data.createdAt is timestamp
+        && data.updatedAt is timestamp;
+    }
+
+    function isValidCommunication(data, commId, leadId) {
+      return data.keys().hasAll(['id', 'lead_id', 'comm_type', 'description', 'employee_id', 'employee_name', 'createdAt'])
+        && data.keys().hasOnly(['id', 'lead_id', 'comm_type', 'description', 'next_action_remarks', 'employee_id', 'employee_name', 'createdAt'])
+        && data.id == commId
+        && data.lead_id == leadId
+        && data.comm_type in ['Call Completed', 'WhatsApp Message Sent', 'Customer Response Received', 'Discussion Summary', 'Next Action/Follow-up Remarks']
+        && data.description is string && data.description.size() >= 1 && data.description.size() <= 2000
+        && isOptionalString(data, 'next_action_remarks', 1000)
+        && data.employee_id is string && data.employee_id.size() >= 1 && data.employee_id.size() <= 128
+        && data.employee_name is string && data.employee_name.size() >= 1 && data.employee_name.size() <= 120
+        && data.createdAt == request.time;
+    }
+
+    function isValidTimelineEvent(data, eventId, leadId) {
+      return data.keys().hasAll(['id', 'lead_id', 'event_type', 'description', 'employee_name', 'createdAt'])
+        && data.keys().hasOnly(['id', 'lead_id', 'event_type', 'description', 'employee_id', 'employee_name', 'createdAt'])
+        && data.id == eventId
+        && data.lead_id == leadId
+        && data.event_type is string && data.event_type.size() >= 1 && data.event_type.size() <= 100
+        && data.description is string && data.description.size() >= 1 && data.description.size() <= 2000
+        && isOptionalString(data, 'employee_id', 128)
+        && data.employee_name is string && data.employee_name.size() >= 1 && data.employee_name.size() <= 120
+        && data.createdAt == request.time;
+    }
+
+    function isValidNotification(data, notifId) {
+      return data.keys().hasAll(['id', 'user_email', 'notif_type', 'title', 'message', 'is_read', 'createdAt', 'updatedAt'])
+        && data.keys().hasOnly(['id', 'user_uid', 'user_email', 'lead_id', 'lead_code', 'activity_id', 'notif_type', 'title', 'message', 'is_read', 'createdAt', 'updatedAt'])
+        && data.id == notifId
+        && isOptionalString(data, 'user_uid', 128)
+        && data.user_email is string && data.user_email.size() >= 3 && data.user_email.size() <= 200
+        && isOptionalString(data, 'lead_id', 128)
+        && isOptionalString(data, 'lead_code', 20)
+        && isOptionalString(data, 'activity_id', 128)
+        && data.notif_type is string && data.notif_type.size() >= 1 && data.notif_type.size() <= 80
+        && data.title is string && data.title.size() >= 1 && data.title.size() <= 200
+        && data.message is string && data.message.size() >= 1 && data.message.size() <= 1000
+        && data.is_read is bool
+        && data.createdAt is timestamp
+        && data.updatedAt is timestamp;
+    }
+
+    function isValidAuditLog(data, logId) {
+      return data.keys().hasAll(['id', 'entity_type', 'entity_id', 'action_type', 'employee_id', 'employee_name', 'createdAt'])
+        && data.keys().hasOnly([
+          'id', 'entity_type', 'entity_id', 'lead_id', 'lead_code', 'lead_assigned_to_email',
+          'action_type', 'field_name', 'previous_value', 'new_value', 'remarks', 'employee_id', 'employee_name', 'createdAt'
+        ])
+        && data.id == logId
+        && data.entity_type is string && data.entity_type.size() >= 1 && data.entity_type.size() <= 60
+        && data.entity_id is string && data.entity_id.size() >= 1 && data.entity_id.size() <= 128
+        && isOptionalString(data, 'lead_id', 128)
+        && isOptionalString(data, 'lead_code', 20)
+        && isOptionalString(data, 'lead_assigned_to_email', 200)
+        && data.action_type is string && data.action_type.size() >= 1 && data.action_type.size() <= 80
+        && isOptionalString(data, 'field_name', 80)
+        && isOptionalString(data, 'previous_value', 2000)
+        && isOptionalString(data, 'new_value', 2000)
+        && isOptionalString(data, 'remarks', 2000)
+        && data.employee_id is string && data.employee_id.size() >= 1 && data.employee_id.size() <= 128
+        && data.employee_name is string && data.employee_name.size() >= 1 && data.employee_name.size() <= 120
+        && data.createdAt == request.time;
+    }
+
+    function isValidImportBatch(data, batchId) {
+      return data.keys().hasAll([
+          'id', 'batch_ref', 'filename', 'uploaded_by', 'uploaded_by_name',
+          'total_count', 'success_count', 'skipped_count', 'failed_count', 'decisions', 'errors', 'createdAt'
+        ])
+        && data.keys().hasOnly([
+          'id', 'batch_ref', 'filename', 'uploaded_by', 'uploaded_by_name',
+          'total_count', 'success_count', 'skipped_count', 'failed_count', 'decisions', 'errors', 'createdAt'
+        ])
+        && data.id == batchId
+        && data.batch_ref is string && data.batch_ref.size() >= 1 && data.batch_ref.size() <= 80
+        && data.filename is string && data.filename.size() >= 1 && data.filename.size() <= 200
+        && data.uploaded_by == request.auth.uid
+        && data.uploaded_by_name is string && data.uploaded_by_name.size() >= 1 && data.uploaded_by_name.size() <= 120
+        && data.total_count is number && data.success_count is number && data.skipped_count is number && data.failed_count is number
+        && data.decisions is list && data.decisions.size() <= 500
+        && data.errors is list && data.errors.size() <= 500
+        && data.createdAt == request.time;
+    }
+
+    function isValidExportLog(data, logId) {
+      return data.keys().hasAll(['id', 'employee_id', 'employee_name', 'format', 'export_mode', 'record_count', 'createdAt'])
+        && data.keys().hasOnly(['id', 'employee_id', 'employee_name', 'format', 'export_mode', 'record_count', 'createdAt'])
+        && data.id == logId
+        && data.employee_id == request.auth.uid
+        && data.employee_name is string && data.employee_name.size() >= 1 && data.employee_name.size() <= 120
+        && data.format in ['xlsx', 'csv']
+        && data.export_mode is string && data.export_mode.size() >= 1 && data.export_mode.size() <= 80
+        && data.record_count is number && data.record_count >= 0
+        && data.createdAt == request.time;
+    }
+
+    function isValidLoginLog(data, logId) {
+      return data.keys().hasAll(['id', 'user_uid', 'email', 'event_type', 'createdAt'])
+        && data.keys().hasOnly(['id', 'user_uid', 'email', 'event_type', 'details', 'createdAt'])
+        && data.id == logId
+        && data.user_uid == request.auth.uid
+        && data.email is string && data.email.size() >= 3 && data.email.size() <= 200
+        && data.event_type in ['login_success', 'login_blocked_inactive', 'login_blocked_uninvited', 'logout']
+        && isOptionalString(data, 'details', 300)
+        && data.createdAt == request.time;
+    }
+
+    // ==================== COLLECTION MATCH RULES ====================
+
+    match /test/connection {
+      allow get: if isSignedIn();
+    }
+
+    match /settings/{settingId} {
+      allow get: if isValidId(settingId) && isEmailVerified();
+      allow create: if isValidId(settingId)
+        && settingId == 'workspace'
+        && isValidWorkspaceSettings(incoming())
+        && incoming().createdAt == request.time
+        && incoming().updatedAt == request.time
+        && (isBootstrappedAdmin() || isSuperAdmin());
+      allow update: if isValidId(settingId)
+        && settingId == 'workspace'
+        && isValidWorkspaceSettings(incoming())
+        && incoming().createdAt == existing().createdAt
+        && incoming().updatedAt == request.time
+        && (
+          isSuperAdmin()
+          || (
+            isActiveUser()
+            && incoming().diff(existing()).affectedKeys().hasOnly(['lead_seq', 'updatedAt'])
+            && incoming().lead_seq == existing().lead_seq + 1
+          )
+        );
+    }
+
+    match /admins/{userId} {
+      allow get: if isValidId(userId) && (isOwner(userId) || isSuperAdmin());
+      allow create: if isValidId(userId)
+        && isValidAdminRecord(incoming(), userId)
+        && (
+          (isBootstrappedAdmin() && isOwner(userId))
+          || isSuperAdmin()
+          || (
+            isOwner(userId)
+            && exists(/databases/$(database)/documents/users/$(userId))
+            && get(/databases/$(database)/documents/users/$(userId)).data.role == 'super_admin'
+            && get(/databases/$(database)/documents/users/$(userId)).data.status == 'active'
+          )
+        );
+      allow delete: if isValidId(userId) && isSuperAdmin();
+    }
+
+    match /users/{userId} {
+      allow get: if isValidId(userId) && (isOwner(userId) || isSuperAdmin());
+      allow list: if isSuperAdmin();
+      allow create: if isValidId(userId)
+        && isValidUserProfile(incoming(), userId)
+        && incoming().createdAt == request.time
+        && incoming().updatedAt == request.time
+        && (
+          (isOwner(userId) && isBootstrappedAdmin() && incoming().role == 'super_admin' && incoming().status == 'active' && incoming().email == authEmail())
+          || (isOwner(userId) && incoming().email == authEmail() && hasValidInviteFor(incoming()))
+          || isSuperAdmin()
+        );
+      allow update: if isValidId(userId)
+        && isValidUserProfile(incoming(), userId)
+        && incoming().createdAt == existing().createdAt
+        && incoming().updatedAt == request.time
+        && incoming().uid == existing().uid
+        && (
+          isSuperAdmin()
+          || (
+            isOwner(userId)
+            && existing().status == 'active'
+            && incoming().diff(existing()).affectedKeys().hasOnly([
+              'full_name', 'mobile', 'designation', 'profile_photo',
+              'theme_preference', 'lead_view_preference', 'page_size_preference',
+              'table_columns_preference', 'updatedAt'
+            ])
+          )
+        );
+    }
+
+    match /employeeInvites/{inviteId} {
+      allow get: if isValidId(inviteId) && (isSuperAdmin() || (isEmailVerified() && existing().email == authEmail()));
+      allow list: if isSuperAdmin() || (isEmailVerified() && resource.data.email == authEmail());
+      allow create: if isValidId(inviteId)
+        && isSuperAdmin()
+        && isValidEmployeeInvite(incoming(), inviteId)
+        && incoming().createdBy == request.auth.uid
+        && incoming().createdAt == request.time
+        && incoming().updatedAt == request.time;
+      allow update: if isValidId(inviteId)
+        && isValidEmployeeInvite(incoming(), inviteId)
+        && incoming().createdAt == existing().createdAt
+        && incoming().updatedAt == request.time
+        && incoming().createdBy == existing().createdBy
+        && (
+          isSuperAdmin()
+          || (
+            isEmailVerified()
+            && existing().email == authEmail()
+            && existing().status == 'active'
+            && (!('claimed_uid' in existing()) || existing().claimed_uid == null)
+            && incoming().diff(existing()).affectedKeys().hasOnly(['claimed_uid', 'updatedAt'])
+            && incoming().claimed_uid == request.auth.uid
+          )
+        );
+    }
+
+    match /employeeDirectory/{entryId} {
+      allow get: if isValidId(entryId) && (isActiveUser() || isSuperAdmin());
+      allow list: if isSuperAdmin() || (isActiveUser() && resource.data.status in ['active', 'inactive']);
+      allow create: if isValidId(entryId)
+        && isValidDirectoryEntry(incoming(), entryId)
+        && incoming().createdAt == request.time
+        && incoming().updatedAt == request.time
+        && (
+          isSuperAdmin()
+          || (
+            isEmailVerified()
+            && incoming().uid == request.auth.uid
+            && incoming().email_key == authEmail()
+            && (isBootstrappedAdmin() || exists(/databases/$(database)/documents/users/$(request.auth.uid)))
+          )
+        );
+      allow update: if isValidId(entryId)
+        && isValidDirectoryEntry(incoming(), entryId)
+        && incoming().createdAt == existing().createdAt
+        && incoming().updatedAt == request.time
+        && (
+          isSuperAdmin()
+          || (
+            isActiveUser()
+            && existing().email_key == authEmail()
+            && incoming().diff(existing()).affectedKeys().hasOnly(['uid', 'full_name', 'designation', 'updatedAt'])
+            && incoming().uid == request.auth.uid
+          )
+        );
+    }
+
+    match /masters/{masterId} {
+      allow get: if isValidId(masterId) && (isActiveUser() || isSuperAdmin());
+      allow list: if isSuperAdmin()
+        || (
+          isActiveUser()
+          && resource.data.category in [
+            'lead_source', 'lead_stage', 'property_type', 'property_subtype', 'transaction_type',
+            'locality', 'bhk_config', 'dead_reason', 'furnishing_type', 'possession_pref'
+          ]
+        );
+      allow create: if isValidId(masterId)
+        && isSuperAdmin()
+        && isValidMasterItem(incoming(), masterId)
+        && incoming().createdAt == request.time
+        && incoming().updatedAt == request.time;
+      allow update: if isValidId(masterId)
+        && isSuperAdmin()
+        && isValidMasterItem(incoming(), masterId)
+        && incoming().createdAt == existing().createdAt
+        && incoming().updatedAt == request.time
+        && incoming().category == existing().category;
+      allow delete: if isValidId(masterId) && isSuperAdmin();
+    }
+
+    match /leads/{leadId} {
+      allow get: if isValidId(leadId) && (
+        isSuperAdmin()
+        || (isActiveUser() && existing().is_deleted == false && (existing().assigned_to_uid == request.auth.uid || existing().assigned_to_email == authEmail()))
+      );
+      allow list: if isSuperAdmin()
+        || (isActiveUser() && resource.data.is_deleted == false && (resource.data.assigned_to_uid == request.auth.uid || resource.data.assigned_to_email == authEmail()));
+      allow create: if isValidId(leadId)
+        && (isSuperAdmin() || isActiveUser());
+      allow update: if isValidId(leadId)
+        && (isSuperAdmin() || isActiveUser())
+        && incoming().createdAt == existing().createdAt
+        && incoming().updatedAt == request.time
+        && (
+          isSuperAdmin()
+          || (
+            existing().is_deleted == false
+            && (existing().assigned_to_uid == request.auth.uid || existing().assigned_to_email == authEmail())
+            && incoming().is_deleted == false
+          )
+        );
+
+      match /communications/{commId} {
+        allow get, list: if isValidId(leadId) && (
+          isSuperAdmin()
+          || (
+            isActiveUser()
+            && get(/databases/$(database)/documents/leads/$(leadId)).data.is_deleted == false
+            && (
+              get(/databases/$(database)/documents/leads/$(leadId)).data.assigned_to_uid == request.auth.uid
+              || get(/databases/$(database)/documents/leads/$(leadId)).data.assigned_to_email == authEmail()
+            )
+          )
+        );
+        allow create: if isValidId(leadId)
+          && isValidId(commId)
+          && (isSuperAdmin() || isActiveUser())
+          && isValidCommunication(incoming(), commId, leadId)
+          && incoming().employee_id == request.auth.uid
+          && exists(/databases/$(database)/documents/leads/$(leadId))
+          && (
+            isSuperAdmin()
+            || (
+              get(/databases/$(database)/documents/leads/$(leadId)).data.is_deleted == false
+              && (
+                get(/databases/$(database)/documents/leads/$(leadId)).data.assigned_to_uid == request.auth.uid
+                || get(/databases/$(database)/documents/leads/$(leadId)).data.assigned_to_email == authEmail()
+              )
+            )
+          );
+      }
+
+      match /timeline/{eventId} {
+        allow get, list: if isValidId(leadId) && (
+          isSuperAdmin()
+          || (
+            isActiveUser()
+            && get(/databases/$(database)/documents/leads/$(leadId)).data.is_deleted == false
+            && (
+              get(/databases/$(database)/documents/leads/$(leadId)).data.assigned_to_uid == request.auth.uid
+              || get(/databases/$(database)/documents/leads/$(leadId)).data.assigned_to_email == authEmail()
+            )
+          )
+        );
+        allow create: if isValidId(leadId)
+          && isValidId(eventId)
+          && (isSuperAdmin() || isActiveUser())
+          && isValidTimelineEvent(incoming(), eventId, leadId)
+          && (exists(/databases/$(database)/documents/leads/$(leadId)) || existsAfter(/databases/$(database)/documents/leads/$(leadId)));
+      }
+    }
+
+    match /mobileLookup/{mobile}/matches/{leadId} {
+      allow get: if isValidId(leadId) && mobile.matches('^[6-9][0-9]{9}$') && (isSuperAdmin() || isActiveUser());
+      allow list: if mobile.matches('^[6-9][0-9]{9}$')
+        && (isSuperAdmin() || (isActiveUser() && resource.data.mobile == mobile));
+      allow create: if isValidId(leadId)
+        && mobile.matches('^[6-9][0-9]{9}$')
+        && (isSuperAdmin() || isActiveUser())
+        && isValidMobileMatch(incoming(), mobile, leadId)
+        && incoming().createdAt == request.time
+        && incoming().updatedAt == request.time
+        && (exists(/databases/$(database)/documents/leads/$(leadId)) || existsAfter(/databases/$(database)/documents/leads/$(leadId)));
+      allow update: if isValidId(leadId)
+        && mobile.matches('^[6-9][0-9]{9}$')
+        && (isSuperAdmin() || isActiveUser())
+        && isValidMobileMatch(incoming(), mobile, leadId)
+        && incoming().createdAt == existing().createdAt
+        && incoming().updatedAt == request.time
+        && (
+          isSuperAdmin()
+          || get(/databases/$(database)/documents/leads/$(leadId)).data.assigned_to_email == authEmail()
+        );
+      allow delete: if isValidId(leadId)
+        && mobile.matches('^[6-9][0-9]{9}$')
+        && (isSuperAdmin() || isActiveUser())
+        && (
+          isSuperAdmin()
+          || get(/databases/$(database)/documents/leads/$(leadId)).data.assigned_to_email == authEmail()
+        );
+    }
+
+    match /activities/{activityId} {
+      allow get: if isValidId(activityId) && (
+        isSuperAdmin()
+        || (isActiveUser() && existing().lead_is_deleted == false && (existing().assigned_to_uid == request.auth.uid || existing().assigned_to_email == authEmail()))
+      );
+      allow list: if isSuperAdmin()
+        || (isActiveUser() && resource.data.lead_is_deleted == false && (resource.data.assigned_to_uid == request.auth.uid || resource.data.assigned_to_email == authEmail()));
+      allow create: if isValidId(activityId)
+        && (isSuperAdmin() || isActiveUser())
+        && isValidActivity(incoming(), activityId)
+        && incoming().createdAt == request.time
+        && incoming().updatedAt == request.time
+        && (exists(/databases/$(database)/documents/leads/$(incoming().lead_id)) || existsAfter(/databases/$(database)/documents/leads/$(incoming().lead_id)));
+      allow update: if isValidId(activityId)
+        && (isSuperAdmin() || isActiveUser())
+        && isValidActivity(incoming(), activityId)
+        && incoming().createdAt == existing().createdAt
+        && incoming().updatedAt == request.time
+        && incoming().lead_id == existing().lead_id
+        && incoming().created_by == existing().created_by
+        && (
+          isSuperAdmin()
+          || (
+            existing().lead_is_deleted == false
+            && (existing().assigned_to_uid == request.auth.uid || existing().assigned_to_email == authEmail())
+            && (
+              // Complete or Cancel
+              (
+                existing().status == 'Pending'
+                && incoming().diff(existing()).affectedKeys().hasOnly([
+                  'status', 'completed_by', 'completed_by_name', 'completed_at', 'completion_remarks',
+                  'cancelled_by', 'cancelled_by_name', 'cancelled_at', 'cancel_reason', 'updatedAt'
+                ])
+              )
+              ||
+              // Reschedule
+              (
+                existing().status == 'Pending'
+                && incoming().diff(existing()).affectedKeys().hasOnly([
+                  'scheduled_date', 'scheduled_time', 'scheduled_at', 'description',
+                  'reschedule_count', 'previous_schedule_history', 'reminded_30', 'reminded_15', 'reminded_overdue', 'updatedAt'
+                ])
+              )
+              ||
+              // Reminder Flags
+              incoming().diff(existing()).affectedKeys().hasOnly(['reminded_30', 'reminded_15', 'reminded_overdue', 'updatedAt'])
+            )
+          )
+        );
+    }
+
+    match /notifications/{notifId} {
+      allow get: if isValidId(notifId) && (
+        isSuperAdmin()
+        || (isEmailVerified() && (existing().user_uid == request.auth.uid || existing().user_email == authEmail()))
+      );
+      allow list: if isSuperAdmin()
+        || (isActiveUser() && (resource.data.user_uid == request.auth.uid || resource.data.user_email == authEmail()));
+      allow create: if isValidId(notifId)
+        && (isSuperAdmin() || isActiveUser())
+        && isValidNotification(incoming(), notifId)
+        && incoming().createdAt == request.time
+        && incoming().updatedAt == request.time;
+      allow update: if isValidId(notifId)
+        && (isSuperAdmin() || isActiveUser())
+        && isValidNotification(incoming(), notifId)
+        && incoming().createdAt == existing().createdAt
+        && incoming().updatedAt == request.time
+        && incoming().diff(existing()).affectedKeys().hasOnly(['is_read', 'updatedAt'])
+        && (isSuperAdmin() || existing().user_uid == request.auth.uid || existing().user_email == authEmail());
+    }
+
+    match /auditLogs/{logId} {
+      allow get: if isValidId(logId) && (
+        isSuperAdmin()
+        || (isEmailVerified() && (existing().employee_id == request.auth.uid || existing().lead_assigned_to_email == authEmail()))
+      );
+      allow list: if isSuperAdmin()
+        || (isActiveUser() && (resource.data.employee_id == request.auth.uid || resource.data.lead_assigned_to_email == authEmail()));
+      allow create: if isValidId(logId)
+        && (isSuperAdmin() || isActiveUser())
+        && isValidAuditLog(incoming(), logId)
+        && incoming().employee_id == request.auth.uid;
+    }
+
+    match /importBatches/{batchId} {
+      allow get: if isValidId(batchId) && isSuperAdmin();
+      allow list: if isSuperAdmin();
+      allow create: if isValidId(batchId) && isSuperAdmin() && isValidImportBatch(incoming(), batchId);
+    }
+
+    match /exportLogs/{logId} {
+      allow get: if isValidId(logId) && isSuperAdmin();
+      allow list: if isSuperAdmin();
+      allow create: if isValidId(logId) && (isSuperAdmin() || isActiveUser()) && isValidExportLog(incoming(), logId);
+    }
+
+    match /loginLogs/{logId} {
+      allow get: if isValidId(logId) && isSuperAdmin();
+      allow list: if isSuperAdmin();
+      allow create: if isValidId(logId) && isEmailVerified() && isValidLoginLog(incoming(), logId);
+    }
+  }
+}

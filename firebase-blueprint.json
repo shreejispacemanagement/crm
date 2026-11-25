@@ -1,0 +1,528 @@
+{
+  "entities": {
+    "WorkspaceSettings": {
+      "title": "WorkspaceSettings",
+      "description": "Company branding, default table column layout, and sequential SSM lead ID counter.",
+      "type": "object",
+      "properties": {
+        "company_name": { "type": "string", "minLength": 1, "maxLength": 120 },
+        "short_name": { "type": "string", "minLength": 1, "maxLength": 40 },
+        "company_logo": { "type": "string", "maxLength": 400000 },
+        "default_table_columns": { "type": "array", "description": "Up to 20 default column keys" },
+        "lead_seq": { "type": "number" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["company_name", "short_name", "default_table_columns", "lead_seq", "createdAt", "updatedAt"]
+    },
+    "AdminRecord": {
+      "title": "AdminRecord",
+      "description": "Trusted active Super Admin privilege lookup document.",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string", "minLength": 1, "maxLength": 128 },
+        "email": { "type": "string", "format": "email", "maxLength": 200 },
+        "grantedBy": { "type": "string", "minLength": 1, "maxLength": 128 },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["uid", "email", "grantedBy", "createdAt"]
+    },
+    "UserProfile": {
+      "title": "UserProfile",
+      "description": "Authenticated internal employee profile with PII, role, status, and UI preferences.",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string", "minLength": 1, "maxLength": 128 },
+        "email": { "type": "string", "format": "email", "maxLength": 200 },
+        "full_name": { "type": "string", "minLength": 1, "maxLength": 120 },
+        "mobile": { "type": "string", "maxLength": 20, "pattern": "^(|[6-9][0-9]{9})$" },
+        "designation": { "type": "string", "minLength": 1, "maxLength": 100 },
+        "role": { "type": "string", "enum": ["super_admin", "sales_executive"] },
+        "status": { "type": "string", "enum": ["active", "inactive"] },
+        "profile_photo": { "type": "string", "maxLength": 300000 },
+        "theme_preference": { "type": "string", "enum": ["light", "dark"] },
+        "lead_view_preference": { "type": "string", "enum": ["table", "kanban"] },
+        "page_size_preference": { "type": "number" },
+        "table_columns_preference": { "type": "array" },
+        "invite_id": { "type": "string", "maxLength": 128 },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": [
+        "uid",
+        "email",
+        "full_name",
+        "mobile",
+        "designation",
+        "role",
+        "status",
+        "theme_preference",
+        "lead_view_preference",
+        "page_size_preference",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "EmployeeInvite": {
+      "title": "EmployeeInvite",
+      "description": "Super Admin provisioned employee invitation gated by verified Google email.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "minLength": 1, "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "email": { "type": "string", "format": "email", "maxLength": 200 },
+        "full_name": { "type": "string", "minLength": 1, "maxLength": 120 },
+        "mobile": { "type": "string", "maxLength": 20, "pattern": "^(|[6-9][0-9]{9})$" },
+        "designation": { "type": "string", "minLength": 1, "maxLength": 100 },
+        "role": { "type": "string", "enum": ["super_admin", "sales_executive"] },
+        "status": { "type": "string", "enum": ["active", "inactive"] },
+        "claimed_uid": { "type": "string", "maxLength": 128 },
+        "createdBy": { "type": "string", "minLength": 1, "maxLength": 128 },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "email", "full_name", "mobile", "designation", "role", "status", "createdBy", "createdAt", "updatedAt"]
+    },
+    "EmployeeDirectoryEntry": {
+      "title": "EmployeeDirectoryEntry",
+      "description": "Non-PII team member directory entry readable by active team members for lead assignment labels.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "minLength": 1, "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "uid": { "type": "string", "maxLength": 128 },
+        "email_key": { "type": "string", "format": "email", "maxLength": 200 },
+        "full_name": { "type": "string", "minLength": 1, "maxLength": 120 },
+        "designation": { "type": "string", "minLength": 1, "maxLength": 100 },
+        "role": { "type": "string", "enum": ["super_admin", "sales_executive"] },
+        "status": { "type": "string", "enum": ["active", "inactive"] },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "email_key", "full_name", "designation", "role", "status", "createdAt", "updatedAt"]
+    },
+    "MasterItem": {
+      "title": "MasterItem",
+      "description": "Configurable CRM master value (stages, sources, Ahmedabad localities, property types/subtypes, etc.).",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "minLength": 1, "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "category": {
+          "type": "string",
+          "enum": [
+            "lead_source",
+            "lead_stage",
+            "property_type",
+            "property_subtype",
+            "transaction_type",
+            "locality",
+            "bhk_config",
+            "dead_reason",
+            "furnishing_type",
+            "possession_pref"
+          ]
+        },
+        "name": { "type": "string", "minLength": 1, "maxLength": 120 },
+        "parent_value": { "type": "string", "maxLength": 120 },
+        "sort_order": { "type": "number" },
+        "is_active": { "type": "boolean" },
+        "is_terminal": { "type": "boolean" },
+        "terminal_outcome": { "type": "string", "enum": ["won", "lost"] },
+        "system_key": { "type": "string", "maxLength": 60 },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "category", "name", "sort_order", "is_active", "is_terminal", "createdAt", "updatedAt"]
+    },
+    "Lead": {
+      "title": "Lead",
+      "description": "Real estate client lead with requirements, stage pipeline, inactivity tracking, booking, and dead details.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "minLength": 1, "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "lead_code": { "type": "string", "minLength": 4, "maxLength": 20, "pattern": "^SSM-[0-9]{6,}$" },
+        "customer_name": { "type": "string", "minLength": 1, "maxLength": 150 },
+        "mobile": { "type": "string", "pattern": "^[6-9][0-9]{9}$" },
+        "alternate_mobile": { "type": "string", "maxLength": 20 },
+        "whatsapp": { "type": "string", "maxLength": 20 },
+        "email": { "type": "string", "maxLength": 200 },
+        "company_name": { "type": "string", "maxLength": 150 },
+        "customer_remarks": { "type": "string", "maxLength": 2000 },
+        "lead_source": { "type": "string", "minLength": 1, "maxLength": 120 },
+        "property_type": { "type": "string", "minLength": 1, "maxLength": 120 },
+        "property_subtype": { "type": "string", "minLength": 1, "maxLength": 120 },
+        "transaction_type": { "type": "string", "minLength": 1, "maxLength": 120 },
+        "localities": { "type": "array", "description": "1 to 30 preferred Ahmedabad localities" },
+        "budget_from": { "type": "number" },
+        "budget_to": { "type": "number" },
+        "min_area": { "type": "number" },
+        "max_area": { "type": "number" },
+        "area_unit": { "type": "string", "maxLength": 40 },
+        "bhk_config": { "type": "string", "maxLength": 60 },
+        "commercial_config": { "type": "string", "maxLength": 200 },
+        "furnishing_type": { "type": "string", "maxLength": 60 },
+        "preferred_floor": { "type": "string", "maxLength": 60 },
+        "possession_pref": { "type": "string", "maxLength": 60 },
+        "required_workstations": { "type": "number" },
+        "required_cabins": { "type": "number" },
+        "requirement_remarks": { "type": "string", "maxLength": 2000 },
+        "stage": { "type": "string", "minLength": 1, "maxLength": 120 },
+        "is_terminal_stage": { "type": "boolean" },
+        "created_by": { "type": "string", "minLength": 1, "maxLength": 128 },
+        "created_by_name": { "type": "string", "maxLength": 120 },
+        "assigned_to": { "type": "string", "minLength": 1, "maxLength": 128 },
+        "assigned_to_uid": { "type": "string", "maxLength": 128 },
+        "assigned_to_email": { "type": "string", "format": "email", "maxLength": 200 },
+        "assigned_to_name": { "type": "string", "minLength": 1, "maxLength": 120 },
+        "is_deleted": { "type": "boolean" },
+        "deleted_at": { "type": "string", "maxLength": 50 },
+        "deleted_by": { "type": "string", "maxLength": 128 },
+        "deleted_by_name": { "type": "string", "maxLength": 120 },
+        "is_inactive": { "type": "boolean" },
+        "inactive_since": { "type": "string", "maxLength": 50 },
+        "last_qualifying_interaction_at": { "type": "string", "maxLength": 50 },
+        "last_interaction_type": { "type": "string", "maxLength": 120 },
+        "last_interaction_remarks": { "type": "string", "maxLength": 1000 },
+        "inactivity_notified_15": { "type": "boolean" },
+        "inactivity_escalated_22": { "type": "boolean" },
+        "booking_date": { "type": "string", "maxLength": 30 },
+        "booking_project_name": { "type": "string", "maxLength": 200 },
+        "final_transaction_amount": { "type": "number" },
+        "brokerage_amount": { "type": "number" },
+        "brokerage_percentage": { "type": "number" },
+        "payment_status": { "type": "string", "enum": ["Pending", "Partially Paid", "Paid"] },
+        "booking_remarks": { "type": "string", "maxLength": 2000 },
+        "dead_reason": { "type": "string", "maxLength": 120 },
+        "dead_remarks": { "type": "string", "maxLength": 2000 },
+        "dead_by": { "type": "string", "maxLength": 128 },
+        "dead_by_name": { "type": "string", "maxLength": 120 },
+        "dead_at": { "type": "string", "maxLength": 50 },
+        "import_batch_ref": { "type": "string", "maxLength": 80 },
+        "created_date_iso": { "type": "string", "maxLength": 50 },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": [
+        "id",
+        "lead_code",
+        "customer_name",
+        "mobile",
+        "lead_source",
+        "property_type",
+        "property_subtype",
+        "transaction_type",
+        "localities",
+        "stage",
+        "is_terminal_stage",
+        "created_by",
+        "assigned_to",
+        "assigned_to_email",
+        "assigned_to_name",
+        "is_deleted",
+        "is_inactive",
+        "last_qualifying_interaction_at",
+        "inactivity_notified_15",
+        "inactivity_escalated_22",
+        "created_date_iso",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "MobileDuplicateMatch": {
+      "title": "MobileDuplicateMatch",
+      "description": "Lightweight non-PII index entry keyed by exact 10-digit primary mobile for live duplicate detection.",
+      "type": "object",
+      "properties": {
+        "lead_id": { "type": "string", "minLength": 1, "maxLength": 128 },
+        "lead_code": { "type": "string", "minLength": 4, "maxLength": 20 },
+        "mobile": { "type": "string", "pattern": "^[6-9][0-9]{9}$" },
+        "customer_name": { "type": "string", "minLength": 1, "maxLength": 150 },
+        "requirement_summary": { "type": "string", "maxLength": 250 },
+        "stage": { "type": "string", "minLength": 1, "maxLength": 120 },
+        "assigned_to": { "type": "string", "minLength": 1, "maxLength": 128 },
+        "assigned_to_name": { "type": "string", "minLength": 1, "maxLength": 120 },
+        "is_deleted": { "type": "boolean" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": [
+        "lead_id",
+        "lead_code",
+        "mobile",
+        "customer_name",
+        "requirement_summary",
+        "stage",
+        "assigned_to",
+        "assigned_to_name",
+        "is_deleted",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "Activity": {
+      "title": "Activity",
+      "description": "Scheduled follow-up call, WhatsApp follow-up, site visit, meeting, or other activity.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "minLength": 1, "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "lead_id": { "type": "string", "minLength": 1, "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "lead_code": { "type": "string", "minLength": 4, "maxLength": 20 },
+        "customer_name": { "type": "string", "minLength": 1, "maxLength": 150 },
+        "customer_mobile": { "type": "string", "maxLength": 20 },
+        "lead_stage": { "type": "string", "maxLength": 120 },
+        "lead_is_deleted": { "type": "boolean" },
+        "activity_type": { "type": "string", "enum": ["Follow-up Call", "WhatsApp Follow-up", "Site Visit", "Meeting", "Other"] },
+        "scheduled_date": { "type": "string", "minLength": 10, "maxLength": 10 },
+        "scheduled_time": { "type": "string", "minLength": 5, "maxLength": 8 },
+        "scheduled_at": { "type": "string", "maxLength": 50 },
+        "assigned_to": { "type": "string", "minLength": 1, "maxLength": 128 },
+        "assigned_to_uid": { "type": "string", "maxLength": 128 },
+        "assigned_to_email": { "type": "string", "format": "email", "maxLength": 200 },
+        "assigned_to_name": { "type": "string", "minLength": 1, "maxLength": 120 },
+        "description": { "type": "string", "maxLength": 1000 },
+        "status": { "type": "string", "enum": ["Pending", "Completed", "Cancelled"] },
+        "completed_by": { "type": "string", "maxLength": 128 },
+        "completed_by_name": { "type": "string", "maxLength": 120 },
+        "completed_at": { "type": "string", "maxLength": 50 },
+        "completion_remarks": { "type": "string", "maxLength": 1000 },
+        "cancelled_by": { "type": "string", "maxLength": 128 },
+        "cancelled_by_name": { "type": "string", "maxLength": 120 },
+        "cancelled_at": { "type": "string", "maxLength": 50 },
+        "cancel_reason": { "type": "string", "maxLength": 1000 },
+        "reschedule_count": { "type": "number" },
+        "previous_schedule_history": { "type": "array" },
+        "reminded_30": { "type": "boolean" },
+        "reminded_15": { "type": "boolean" },
+        "reminded_overdue": { "type": "boolean" },
+        "created_by": { "type": "string", "minLength": 1, "maxLength": 128 },
+        "created_by_name": { "type": "string", "maxLength": 120 },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": [
+        "id",
+        "lead_id",
+        "lead_code",
+        "customer_name",
+        "lead_is_deleted",
+        "activity_type",
+        "scheduled_date",
+        "scheduled_time",
+        "scheduled_at",
+        "assigned_to",
+        "assigned_to_email",
+        "assigned_to_name",
+        "status",
+        "reschedule_count",
+        "reminded_30",
+        "reminded_15",
+        "reminded_overdue",
+        "created_by",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "Communication": {
+      "title": "Communication",
+      "description": "Manual communication log attached to a lead.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "minLength": 1, "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "lead_id": { "type": "string", "minLength": 1, "maxLength": 128 },
+        "comm_type": {
+          "type": "string",
+          "enum": ["Call Completed", "WhatsApp Message Sent", "Customer Response Received", "Discussion Summary", "Next Action/Follow-up Remarks"]
+        },
+        "description": { "type": "string", "minLength": 1, "maxLength": 2000 },
+        "next_action_remarks": { "type": "string", "maxLength": 1000 },
+        "employee_id": { "type": "string", "minLength": 1, "maxLength": 128 },
+        "employee_name": { "type": "string", "minLength": 1, "maxLength": 120 },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "lead_id", "comm_type", "description", "employee_id", "employee_name", "createdAt"]
+    },
+    "TimelineEvent": {
+      "title": "TimelineEvent",
+      "description": "Append-only chronological lead activity timeline event.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "minLength": 1, "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "lead_id": { "type": "string", "minLength": 1, "maxLength": 128 },
+        "event_type": { "type": "string", "minLength": 1, "maxLength": 100 },
+        "description": { "type": "string", "minLength": 1, "maxLength": 2000 },
+        "employee_id": { "type": "string", "maxLength": 128 },
+        "employee_name": { "type": "string", "minLength": 1, "maxLength": 120 },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "lead_id", "event_type", "description", "employee_name", "createdAt"]
+    },
+    "Notification": {
+      "title": "Notification",
+      "description": "In-app alert for assigned leads, 15/22-day inactivity, and 15m/30m/overdue activity reminders.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "minLength": 1, "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "user_uid": { "type": "string", "maxLength": 128 },
+        "user_email": { "type": "string", "format": "email", "maxLength": 200 },
+        "lead_id": { "type": "string", "maxLength": 128 },
+        "lead_code": { "type": "string", "maxLength": 20 },
+        "activity_id": { "type": "string", "maxLength": 128 },
+        "notif_type": { "type": "string", "minLength": 1, "maxLength": 80 },
+        "title": { "type": "string", "minLength": 1, "maxLength": 200 },
+        "message": { "type": "string", "minLength": 1, "maxLength": 1000 },
+        "is_read": { "type": "boolean" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "user_email", "notif_type", "title", "message", "is_read", "createdAt", "updatedAt"]
+    },
+    "AuditLog": {
+      "title": "AuditLog",
+      "description": "Immutable field-level audit log entry.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "minLength": 1, "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "entity_type": { "type": "string", "minLength": 1, "maxLength": 60 },
+        "entity_id": { "type": "string", "minLength": 1, "maxLength": 128 },
+        "lead_id": { "type": "string", "maxLength": 128 },
+        "lead_code": { "type": "string", "maxLength": 20 },
+        "lead_assigned_to_email": { "type": "string", "maxLength": 200 },
+        "action_type": { "type": "string", "minLength": 1, "maxLength": 80 },
+        "field_name": { "type": "string", "maxLength": 80 },
+        "previous_value": { "type": "string", "maxLength": 2000 },
+        "new_value": { "type": "string", "maxLength": 2000 },
+        "remarks": { "type": "string", "maxLength": 2000 },
+        "employee_id": { "type": "string", "minLength": 1, "maxLength": 128 },
+        "employee_name": { "type": "string", "minLength": 1, "maxLength": 120 },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "entity_type", "entity_id", "action_type", "employee_id", "employee_name", "createdAt"]
+    },
+    "ImportBatch": {
+      "title": "ImportBatch",
+      "description": "Super Admin bulk Excel/CSV import batch audit record.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "minLength": 1, "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "batch_ref": { "type": "string", "minLength": 1, "maxLength": 80 },
+        "filename": { "type": "string", "minLength": 1, "maxLength": 200 },
+        "uploaded_by": { "type": "string", "minLength": 1, "maxLength": 128 },
+        "uploaded_by_name": { "type": "string", "minLength": 1, "maxLength": 120 },
+        "total_count": { "type": "number" },
+        "success_count": { "type": "number" },
+        "skipped_count": { "type": "number" },
+        "failed_count": { "type": "number" },
+        "decisions": { "type": "array" },
+        "errors": { "type": "array" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": [
+        "id",
+        "batch_ref",
+        "filename",
+        "uploaded_by",
+        "uploaded_by_name",
+        "total_count",
+        "success_count",
+        "skipped_count",
+        "failed_count",
+        "decisions",
+        "errors",
+        "createdAt"
+      ]
+    },
+    "ExportLog": {
+      "title": "ExportLog",
+      "description": "Immutable export download log record.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "minLength": 1, "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "employee_id": { "type": "string", "minLength": 1, "maxLength": 128 },
+        "employee_name": { "type": "string", "minLength": 1, "maxLength": 120 },
+        "format": { "type": "string", "enum": ["xlsx", "csv"] },
+        "export_mode": { "type": "string", "minLength": 1, "maxLength": 80 },
+        "record_count": { "type": "number" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "employee_id", "employee_name", "format", "export_mode", "record_count", "createdAt"]
+    },
+    "LoginLog": {
+      "title": "LoginLog",
+      "description": "Immutable sign-in and sign-out audit event.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "minLength": 1, "maxLength": 128, "pattern": "^[a-zA-Z0-9_\\-]+$" },
+        "user_uid": { "type": "string", "minLength": 1, "maxLength": 128 },
+        "email": { "type": "string", "format": "email", "maxLength": 200 },
+        "event_type": { "type": "string", "enum": ["login_success", "login_blocked_inactive", "login_blocked_uninvited", "logout"] },
+        "details": { "type": "string", "maxLength": 300 },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "user_uid", "email", "event_type", "createdAt"]
+    }
+  },
+  "firestore": {
+    "/settings/{settingId}": {
+      "schema": { "$ref": "#/entities/WorkspaceSettings" },
+      "description": "Global workspace configuration and sequential lead counter."
+    },
+    "/admins/{userId}": {
+      "schema": { "$ref": "#/entities/AdminRecord" },
+      "description": "Active Super Admin privilege lookup documents."
+    },
+    "/users/{userId}": {
+      "schema": { "$ref": "#/entities/UserProfile" },
+      "description": "Authenticated user profiles with PII, role, status, and personal preferences."
+    },
+    "/employeeInvites/{inviteId}": {
+      "schema": { "$ref": "#/entities/EmployeeInvite" },
+      "description": "Employee email invitations created by Super Admin."
+    },
+    "/employeeDirectory/{entryId}": {
+      "schema": { "$ref": "#/entities/EmployeeDirectoryEntry" },
+      "description": "Non-PII employee directory for assignee labels."
+    },
+    "/masters/{masterId}": {
+      "schema": { "$ref": "#/entities/MasterItem" },
+      "description": "Configurable dropdown masters for stages, sources, localities, and property options."
+    },
+    "/leads/{leadId}": {
+      "schema": { "$ref": "#/entities/Lead" },
+      "description": "Real estate customer leads."
+    },
+    "/mobileLookup/{mobile}/matches/{leadId}": {
+      "schema": { "$ref": "#/entities/MobileDuplicateMatch" },
+      "description": "Exact-mobile duplicate lookup matches."
+    },
+    "/leads/{leadId}/communications/{commId}": {
+      "schema": { "$ref": "#/entities/Communication" },
+      "description": "Manual communications recorded against a lead."
+    },
+    "/leads/{leadId}/timeline/{eventId}": {
+      "schema": { "$ref": "#/entities/TimelineEvent" },
+      "description": "Append-only chronological lead timeline."
+    },
+    "/activities/{activityId}": {
+      "schema": { "$ref": "#/entities/Activity" },
+      "description": "Scheduled follow-ups, site visits, and meetings."
+    },
+    "/notifications/{notifId}": {
+      "schema": { "$ref": "#/entities/Notification" },
+      "description": "In-app user notifications."
+    },
+    "/auditLogs/{logId}": {
+      "schema": { "$ref": "#/entities/AuditLog" },
+      "description": "Immutable field-level audit logs."
+    },
+    "/importBatches/{batchId}": {
+      "schema": { "$ref": "#/entities/ImportBatch" },
+      "description": "Bulk Excel/CSV import batch logs."
+    },
+    "/exportLogs/{logId}": {
+      "schema": { "$ref": "#/entities/ExportLog" },
+      "description": "Export download audit logs."
+    },
+    "/loginLogs/{logId}": {
+      "schema": { "$ref": "#/entities/LoginLog" },
+      "description": "Authentication login and logout audit logs."
+    }
+  }
+}

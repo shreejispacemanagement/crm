@@ -1,0 +1,6 @@
+{
+  "name": "Shreeji Space Management CRM",
+  "description": "Internal real estate lead management CRM for Shreeji Space Management (SSM CRM) covering leads, property requirements, follow-ups, site visits, pipeline stages, inactivity tracking, and operational reports.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
