@@ -1,7 +1,7 @@
 import { type User, signOut } from 'firebase/auth';
-import { LogOut, Moon, ShieldCheck, Sun } from 'lucide-react';
+import { LogOut, Moon, Sun } from 'lucide-react';
 import React, { useState } from 'react';
-import { BOOTSTRAPPED_ADMIN_EMAIL, signInWithGooglePopup } from '../lib/crmAuth.ts';
+import { signInWithGooglePopup } from '../lib/crmAuth.ts';
 import { bootstrapFirebaseWorkspace } from '../lib/crmSeed.ts';
 import { auth } from '../lib/firebase.ts';
 import type { CompanySettings, ThemeMode } from '../types.ts';
@@ -238,19 +238,6 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({
                 </svg>
                 {loading ? 'Connecting to Google...' : 'Continue with Google'}
               </button>
-
-              <div className="rounded-lg border border-[#E2E8F0] bg-[#F8FAFC] p-3.5 text-[11px] text-[#525252] dark:border-[#1E3349] dark:bg-[#0F1926] dark:text-[#A3A3A3] space-y-1">
-                <p className="font-medium text-[#262626] dark:text-[#E5E5E5]">
-                  Internal access only · Sign in with your Google account provisioned by Super Admin.
-                </p>
-                <p>
-                  First-time workspace owners should sign in with{' '}
-                  <span className="font-mono-tabular font-semibold text-[#16273A] dark:text-white">
-                    {BOOTSTRAPPED_ADMIN_EMAIL}
-                  </span>{' '}
-                  to initialize the CRM.
-                </p>
-              </div>
             </div>
           )}
         </div>
