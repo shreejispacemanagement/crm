@@ -7,7 +7,8 @@ interface BrandMarkProps {
 }
 
 export const BrandMark: React.FC<BrandMarkProps> = ({ settings, compact = false }) => {
-  const logoSrc = settings.company_logo || '/assets/aistudio/image_b871e6e7.png';
+  const rawLogo = settings.company_logo || './assets/aistudio/image_b871e6e7.png';
+  const logoSrc = rawLogo.startsWith('/assets/') ? `.${rawLogo}` : rawLogo;
 
   return (
     <div className="flex items-center gap-2.5 min-w-0">

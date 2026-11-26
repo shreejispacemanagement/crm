@@ -106,7 +106,7 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({
             <div className="flex justify-center mb-5">
               <div className="p-3 rounded-xl bg-white border border-[#E2E8F0] shadow-xs flex items-center justify-center">
                 <img
-                  src={settings.company_logo || '/assets/aistudio/image_b871e6e7.png'}
+                  src={(settings.company_logo || './assets/aistudio/image_b871e6e7.png').replace(/^\/assets\//, './assets/')}
                   alt={settings.company_name || 'Shreeji Space'}
                   referrerPolicy="no-referrer"
                   className="h-16 w-auto object-contain"

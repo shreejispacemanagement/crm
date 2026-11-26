@@ -1184,7 +1184,7 @@ export const ProfileSettingsView: React.FC<{
               <div className="flex items-center gap-3">
                 <div className="h-12 w-16 rounded-lg bg-white p-1 border border-[#E2E8F0] dark:border-[#1E3349] flex items-center justify-center overflow-hidden shrink-0">
                   <img
-                    src={settings.company_logo || '/assets/aistudio/image_b871e6e7.png'}
+                    src={(settings.company_logo || './assets/aistudio/image_b871e6e7.png').replace(/^\/assets\//, './assets/')}
                     alt="Current Logo"
                     className="max-h-full max-w-full object-contain"
                   />

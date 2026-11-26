@@ -61,7 +61,7 @@ export default function App() {
   const [settings, setSettings] = useState<CompanySettings>({
     company_name: 'Shreeji Space Management CRM',
     short_name: 'Shreeji Space',
-    company_logo: '/assets/aistudio/image_b871e6e7.png',
+    company_logo: './assets/aistudio/image_b871e6e7.png',
     default_table_columns: [],
   });
 

@@ -634,7 +634,7 @@ async function allocateLeadCodes(count: number, user: UserProfile): Promise<stri
         tx.set(ref, {
           company_name: 'Shreeji Space Management CRM',
           short_name: 'Shreeji Space',
-          company_logo: '/assets/aistudio/image_b871e6e7.png',
+          company_logo: './assets/aistudio/image_b871e6e7.png',
           default_table_columns: [
             'lead_code',
             'customer_name',
