@@ -5,8 +5,24 @@ interface BeforeInstallPromptEvent extends Event {
   userChoice: Promise<{ outcome: 'accepted' | 'dismissed'; platform: string }>;
 }
 
+let cachedDeferredPrompt: BeforeInstallPromptEvent | null = null;
+const promptSubscribers = new Set<(prompt: BeforeInstallPromptEvent | null) => void>();
+
+if (typeof window !== 'undefined') {
+  window.addEventListener('beforeinstallprompt', (e: Event) => {
+    e.preventDefault();
+    cachedDeferredPrompt = e as BeforeInstallPromptEvent;
+    promptSubscribers.forEach((fn) => fn(cachedDeferredPrompt));
+  });
+
+  window.addEventListener('appinstalled', () => {
+    cachedDeferredPrompt = null;
+    promptSubscribers.forEach((fn) => fn(null));
+  });
+}
+
 export function usePWAInstall() {
-  const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null);
+  const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(cachedDeferredPrompt);
   const [isInstalled, setIsInstalled] = useState(false);
   const [isIOS, setIsIOS] = useState(false);
 
@@ -19,39 +35,46 @@ export function usePWAInstall() {
     const userAgent = window.navigator.userAgent.toLowerCase();
     setIsIOS(/iphone|ipad|ipod/.test(userAgent));
 
-    const handleBeforeInstallPrompt = (e: Event) => {
-      e.preventDefault();
-      setDeferredPrompt(e as BeforeInstallPromptEvent);
+    setDeferredPrompt(cachedDeferredPrompt);
+    const onPromptChange = (next: BeforeInstallPromptEvent | null) => {
+      setDeferredPrompt(next);
+      if (next === null && isStandalone) {
+        setIsInstalled(true);
+      }
     };
+    promptSubscribers.add(onPromptChange);
 
     const handleAppInstalled = () => {
       setIsInstalled(true);
+      cachedDeferredPrompt = null;
       setDeferredPrompt(null);
     };
 
-    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
     window.addEventListener('appinstalled', handleAppInstalled);
 
     return () => {
-      window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+      promptSubscribers.delete(onPromptChange);
       window.removeEventListener('appinstalled', handleAppInstalled);
     };
   }, []);
 
   const install = async () => {
-    if (!deferredPrompt) return false;
-    await deferredPrompt.prompt();
-    const { outcome } = await deferredPrompt.userChoice;
+    const target = deferredPrompt || cachedDeferredPrompt;
+    if (!target) return false;
+    await target.prompt();
+    const { outcome } = await target.userChoice;
     if (outcome === 'accepted') {
       setIsInstalled(true);
+      cachedDeferredPrompt = null;
       setDeferredPrompt(null);
+      promptSubscribers.forEach((fn) => fn(null));
       return true;
     }
     return false;
   };
 
   return {
-    isInstallable: !!deferredPrompt,
+    isInstallable: !!(deferredPrompt || cachedDeferredPrompt),
     isInstalled,
     isIOS,
     install,
