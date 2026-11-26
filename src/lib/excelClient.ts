@@ -1,4 +1,4 @@
-import ExcelJS from 'exceljs';
+import type ExcelJS from 'exceljs';
 
 export const IMPORT_TEMPLATE_HEADERS = [
   'Customer Name',
@@ -129,6 +129,7 @@ export async function generateImportTemplateBlob(format: 'xlsx' | 'csv'): Promis
     return new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
   }
 
+  const ExcelJS = (await import('exceljs')).default;
   const wb = new ExcelJS.Workbook();
   const ws = wb.addWorksheet('Lead Import Template');
   ws.addRow(IMPORT_TEMPLATE_HEADERS);
@@ -164,6 +165,7 @@ export async function parseSpreadsheetBase64Client(
       });
   }
 
+  const ExcelJS = (await import('exceljs')).default;
   const wb = new ExcelJS.Workbook();
   const ab = new ArrayBuffer(bytes.byteLength);
   new Uint8Array(ab).set(bytes);
@@ -208,6 +210,7 @@ export async function buildSpreadsheetBlob(
     return new Blob(['\uFEFF' + lines.join('\r\n')], { type: 'text/csv;charset=utf-8;' });
   }
 
+  const ExcelJS = (await import('exceljs')).default;
   const wb = new ExcelJS.Workbook();
   const ws = wb.addWorksheet(sheetName.slice(0, 31));
   ws.addRow(headers);

@@ -21,7 +21,55 @@
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
   </head>
   <body class="bg-[#F8FAFC] text-[#16273A] dark:bg-[#0C141E] dark:text-[#F1F5F9] antialiased selection:bg-[#C99B56]/20 selection:text-[#16273A] dark:selection:text-[#F4EBDC]">
-    <div id="root"></div>
+    <div id="root">
+      <div id="ssm-boot-loader" style="min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;padding:24px;font-family:'Plus Jakarta Sans',-apple-system,BlinkMacSystemFont,sans-serif;color:#16273A;">
+        <div style="font-size:13px;font-weight:600;letter-spacing:0.02em;">Loading Shreeji Space Management CRM...</div>
+        <div id="ssm-boot-error" style="display:none;max-width:420px;text-align:center;font-size:12px;color:#b91c1c;background:#fef2f2;border:1px solid #fecaca;border-radius:10px;padding:12px 16px;"></div>
+        <button id="ssm-boot-reload" type="button" style="display:none;padding:8px 16px;border-radius:8px;border:none;background:#16273A;color:#ffffff;font-size:12px;font-weight:600;cursor:pointer;">Clear Cache &amp; Reload</button>
+      </div>
+    </div>
+    <script>
+      (function () {
+        function showBootError(msg) {
+          var loader = document.getElementById('ssm-boot-loader');
+          if (!loader) return;
+          var errBox = document.getElementById('ssm-boot-error');
+          var btn = document.getElementById('ssm-boot-reload');
+          if (errBox) {
+            errBox.textContent = msg || 'Unable to load application scripts. Try clearing cache and reloading.';
+            errBox.style.display = 'block';
+          }
+          if (btn) {
+            btn.style.display = 'inline-block';
+            btn.onclick = function () {
+              if ('serviceWorker' in navigator && navigator.serviceWorker.getRegistrations) {
+                navigator.serviceWorker.getRegistrations().then(function (regs) {
+                  Promise.all(regs.map(function (r) { return r.unregister(); })).finally(function () {
+                    window.location.reload();
+                  });
+                }).catch(function () { window.location.reload(); });
+              } else {
+                window.location.reload();
+              }
+            };
+          }
+        }
+        window.addEventListener('error', function (ev) {
+          if (!document.getElementById('ssm-boot-loader')) return;
+          var target = ev && ev.target;
+          var isScriptError = target && target.tagName === 'SCRIPT';
+          if (ev instanceof ErrorEvent || isScriptError) {
+            showBootError((ev && ev.message) || 'Application script failed to load.');
+          }
+        }, true);
+        window.addEventListener('unhandledrejection', function (ev) {
+          if (document.getElementById('ssm-boot-loader')) {
+            var reason = ev && ev.reason;
+            showBootError(reason && reason.message ? reason.message : 'Application failed to initialize.');
+          }
+        });
+      })();
+    </script>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
