@@ -1,6 +1,14 @@
 import { AlertTriangle, ExternalLink, Search, X } from 'lucide-react';
 import React, { useEffect, useMemo, useState } from 'react';
-import { apiFetch, formatAmountInWords, formatDateOnly, generateBudgetOptions } from '../lib/api.ts';
+import {
+  apiFetch,
+  formatAmountInWords,
+  formatDateOnly,
+  generateBudgetOptions,
+  getMobileValidationError,
+  handleMobileFieldChange,
+  sanitizeIndianMobileInput,
+} from '../lib/api.ts';
 import { AREA_UNITS, type DuplicateMatch, type MasterItem, type UserProfile } from '../types.ts';
 
 const getTodayDateStr = () => {
@@ -130,9 +138,30 @@ export const LeadFormModal: React.FC<LeadFormModalProps> = ({
     setSelectedLocalities((prev) => (prev.includes(name) ? prev.filter((x) => x !== name) : [...prev, name]));
   };
 
+  const mobileLiveError = getMobileValidationError(mobile, { required: true, label: 'Primary Mobile', liveOnly: true });
+  const altMobileLiveError = getMobileValidationError(altMobile, { label: 'Alternate Mobile', liveOnly: true });
+  const whatsappLiveError = getMobileValidationError(whatsapp, { label: 'WhatsApp Number', liveOnly: true });
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
+
+    const primaryErr = getMobileValidationError(mobile, { required: true, label: 'Primary Mobile' });
+    if (primaryErr) {
+      setError(primaryErr);
+      return;
+    }
+    const altErr = getMobileValidationError(altMobile, { label: 'Alternate Mobile' });
+    if (altErr) {
+      setError(altErr);
+      return;
+    }
+    const waErr = getMobileValidationError(whatsapp, { label: 'WhatsApp Number' });
+    if (waErr) {
+      setError(waErr);
+      return;
+    }
+
     setSaving(true);
     try {
       const res = await apiFetch<{ lead: { id: string } }>('/api/leads', {
@@ -221,22 +250,44 @@ export const LeadFormModal: React.FC<LeadFormModalProps> = ({
                 <input
                   type="tel"
                   required
-                  maxLength={10}
                   value={mobile}
-                  onChange={(e) => setMobile(e.target.value.replace(/\D/g, ''))}
+                  onPaste={(e) => {
+                    e.preventDefault();
+                    const pasted = e.clipboardData.getData('text');
+                    const el = e.currentTarget;
+                    const start = el.selectionStart ?? el.value.length;
+                    const end = el.selectionEnd ?? el.value.length;
+                    const nextRaw = el.value.slice(0, start) + pasted + el.value.slice(end);
+                    setMobile(sanitizeIndianMobileInput(nextRaw));
+                  }}
+                  onChange={(e) => setMobile(handleMobileFieldChange(e.target.value, mobile))}
                   placeholder="9825012345"
-                  className="w-full rounded-lg border border-[#E2E8F0] bg-white px-3 py-2 text-sm font-mono-tabular dark:border-[#1E3349] dark:bg-[#0C141E] dark:text-white"
+                  className={`w-full rounded-lg border bg-white px-3 py-2 text-sm font-mono-tabular dark:bg-[#0C141E] dark:text-white ${
+                    mobileLiveError ? 'border-red-500 focus:border-red-500' : 'border-[#E2E8F0] dark:border-[#1E3349]'
+                  }`}
                 />
+                {mobileLiveError && <p className="mt-1 text-[11px] font-medium text-red-600 dark:text-red-400">{mobileLiveError}</p>}
               </div>
               <div>
                 <label className="block text-xs font-medium text-[#404040] dark:text-[#D4D4D4] mb-1">Alternate Mobile</label>
                 <input
                   type="tel"
-                  maxLength={10}
                   value={altMobile}
-                  onChange={(e) => setAltMobile(e.target.value.replace(/\D/g, ''))}
-                  className="w-full rounded-lg border border-[#E2E8F0] bg-white px-3 py-2 text-sm font-mono-tabular dark:border-[#1E3349] dark:bg-[#0C141E] dark:text-white"
+                  onPaste={(e) => {
+                    e.preventDefault();
+                    const pasted = e.clipboardData.getData('text');
+                    const el = e.currentTarget;
+                    const start = el.selectionStart ?? el.value.length;
+                    const end = el.selectionEnd ?? el.value.length;
+                    const nextRaw = el.value.slice(0, start) + pasted + el.value.slice(end);
+                    setAltMobile(sanitizeIndianMobileInput(nextRaw));
+                  }}
+                  onChange={(e) => setAltMobile(handleMobileFieldChange(e.target.value, altMobile))}
+                  className={`w-full rounded-lg border bg-white px-3 py-2 text-sm font-mono-tabular dark:bg-[#0C141E] dark:text-white ${
+                    altMobileLiveError ? 'border-red-500 focus:border-red-500' : 'border-[#E2E8F0] dark:border-[#1E3349]'
+                  }`}
                 />
+                {altMobileLiveError && <p className="mt-1 text-[11px] font-medium text-red-600 dark:text-red-400">{altMobileLiveError}</p>}
               </div>
               <div>
                 <div className="flex items-center justify-between mb-1">
@@ -255,12 +306,23 @@ export const LeadFormModal: React.FC<LeadFormModalProps> = ({
                 </div>
                 <input
                   type="tel"
-                  maxLength={10}
                   value={whatsapp}
-                  onChange={(e) => setWhatsapp(e.target.value.replace(/\D/g, ''))}
+                  onPaste={(e) => {
+                    e.preventDefault();
+                    const pasted = e.clipboardData.getData('text');
+                    const el = e.currentTarget;
+                    const start = el.selectionStart ?? el.value.length;
+                    const end = el.selectionEnd ?? el.value.length;
+                    const nextRaw = el.value.slice(0, start) + pasted + el.value.slice(end);
+                    setWhatsapp(sanitizeIndianMobileInput(nextRaw));
+                  }}
+                  onChange={(e) => setWhatsapp(handleMobileFieldChange(e.target.value, whatsapp))}
                   placeholder="9825012345"
-                  className="w-full rounded-lg border border-[#E2E8F0] bg-white px-3 py-2 text-sm font-mono-tabular dark:border-[#1E3349] dark:bg-[#0C141E] dark:text-white"
+                  className={`w-full rounded-lg border bg-white px-3 py-2 text-sm font-mono-tabular dark:bg-[#0C141E] dark:text-white ${
+                    whatsappLiveError ? 'border-red-500 focus:border-red-500' : 'border-[#E2E8F0] dark:border-[#1E3349]'
+                  }`}
                 />
+                {whatsappLiveError && <p className="mt-1 text-[11px] font-medium text-red-600 dark:text-red-400">{whatsappLiveError}</p>}
               </div>
               <div>
                 <label className="block text-xs font-medium text-[#404040] dark:text-[#D4D4D4] mb-1">Email Address</label>

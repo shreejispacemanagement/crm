@@ -1,6 +1,7 @@
 import { type User, signOut } from 'firebase/auth';
 import { LogOut, Moon, Sun } from 'lucide-react';
 import React, { useState } from 'react';
+import { handleMobileFieldChange, sanitizeIndianMobileInput } from '../lib/api.ts';
 import { signInWithGooglePopup } from '../lib/crmAuth.ts';
 import { bootstrapFirebaseWorkspace } from '../lib/crmSeed.ts';
 import { auth } from '../lib/firebase.ts';
@@ -169,9 +170,12 @@ export const AuthScreen: React.FC<AuthScreenProps> = ({
                   <input
                     type="tel"
                     required
-                    maxLength={10}
                     value={mobile}
-                    onChange={(e) => setMobile(e.target.value.replace(/\D/g, ''))}
+                    onPaste={(e) => {
+                      e.preventDefault();
+                      setMobile(sanitizeIndianMobileInput(e.clipboardData.getData('text')));
+                    }}
+                    onChange={(e) => setMobile(handleMobileFieldChange(e.target.value, mobile))}
                     className="w-full rounded-lg border border-[#E2E8F0] bg-white px-3 py-2 text-sm font-mono-tabular text-[#16273A] focus:border-[#C99B56] focus:outline-none dark:border-[#1E3349] dark:bg-[#0C141E] dark:text-white"
                   />
                 </div>

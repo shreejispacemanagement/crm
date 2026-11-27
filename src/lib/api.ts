@@ -90,43 +90,42 @@ export interface BudgetOption {
 
 export function generateBudgetOptions(transactionType: string): BudgetOption[] {
   const isRent = String(transactionType).trim().toLowerCase() === 'rent';
-  const options: BudgetOption[] = [];
+  const values: number[] = [];
 
   if (isRent) {
-    // Rent: 30,000 to 20 Lakh
-    // In thousands: 30,000 to 1,00,000 with gap of 10,000
-    for (let v = 30000; v <= 100000; v += 10000) {
-      options.push({
-        value: v,
-        label: `₹${v.toLocaleString('en-IN')} (${formatAmountInWords(v)})`,
-      });
-    }
-    // In lakhs: 1,50,000 to 20,00,000 with gap of 50k
-    for (let v = 150000; v <= 2000000; v += 50000) {
-      options.push({
-        value: v,
-        label: `₹${v.toLocaleString('en-IN')} (${formatAmountInWords(v)})`,
-      });
-    }
+    // Rent: 30,000 to 50 Lakh
+    // 30,000 to 1,00,000 with gap of 10,000
+    for (let v = 30000; v <= 100000; v += 10000) values.push(v);
+    // After 1 Lakh up to 5 Lakh with gap of 50,000
+    for (let v = 150000; v <= 500000; v += 50000) values.push(v);
+    // After 5 Lakh up to 10 Lakh with gap of 1 Lakh
+    for (let v = 600000; v <= 1000000; v += 100000) values.push(v);
+    // After 10 Lakh up to 20 Lakh with gap of 2 Lakh
+    for (let v = 1200000; v <= 2000000; v += 200000) values.push(v);
+    // After 20 Lakh up to 50 Lakh with gap of 5 Lakh
+    for (let v = 2500000; v <= 5000000; v += 500000) values.push(v);
   } else {
-    // Sale: 30 Lakh to 20 Crore
-    // In lakhs: 30 Lakh to 1 Crore with gap of 5 Lakhs
-    for (let v = 3000000; v <= 10000000; v += 500000) {
-      options.push({
-        value: v,
-        label: `₹${v.toLocaleString('en-IN')} (${formatAmountInWords(v)})`,
-      });
-    }
-    // In crores: 1.25 Crore to 20 Crore with gap of 25 Lakhs
-    for (let v = 12500000; v <= 200000000; v += 2500000) {
-      options.push({
-        value: v,
-        label: `₹${v.toLocaleString('en-IN')} (${formatAmountInWords(v)})`,
-      });
-    }
+    // Sale & Pre-Leased: 30 Lakh to 100 Crore
+    // 30 Lakh to 1 Crore with gap of 5 Lakhs
+    for (let v = 3000000; v <= 10000000; v += 500000) values.push(v);
+    // After 1 Crore up to 1.50 Crore with gap of 25 Lakhs
+    for (let v = 12500000; v <= 15000000; v += 2500000) values.push(v);
+    // After 1.50 Crore up to 5 Crore with gap of 50 Lakhs
+    for (let v = 20000000; v <= 50000000; v += 5000000) values.push(v);
+    // After 5 Crore up to 10 Crore with gap of 1 Crore
+    for (let v = 60000000; v <= 100000000; v += 10000000) values.push(v);
+    // After 10 Crore up to 20 Crore with gap of 2 Crore
+    for (let v = 120000000; v <= 200000000; v += 20000000) values.push(v);
+    // After 20 Crore up to 50 Crore with gap of 5 Crore
+    for (let v = 250000000; v <= 500000000; v += 50000000) values.push(v);
+    // After 50 Crore up to 100 Crore with gap of 10 Crore
+    for (let v = 600000000; v <= 1000000000; v += 100000000) values.push(v);
   }
 
-  return options;
+  return values.map((v) => ({
+    value: v,
+    label: `₹${v.toLocaleString('en-IN')} (${formatAmountInWords(v)})`,
+  }));
 }
 
 export function formatDateTime(iso: string | null | undefined): string {
@@ -151,4 +150,53 @@ export function formatDateOnly(iso: string | null | undefined): string {
     month: 'short',
     year: 'numeric',
   });
+}
+
+export function sanitizeIndianMobileInput(raw: string): string {
+  const trimmed = String(raw || '').trim();
+  const hasPlus91Prefix = /^\+\s*91/.test(trimmed);
+  let digits = trimmed.replace(/\D/g, '');
+  if (hasPlus91Prefix && digits.startsWith('91')) {
+    digits = digits.slice(2);
+  } else if (digits.length > 10 && digits.startsWith('91')) {
+    digits = digits.slice(2);
+  }
+  return digits;
+}
+
+export function handleMobileFieldChange(raw: string, previousValue: string): string {
+  const trimmed = String(raw || '').trim();
+  const prevDigits = String(previousValue || '').replace(/\D/g, '');
+  const rawDigits = trimmed.replace(/\D/g, '');
+  const isPasteOrBulk =
+    trimmed.includes('+') ||
+    /[^\d]/.test(trimmed) ||
+    Math.abs(rawDigits.length - prevDigits.length) > 1;
+  if (isPasteOrBulk) {
+    return sanitizeIndianMobileInput(raw);
+  }
+  return rawDigits;
+}
+
+export function getMobileValidationError(
+  digits: string,
+  options: { required?: boolean; label?: string; liveOnly?: boolean } = {}
+): string | null {
+  const label = options.label || 'Mobile number';
+  if (!digits) {
+    return options.required && !options.liveOnly ? `${label} is required.` : null;
+  }
+  if (digits.length > 10) {
+    return `${label} cannot be more than 10 digits (${digits.length} digits entered).`;
+  }
+  if (options.liveOnly) {
+    if (digits.length === 10 && !/^[6-9]\d{9}$/.test(digits)) {
+      return `${label} must start with 6, 7, 8, or 9.`;
+    }
+    return null;
+  }
+  if (!/^[6-9]\d{9}$/.test(digits)) {
+    return `${label} must be a valid 10-digit Indian mobile starting with 6-9.`;
+  }
+  return null;
 }

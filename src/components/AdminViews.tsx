@@ -1,6 +1,6 @@
 import { Plus, RotateCcw, Shield, ShieldCheck, Trash2, Upload, UserMinus, UserPlus } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
-import { apiFetch, formatDateOnly, formatDateTime } from '../lib/api.ts';
+import { apiFetch, formatDateOnly, formatDateTime, handleMobileFieldChange, sanitizeIndianMobileInput } from '../lib/api.ts';
 import type {
   AuditLogEntry,
   CompanySettings,
@@ -497,9 +497,12 @@ export const UsersView: React.FC<{
             />
             <input
               type="tel"
-              maxLength={10}
               value={mobile}
-              onChange={(e) => setMobile(e.target.value.replace(/\D/g, ''))}
+              onPaste={(e) => {
+                e.preventDefault();
+                setMobile(sanitizeIndianMobileInput(e.clipboardData.getData('text')));
+              }}
+              onChange={(e) => setMobile(handleMobileFieldChange(e.target.value, mobile))}
               placeholder="10-Digit Mobile"
               className="rounded-lg border border-[#E2E8F0] px-3 py-2 font-mono-tabular dark:border-[#1E3349] dark:bg-[#0C141E] dark:text-white"
             />
@@ -654,9 +657,12 @@ export const UsersView: React.FC<{
             />
             <input
               type="tel"
-              maxLength={10}
               value={editDraft.mobile}
-              onChange={(e) => setEditDraft({ ...editDraft, mobile: e.target.value.replace(/\D/g, '') })}
+              onPaste={(e) => {
+                e.preventDefault();
+                setEditDraft({ ...editDraft, mobile: sanitizeIndianMobileInput(e.clipboardData.getData('text')) });
+              }}
+              onChange={(e) => setEditDraft({ ...editDraft, mobile: handleMobileFieldChange(e.target.value, editDraft.mobile) })}
               placeholder="Mobile"
               className="w-full rounded-lg border border-[#E2E8F0] px-3 py-2 text-xs font-mono-tabular dark:border-[#1E3349] dark:bg-[#0C141E] dark:text-white"
             />
@@ -1147,9 +1153,12 @@ export const ProfileSettingsView: React.FC<{
             <label className="block text-xs font-medium text-[#404040] dark:text-[#D4D4D4] mb-1">10-Digit Mobile</label>
             <input
               type="tel"
-              maxLength={10}
               value={mobile}
-              onChange={(e) => setMobile(e.target.value.replace(/\D/g, ''))}
+              onPaste={(e) => {
+                e.preventDefault();
+                setMobile(sanitizeIndianMobileInput(e.clipboardData.getData('text')));
+              }}
+              onChange={(e) => setMobile(handleMobileFieldChange(e.target.value, mobile))}
               className="w-full rounded-lg border border-[#E2E8F0] px-3 py-2 text-xs font-mono-tabular dark:border-[#1E3349] dark:bg-[#0C141E] dark:text-white"
             />
           </div>

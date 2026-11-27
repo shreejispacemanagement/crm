@@ -12,7 +12,18 @@ import {
   XCircle,
 } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
-import { apiFetch, formatAmountInWords, formatBudgetRange, formatDateOnly, formatDateTime, formatINR, generateBudgetOptions } from '../lib/api.ts';
+import {
+  apiFetch,
+  formatAmountInWords,
+  formatBudgetRange,
+  formatDateOnly,
+  formatDateTime,
+  formatINR,
+  generateBudgetOptions,
+  getMobileValidationError,
+  handleMobileFieldChange,
+  sanitizeIndianMobileInput,
+} from '../lib/api.ts';
 import {
   AREA_UNITS,
   type ActivityRecord,
@@ -186,6 +197,23 @@ export const LeadDetailView: React.FC<LeadDetailViewProps> = ({
 
   const saveEdit = async (section: 'customer' | 'requirement' | 'booking') => {
     setError(null);
+    if (section === 'customer') {
+      const mErr = getMobileValidationError(String(editDraft.mobile || ''), { required: true, label: 'Primary Mobile' });
+      if (mErr) {
+        setError(mErr);
+        return;
+      }
+      const altErr = getMobileValidationError(String(editDraft.alternate_mobile || ''), { label: 'Alternate Mobile' });
+      if (altErr) {
+        setError(altErr);
+        return;
+      }
+      const waErr = getMobileValidationError(String(editDraft.whatsapp || ''), { label: 'WhatsApp Number' });
+      if (waErr) {
+        setError(waErr);
+        return;
+      }
+    }
     try {
       await apiFetch(`/api/leads/${lead.id}`, {
         method: 'PATCH',
@@ -510,22 +538,70 @@ export const LeadDetailView: React.FC<LeadDetailViewProps> = ({
                   className="w-full rounded-lg border border-[#E2E8F0] px-2.5 py-1.5 dark:border-[#1E3349] dark:bg-[#0C141E] dark:text-white"
                 />
                 <div className="grid grid-cols-2 gap-2">
-                  <input
-                    type="tel"
-                    maxLength={10}
-                    value={String(editDraft.mobile || '')}
-                    onChange={(e) => setEditDraft({ ...editDraft, mobile: e.target.value.replace(/\D/g, '') })}
-                    placeholder="Mobile"
-                    className="w-full rounded-lg border border-[#E2E8F0] px-2.5 py-1.5 font-mono-tabular dark:border-[#1E3349] dark:bg-[#0C141E] dark:text-white"
-                  />
-                  <input
-                    type="tel"
-                    maxLength={10}
-                    value={String(editDraft.alternate_mobile || '')}
-                    onChange={(e) => setEditDraft({ ...editDraft, alternate_mobile: e.target.value.replace(/\D/g, '') })}
-                    placeholder="Alternate Mobile"
-                    className="w-full rounded-lg border border-[#E2E8F0] px-2.5 py-1.5 font-mono-tabular dark:border-[#1E3349] dark:bg-[#0C141E] dark:text-white"
-                  />
+                  <div>
+                    <input
+                      type="tel"
+                      value={String(editDraft.mobile || '')}
+                      onPaste={(e) => {
+                        e.preventDefault();
+                        const pasted = e.clipboardData.getData('text');
+                        const el = e.currentTarget;
+                        const start = el.selectionStart ?? el.value.length;
+                        const end = el.selectionEnd ?? el.value.length;
+                        const nextRaw = el.value.slice(0, start) + pasted + el.value.slice(end);
+                        setEditDraft({ ...editDraft, mobile: sanitizeIndianMobileInput(nextRaw) });
+                      }}
+                      onChange={(e) =>
+                        setEditDraft({
+                          ...editDraft,
+                          mobile: handleMobileFieldChange(e.target.value, String(editDraft.mobile || '')),
+                        })
+                      }
+                      placeholder="Mobile"
+                      className={`w-full rounded-lg border px-2.5 py-1.5 font-mono-tabular dark:bg-[#0C141E] dark:text-white ${
+                        getMobileValidationError(String(editDraft.mobile || ''), { required: true, label: 'Primary Mobile', liveOnly: true })
+                          ? 'border-red-500'
+                          : 'border-[#E2E8F0] dark:border-[#1E3349]'
+                      }`}
+                    />
+                    {getMobileValidationError(String(editDraft.mobile || ''), { required: true, label: 'Primary Mobile', liveOnly: true }) && (
+                      <p className="mt-1 text-[10px] font-medium text-red-600 dark:text-red-400">
+                        {getMobileValidationError(String(editDraft.mobile || ''), { required: true, label: 'Primary Mobile', liveOnly: true })}
+                      </p>
+                    )}
+                  </div>
+                  <div>
+                    <input
+                      type="tel"
+                      value={String(editDraft.alternate_mobile || '')}
+                      onPaste={(e) => {
+                        e.preventDefault();
+                        const pasted = e.clipboardData.getData('text');
+                        const el = e.currentTarget;
+                        const start = el.selectionStart ?? el.value.length;
+                        const end = el.selectionEnd ?? el.value.length;
+                        const nextRaw = el.value.slice(0, start) + pasted + el.value.slice(end);
+                        setEditDraft({ ...editDraft, alternate_mobile: sanitizeIndianMobileInput(nextRaw) });
+                      }}
+                      onChange={(e) =>
+                        setEditDraft({
+                          ...editDraft,
+                          alternate_mobile: handleMobileFieldChange(e.target.value, String(editDraft.alternate_mobile || '')),
+                        })
+                      }
+                      placeholder="Alternate Mobile"
+                      className={`w-full rounded-lg border px-2.5 py-1.5 font-mono-tabular dark:bg-[#0C141E] dark:text-white ${
+                        getMobileValidationError(String(editDraft.alternate_mobile || ''), { label: 'Alternate Mobile', liveOnly: true })
+                          ? 'border-red-500'
+                          : 'border-[#E2E8F0] dark:border-[#1E3349]'
+                      }`}
+                    />
+                    {getMobileValidationError(String(editDraft.alternate_mobile || ''), { label: 'Alternate Mobile', liveOnly: true }) && (
+                      <p className="mt-1 text-[10px] font-medium text-red-600 dark:text-red-400">
+                        {getMobileValidationError(String(editDraft.alternate_mobile || ''), { label: 'Alternate Mobile', liveOnly: true })}
+                      </p>
+                    )}
+                  </div>
                 </div>
                 <div className="grid grid-cols-2 gap-2">
                   <div>
@@ -543,12 +619,34 @@ export const LeadDetailView: React.FC<LeadDetailViewProps> = ({
                     </div>
                     <input
                       type="tel"
-                      maxLength={10}
                       value={String(editDraft.whatsapp || '')}
-                      onChange={(e) => setEditDraft({ ...editDraft, whatsapp: e.target.value.replace(/\D/g, '') })}
+                      onPaste={(e) => {
+                        e.preventDefault();
+                        const pasted = e.clipboardData.getData('text');
+                        const el = e.currentTarget;
+                        const start = el.selectionStart ?? el.value.length;
+                        const end = el.selectionEnd ?? el.value.length;
+                        const nextRaw = el.value.slice(0, start) + pasted + el.value.slice(end);
+                        setEditDraft({ ...editDraft, whatsapp: sanitizeIndianMobileInput(nextRaw) });
+                      }}
+                      onChange={(e) =>
+                        setEditDraft({
+                          ...editDraft,
+                          whatsapp: handleMobileFieldChange(e.target.value, String(editDraft.whatsapp || '')),
+                        })
+                      }
                       placeholder="WhatsApp (10 digits)"
-                      className="w-full rounded-lg border border-[#E2E8F0] px-2.5 py-1.5 font-mono-tabular dark:border-[#1E3349] dark:bg-[#0C141E] dark:text-white"
+                      className={`w-full rounded-lg border px-2.5 py-1.5 font-mono-tabular dark:bg-[#0C141E] dark:text-white ${
+                        getMobileValidationError(String(editDraft.whatsapp || ''), { label: 'WhatsApp', liveOnly: true })
+                          ? 'border-red-500'
+                          : 'border-[#E2E8F0] dark:border-[#1E3349]'
+                      }`}
                     />
+                    {getMobileValidationError(String(editDraft.whatsapp || ''), { label: 'WhatsApp', liveOnly: true }) && (
+                      <p className="mt-1 text-[10px] font-medium text-red-600 dark:text-red-400">
+                        {getMobileValidationError(String(editDraft.whatsapp || ''), { label: 'WhatsApp', liveOnly: true })}
+                      </p>
+                    )}
                   </div>
                   <div>
                     <span className="block text-[10px] text-[#737373] mb-1">Email</span>
