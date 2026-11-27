@@ -82,7 +82,7 @@ export function buildDefaultMasterItems(): SeedMasterDef[] {
   push('transaction_type', 1, 'Sale');
   push('transaction_type', 2, 'Rent');
 
-  [
+  const baseLocalities = [
     'Satellite',
     'Prahlad Nagar',
     'Bodakdev',
@@ -107,7 +107,175 @@ export function buildDefaultMasterItems(): SeedMasterDef[] {
     'Ghuma',
     'Nikol',
     'GIFT City',
-  ].forEach((n, i) => push('locality', i + 1, n));
+  ];
+
+  const additionalAhmedabadLocalities = [
+    '100 Feet Road',
+    'Adalaj',
+    'Ambawadi',
+    'Ambli',
+    'Ashram Road',
+    'Bavla',
+    'Bavlu',
+    'Bhadaj',
+    'Bhat',
+    'Bhuyangdev',
+    'Bodakdev',
+    'Bopal',
+    'CG Road',
+    'Chanakyapuri',
+    'Chandkheda',
+    'Chandlodia',
+    'Changodar',
+    'Dholera',
+    'Drive In Road',
+    'Ellisbridge',
+    'Gandhinagar',
+    'Ghatlodia',
+    'Ghuma',
+    'Gift City',
+    'Gota',
+    'Gulbai Tekra',
+    'Gurukul',
+    'Hebatpur Road',
+    'Income Tax',
+    'Iscon Ambli Road',
+    'Jagatpur',
+    'Jivrajpark',
+    'Jodhpur',
+    'Juhapura',
+    'Kalol',
+    'Kasindra',
+    'Koba',
+    'Koteshwar',
+    'Kudasan',
+    'Law Garden',
+    'Makarba',
+    'Manekbaug',
+    'Manipur',
+    'Memnagar',
+    'Mithakhali',
+    'Motera',
+    'Nana Chiloda',
+    'Naranpura',
+    'Navrangpura',
+    'Nehru Nagar',
+    'New CG Road',
+    'New Ranip',
+    'New Wadaj',
+    'Nirnay Nagar',
+    'Ognaj',
+    'Other Area',
+    'Paldi',
+    'Palodia',
+    'Pethapur',
+    'Prahladnagar',
+    'Ramdevnagar',
+    'Rancharda',
+    'Randesan',
+    'Randheja',
+    'Ranip',
+    'Raysan',
+    'Sabarmati',
+    'Sanand',
+    'Sanathal',
+    'Santej',
+    'Sargasan',
+    'Sarkhej',
+    'Satadhar',
+    'Satellite',
+    'Science City',
+    'SG Road',
+    'Shahibaug',
+    'Shastrinagar',
+    'Shela',
+    'Shilaj',
+    'Shivranjani',
+    'Shyamal',
+    'Sindhubhavan Road',
+    'Sola',
+    'South Bopal',
+    'SP Ring Road',
+    'Subhash Bridge',
+    'Sughad',
+    'Surdhara Circle',
+    'Thaltej',
+    'Thol',
+    'Tragad',
+    'Usmanpura',
+    'Vaishno Devi',
+    'Vasna',
+    'Vastrapur',
+    'Vavol',
+    'Vejalpur',
+    'Vijay Cross Road',
+    'Wadaj',
+    'Zundal',
+    'Amraiwadi',
+    'Asarwa',
+    'Bapunagar',
+    'Bhaipura',
+    'CTM',
+    'Dariyapur',
+    'Ghodasar',
+    'Gomtipur',
+    'Hansol',
+    'Hathijan',
+    'Hatkeshwar',
+    'India Colony',
+    'Isanpur',
+    'Jashoda Nagar',
+    'Kankaria',
+    'Kathwada',
+    'Khokhra',
+    'Kubernagar',
+    'Lambha',
+    'Maninagar',
+    'Meghaninagar',
+    'Naroda',
+    'Naroda GIDC',
+    'Nava Naroda',
+    'New Maninagar',
+    'Nikol',
+    'Odhav',
+    'Rabari Colony',
+    'Rakhial',
+    'Ramol',
+    'Saijpur Bogha',
+    'Sardarnagar',
+    'Saraspur',
+    'Thakkarbapa Nagar',
+    'Vastral',
+    'Vatva',
+    'Vatva GIDC',
+    'Vinzol',
+    'Viratnagar',
+  ];
+
+  const seenLocalities = new Set<string>();
+  baseLocalities.forEach((n, i) => {
+    seenLocalities.add(n.trim().toLowerCase());
+    push('locality', i + 1, n);
+  });
+
+  let nextLocalityOrder = baseLocalities.length + 1;
+  for (const name of additionalAhmedabadLocalities) {
+    const key = name.trim().toLowerCase();
+    if (!key || seenLocalities.has(key)) continue;
+    seenLocalities.add(key);
+    const slug = key.replace(/[^a-z0-9]+/g, '_').replace(/^_+|_+$/g, '');
+    items.push({
+      id: `locality_ahm_${slug}`,
+      category: 'locality',
+      name,
+      parent_value: null,
+      sort_order: nextLocalityOrder++,
+      is_active: true,
+      is_terminal: false,
+      terminal_outcome: null,
+      system_key: null,
+    });
+  }
 
   ['1 BHK', '2 BHK', '3 BHK', '4 BHK', '5 BHK'].forEach((n, i) => push('bhk_config', i + 1, n));
 
@@ -133,19 +301,12 @@ export function buildDefaultMasterItems(): SeedMasterDef[] {
   return items;
 }
 
-export async function ensureDefaultMastersSeeded(existingMasters: MasterItem[]): Promise<number> {
-  const existingIds = new Set(existingMasters.map((m) => m.id));
-  const existingNames = new Set(existingMasters.map((m) => `${m.category}::${m.name.trim().toLowerCase()}`));
-
-  const missing = buildDefaultMasterItems().filter(
-    (m) => !existingIds.has(m.id) && !existingNames.has(`${m.category}::${m.name.trim().toLowerCase()}`)
-  );
-
-  if (missing.length === 0) return 0;
-
-  try {
+async function commitMasterItemsChunked(missing: SeedMasterDef[]): Promise<void> {
+  const chunkSize = 400;
+  for (let i = 0; i < missing.length; i += chunkSize) {
+    const slice = missing.slice(i, i + chunkSize);
     const batch = writeBatch(db);
-    for (const m of missing) {
+    for (const m of slice) {
       batch.set(doc(db, 'masters', m.id), {
         id: m.id,
         category: m.category,
@@ -161,6 +322,64 @@ export async function ensureDefaultMastersSeeded(existingMasters: MasterItem[]):
       });
     }
     await batch.commit();
+  }
+}
+
+export async function ensureDefaultMastersSeeded(existingMasters: MasterItem[]): Promise<number> {
+  const existingIds = new Set(existingMasters.map((m) => m.id));
+  const existingNames = new Set(existingMasters.map((m) => `${m.category}::${m.name.trim().toLowerCase()}`));
+
+  const maxOrderByCat = new Map<MasterCategory, number>();
+  for (const m of existingMasters) {
+    maxOrderByCat.set(m.category, Math.max(maxOrderByCat.get(m.category) ?? 0, m.sort_order));
+  }
+
+  const missing = buildDefaultMasterItems()
+    .filter((m) => !existingIds.has(m.id) && !existingNames.has(`${m.category}::${m.name.trim().toLowerCase()}`))
+    .map((m) => {
+      const nextOrder = (maxOrderByCat.get(m.category) ?? 0) + 1;
+      maxOrderByCat.set(m.category, nextOrder);
+      return { ...m, sort_order: existingMasters.length > 0 ? nextOrder : m.sort_order };
+    });
+
+  if (missing.length === 0) return 0;
+
+  try {
+    await commitMasterItemsChunked(missing);
+    return missing.length;
+  } catch (error) {
+    handleFirestoreError(error, OperationType.WRITE, 'masters');
+  }
+}
+
+export async function ensureAdditionalLocalitiesSeeded(existingMasters: MasterItem[]): Promise<number> {
+  const existingIds = new Set(existingMasters.map((m) => m.id));
+  const existingLocalityNames = new Set(
+    existingMasters
+      .filter((m) => m.category === 'locality')
+      .map((m) => m.name.trim().toLowerCase())
+  );
+
+  let nextOrder = existingMasters
+    .filter((m) => m.category === 'locality')
+    .reduce((mx, m) => Math.max(mx, m.sort_order), 0);
+
+  const missing = buildDefaultMasterItems()
+    .filter(
+      (m) =>
+        m.category === 'locality' &&
+        !existingIds.has(m.id) &&
+        !existingLocalityNames.has(m.name.trim().toLowerCase())
+    )
+    .map((m) => {
+      nextOrder += 1;
+      return { ...m, sort_order: nextOrder };
+    });
+
+  if (missing.length === 0) return 0;
+
+  try {
+    await commitMasterItemsChunked(missing);
     return missing.length;
   } catch (error) {
     handleFirestoreError(error, OperationType.WRITE, 'masters');

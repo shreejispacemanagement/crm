@@ -29,7 +29,7 @@ import type {
   UserProfile,
 } from '../types.ts';
 import { mapSettingsDoc, mapUserDoc, tsToIso } from './crmAuth.ts';
-import { ensureDefaultMastersSeeded } from './crmSeed.ts';
+import { ensureAdditionalLocalitiesSeeded, ensureDefaultMastersSeeded } from './crmSeed.ts';
 import { buildSpreadsheetBlob, generateImportTemplateBlob, parseSpreadsheetBase64Client } from './excelClient.ts';
 import { OperationType, auth, db, handleFirestoreError } from './firebase.ts';
 
@@ -1522,7 +1522,28 @@ export async function dispatchCrmRequest<T = unknown>(
     let masters = await fetchMasters();
     if (masters.length === 0 && user.role === 'super_admin') {
       await ensureDefaultMastersSeeded([]);
+      if (typeof window !== 'undefined') {
+        window.localStorage.setItem('ssm_ahm_localities_synced_v2', '1');
+      }
       masters = await fetchMasters();
+    } else if (
+      user.role === 'super_admin' &&
+      typeof window !== 'undefined' &&
+      window.localStorage.getItem('ssm_ahm_localities_synced_v2') !== '1'
+    ) {
+      const added = await ensureAdditionalLocalitiesSeeded(masters);
+      window.localStorage.setItem('ssm_ahm_localities_synced_v2', '1');
+      if (added > 0) {
+        await writeAudit({
+          entityType: 'master',
+          entityId: 'ahm_localities_sync_v2',
+          actionType: 'Created',
+          fieldName: 'locality',
+          newValue: `Added ${added} Ahmedabad localities`,
+          user,
+        });
+        masters = await fetchMasters();
+      }
     }
     return { masters } as T;
   }
