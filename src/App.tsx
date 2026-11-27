@@ -78,6 +78,7 @@ export default function App() {
   // Navigation & UI State
   const [activeNav, setActiveNav] = useState<NavSection>('dashboard');
   const [selectedLeadId, setSelectedLeadId] = useState<string | null>(null);
+  const [leadReturnNav, setLeadReturnNav] = useState<NavSection>('leads');
   const [initialReportKey, setInitialReportKey] = useState<string | undefined>(undefined);
   const [showCreateLead, setShowCreateLead] = useState(false);
   const [showNotifPanel, setShowNotifPanel] = useState(false);
@@ -258,7 +259,12 @@ export default function App() {
     }
   };
 
-  const openLead = (leadId: string) => {
+  const openLead = (leadId: string, fromNav?: NavSection) => {
+    if (!selectedLeadId) {
+      setLeadReturnNav(fromNav ?? activeNav);
+    } else if (fromNav) {
+      setLeadReturnNav(fromNav);
+    }
     setSelectedLeadId(leadId);
     setActiveNav('leads');
     setShowNotifPanel(false);
@@ -554,6 +560,7 @@ export default function App() {
           {activeNav === 'dashboard' && (
             <DashboardView
               user={user}
+              users={users}
               onOpenLead={openLead}
               onCreateLead={() => setShowCreateLead(true)}
               onOpenInactiveReport={() => {
@@ -586,7 +593,21 @@ export default function App() {
               user={user}
               users={users}
               masters={masters}
-              onBack={() => setSelectedLeadId(null)}
+              backLabel={
+                leadReturnNav === 'dashboard'
+                  ? 'Back to Dashboard'
+                  : leadReturnNav === 'calendar'
+                  ? 'Back to Calendar'
+                  : leadReturnNav === 'audit'
+                  ? 'Back to Audit & Logs'
+                  : leadReturnNav === 'deleted'
+                  ? 'Back to Deleted Leads'
+                  : 'Back to Leads'
+              }
+              onBack={() => {
+                setSelectedLeadId(null);
+                setActiveNav(leadReturnNav);
+              }}
               onOpenLead={openLead}
               onMutated={() => {
                 setRefreshSignal((s) => s + 1);

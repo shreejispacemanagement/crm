@@ -21,6 +21,7 @@ import {
   type MasterItem,
   type UserProfile,
 } from '../types.ts';
+import { LeadContactActions } from './LeadContactActions.tsx';
 import { BookingModal, DeadModal } from './StageModals.tsx';
 
 interface LeadsViewProps {
@@ -123,8 +124,8 @@ export const LeadsView: React.FC<LeadsViewProps> = ({
     return qs.toString();
   };
 
-  const fetchLeads = async () => {
-    setLoading(true);
+  const fetchLeads = async (silent = false) => {
+    if (!silent) setLoading(true);
     try {
       const res = await apiFetch<{ leads: LeadRecord[]; total: number }>(
         `/api/leads?${buildQueryString(viewMode === 'kanban')}`
@@ -134,7 +135,7 @@ export const LeadsView: React.FC<LeadsViewProps> = ({
     } catch (err) {
       setActionError((err as Error).message);
     } finally {
-      setLoading(false);
+      if (!silent) setLoading(false);
     }
   };
 
@@ -286,9 +287,17 @@ export const LeadsView: React.FC<LeadsViewProps> = ({
         );
       case 'customer_name':
         return (
-          <div>
-            <div className="font-medium text-[#16273A] dark:text-white">{lead.customer_name}</div>
-            {lead.company_name && <div className="text-[11px] text-[#737373] dark:text-[#A3A3A3]">{lead.company_name}</div>}
+          <div className="flex items-center justify-between gap-3">
+            <div className="min-w-0">
+              <div className="font-medium text-[#16273A] dark:text-white">{lead.customer_name}</div>
+              {lead.company_name && <div className="text-[11px] text-[#737373] dark:text-[#A3A3A3]">{lead.company_name}</div>}
+            </div>
+            <LeadContactActions
+              lead={lead}
+              variant="table"
+              onLogged={() => fetchLeads(true)}
+              onError={(msg) => setActionError(msg)}
+            />
           </div>
         );
       case 'mobile':
@@ -614,6 +623,8 @@ export const LeadsView: React.FC<LeadsViewProps> = ({
               <option value="all_time">All Time</option>
               <option value="today">Today</option>
               <option value="yesterday">Yesterday</option>
+              <option value="this_week">This Week</option>
+              <option value="last_week">Last Week</option>
               <option value="last_7_days">Last 7 Days</option>
               <option value="last_30_days">Last 30 Days</option>
               <option value="this_month">This Month</option>
@@ -876,8 +887,16 @@ export const LeadsView: React.FC<LeadsViewProps> = ({
                           </span>
                         )}
                       </div>
-                      <div className="mt-1 text-xs font-semibold text-[#16273A] dark:text-white truncate">
-                        {lead.customer_name}
+                      <div className="mt-1 flex items-center justify-between gap-2">
+                        <div className="text-xs font-semibold text-[#16273A] dark:text-white truncate">
+                          {lead.customer_name}
+                        </div>
+                        <LeadContactActions
+                          lead={lead}
+                          variant="kanban"
+                          onLogged={() => fetchLeads(true)}
+                          onError={(msg) => setActionError(msg)}
+                        />
                       </div>
                       <div className="mt-1 text-[11px] text-[#525252] dark:text-[#A3A3A3] truncate">
                         {[lead.bhk_config, lead.property_subtype, lead.transaction_type].filter(Boolean).join(' · ')}

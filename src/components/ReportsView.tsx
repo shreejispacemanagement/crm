@@ -10,6 +10,7 @@ interface ReportsViewProps {
 }
 
 const REPORT_CATALOG: Array<{ key: string; label: string; adminOnly?: boolean }> = [
+  { key: 'lead-stage-source', label: 'Lead Stage × Lead Source' },
   { key: 'lead-source', label: 'Lead Source Report' },
   { key: 'lead-stage', label: 'Lead Stage Report' },
   { key: 'employee-performance', label: 'Employee Performance Report' },
@@ -126,6 +127,8 @@ export const ReportsView: React.FC<ReportsViewProps> = ({ user, users, initialRe
           <option value="all_time">All Time</option>
           <option value="today">Today</option>
           <option value="yesterday">Yesterday</option>
+          <option value="this_week">This Week</option>
+          <option value="last_week">Last Week</option>
           <option value="last_7_days">Last 7 Days</option>
           <option value="last_30_days">Last 30 Days</option>
           <option value="this_month">This Month</option>

@@ -24,6 +24,7 @@ import {
   type TimelineEvent,
   type UserProfile,
 } from '../types.ts';
+import { LeadContactActions } from './LeadContactActions.tsx';
 import { BookingModal, DeadModal, ReassignModal, ReopenModal } from './StageModals.tsx';
 
 interface LeadDetailViewProps {
@@ -31,6 +32,7 @@ interface LeadDetailViewProps {
   user: UserProfile;
   users: UserProfile[];
   masters: MasterItem[];
+  backLabel?: string;
   onBack: () => void;
   onOpenLead: (id: string) => void;
   onMutated: () => void;
@@ -41,6 +43,7 @@ export const LeadDetailView: React.FC<LeadDetailViewProps> = ({
   user,
   users,
   masters,
+  backLabel = 'Back to Leads',
   onBack,
   onOpenLead,
   onMutated,
@@ -90,8 +93,8 @@ export const LeadDetailView: React.FC<LeadDetailViewProps> = ({
   const [commDesc, setCommDesc] = useState('');
   const [commNextAction, setCommNextAction] = useState('');
 
-  const load = async () => {
-    setLoading(true);
+  const load = async (silent = false) => {
+    if (!silent) setLoading(true);
     setError(null);
     try {
       const res = await apiFetch<{
@@ -111,7 +114,7 @@ export const LeadDetailView: React.FC<LeadDetailViewProps> = ({
     } catch (err) {
       setError((err as Error).message);
     } finally {
-      setLoading(false);
+      if (!silent) setLoading(false);
     }
   };
 
@@ -142,7 +145,7 @@ export const LeadDetailView: React.FC<LeadDetailViewProps> = ({
       <div className="rounded-xl border border-red-500/30 bg-white p-6 dark:bg-[#121E2C]">
         <p className="text-sm font-medium text-red-700 dark:text-red-300">{error}</p>
         <button type="button" onClick={onBack} className="mt-3 text-xs font-semibold text-[#C99B56] hover:underline">
-          ← Back to Leads
+          ← {backLabel}
         </button>
       </div>
     );
@@ -330,11 +333,20 @@ export const LeadDetailView: React.FC<LeadDetailViewProps> = ({
               onClick={onBack}
               className="inline-flex items-center gap-1 text-xs font-medium text-[#737373] hover:text-[#C99B56] mb-1"
             >
-              <ArrowLeft className="h-3.5 w-3.5" /> Back to Leads
+              <ArrowLeft className="h-3.5 w-3.5" /> {backLabel}
             </button>
             <div className="flex flex-wrap items-center gap-2.5">
               <span className="font-mono-tabular text-sm font-bold text-[#C99B56]">{lead.lead_code}</span>
               <h1 className="text-xl font-bold text-[#16273A] dark:text-white">{lead.customer_name}</h1>
+              <LeadContactActions
+                lead={lead}
+                variant="detail"
+                onLogged={async () => {
+                  await load(true);
+                  onMutated();
+                }}
+                onError={(msg) => setError(msg)}
+              />
               {lead.is_inactive === 1 && (
                 <span className="rounded bg-amber-100 px-2 py-0.5 text-xs font-semibold text-amber-900 dark:bg-amber-950/60 dark:text-amber-300">
                   Inactive ({lead.inactive_days}d)

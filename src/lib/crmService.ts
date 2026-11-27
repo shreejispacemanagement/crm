@@ -63,6 +63,17 @@ export function resolveDateRange(
       const y = new Date(now.getTime() - 86400000);
       return { start: startOfDay(y).toISOString(), end: endOfDay(y).toISOString() };
     }
+    case 'this_week': {
+      const dayIndex = (now.getDay() + 6) % 7; // Monday = 0, Sunday = 6
+      const s = new Date(now.getFullYear(), now.getMonth(), now.getDate() - dayIndex);
+      return { start: startOfDay(s).toISOString(), end: endOfDay(now).toISOString() };
+    }
+    case 'last_week': {
+      const dayIndex = (now.getDay() + 6) % 7;
+      const s = new Date(now.getFullYear(), now.getMonth(), now.getDate() - dayIndex - 7);
+      const e = new Date(now.getFullYear(), now.getMonth(), now.getDate() - dayIndex - 1);
+      return { start: startOfDay(s).toISOString(), end: endOfDay(e).toISOString() };
+    }
     case 'last_7_days': {
       const s = new Date(now.getTime() - 6 * 86400000);
       return { start: startOfDay(s).toISOString(), end: endOfDay(now).toISOString() };
@@ -1006,6 +1017,56 @@ function buildReportData(
             return sa - sb;
           })
           .map(([st, v]) => [st, v.total, v.inactive]),
+      };
+    }
+
+    case 'lead-stage-source': {
+      const activeStages = masters
+        .filter((m) => m.category === 'lead_stage' && m.is_active === 1)
+        .sort((a, b) => a.sort_order - b.sort_order)
+        .map((m) => m.name);
+      const stageList = [...activeStages];
+      for (const l of scopedLeads) {
+        if (l.stage && !stageList.includes(l.stage)) stageList.push(l.stage);
+      }
+
+      const activeSources = masters
+        .filter((m) => m.category === 'lead_source' && m.is_active === 1)
+        .sort((a, b) => a.sort_order - b.sort_order)
+        .map((m) => m.name);
+      const sourceList = [...activeSources];
+      for (const l of scopedLeads) {
+        const src = l.lead_source || 'Unspecified';
+        if (!sourceList.includes(src)) sourceList.push(src);
+      }
+
+      const counts = new Map<string, number>();
+      for (const l of scopedLeads) {
+        const st = l.stage || 'Unspecified';
+        const src = l.lead_source || 'Unspecified';
+        const key = `${st}|||${src}`;
+        counts.set(key, (counts.get(key) || 0) + 1);
+      }
+
+      const colTotals = sourceList.map(() => 0);
+      let grandTotal = 0;
+      const matrixRows: Array<Array<string | number | null>> = stageList.map((st) => {
+        let rowTotal = 0;
+        const cells = sourceList.map((src, idx) => {
+          const val = counts.get(`${st}|||${src}`) || 0;
+          rowTotal += val;
+          colTotals[idx] += val;
+          return val;
+        });
+        grandTotal += rowTotal;
+        return [st, ...cells, rowTotal];
+      });
+      matrixRows.push(['Total', ...colTotals, grandTotal]);
+
+      return {
+        title: 'Lead Stage × Lead Source Report',
+        columns: ['Lead Stage', ...sourceList, 'Total'],
+        rows: matrixRows,
       };
     }
 
@@ -3167,6 +3228,16 @@ export async function dispatchCrmRequest<T = unknown>(
       count: dateLeads.filter((l) => l.stage === st.name).length,
     }));
 
+    const activeSourceNames = masters
+      .filter((m) => m.category === 'lead_source' && m.is_active === 1)
+      .sort((a, b) => a.sort_order - b.sort_order)
+      .map((m) => m.name);
+    const sourcesList = [...activeSourceNames];
+    for (const l of dateLeads) {
+      const src = l.lead_source || 'Unspecified';
+      if (!sourcesList.includes(src)) sourcesList.push(src);
+    }
+
     const sourceMap = new Map<string, number>();
     for (const l of dateLeads) sourceMap.set(l.lead_source, (sourceMap.get(l.lead_source) || 0) + 1);
     const sourceDistribution = Array.from(sourceMap.entries())
@@ -3186,37 +3257,41 @@ export async function dispatchCrmRequest<T = unknown>(
       .sort((a, b) => a.scheduled_at.localeCompare(b.scheduled_at))
       .slice(0, 8);
 
-    const employeeAllocation =
+    const allocTeam =
       user.role === 'super_admin'
-        ? team
-            .filter((u) => u.status === 'active')
-            .map((e) => {
-              const eLeads = dateLeads.filter(
-                (l) => l.assigned_to === e.id || (l.assigned_to_email || '').toLowerCase() === e.email.toLowerCase()
-              );
-              return {
-                id: e.id,
-                full_name: e.full_name,
-                designation: e.designation,
-                total_leads: eLeads.length,
-                active_leads: eLeads.filter((l) => l.stage !== 'Booking Done' && l.stage !== 'Dead').length,
-                won_leads: eLeads.filter((l) => l.stage === 'Booking Done').length,
-              };
-            })
+        ? empFilter
+          ? [empFilter]
+          : team.filter((u) => u.status === 'active')
         : [];
+
+    const employeeAllocation = allocTeam.map((e) => {
+      const eLeads = dateLeads.filter(
+        (l) => l.assigned_to === e.id || (l.assigned_to_email || '').toLowerCase() === e.email.toLowerCase()
+      );
+      return {
+        id: e.id,
+        full_name: e.full_name,
+        email: e.email,
+        designation: e.designation,
+        total_leads: eLeads.length,
+        active_leads: eLeads.filter((l) => l.stage !== 'Booking Done' && l.stage !== 'Dead').length,
+        won_leads: eLeads.filter((l) => l.stage === 'Booking Done').length,
+      };
+    });
 
     const inactiveLeads = nonDeleted
       .filter((l) => l.is_inactive === 1)
       .sort((a, b) => a.last_qualifying_interaction_at.localeCompare(b.last_qualifying_interaction_at))
-      .slice(0, 20)
       .map((l) => ({
         id: l.id,
         lead_code: l.lead_code,
         customer_name: l.customer_name,
         mobile: l.mobile,
         stage: l.stage,
+        lead_source: l.lead_source,
         last_qualifying_interaction_at: l.last_qualifying_interaction_at,
         last_interaction_type: l.last_interaction_type,
+        assigned_to: l.assigned_to,
         assigned_to_name: l.assigned_to_name || '',
       }));
 
@@ -3226,6 +3301,7 @@ export async function dispatchCrmRequest<T = unknown>(
       lead_id: string;
       lead_code: string;
       customer_name: string;
+      customer_mobile: string;
       event_type: string;
       description: string;
       employee_name: string;
@@ -3246,20 +3322,51 @@ export async function dispatchCrmRequest<T = unknown>(
             lead_id: lid,
             lead_code: String(r.lead_code || matchedLead?.lead_code || ''),
             customer_name: matchedLead?.customer_name || String(r.entity_type || 'System'),
+            customer_mobile: matchedLead?.mobile || '',
             event_type: String(r.action_type || ''),
             description: desc,
             employee_name: String(r.employee_name || 'System'),
             created_at: tsToIso(r.createdAt),
+            _ownerMatch: matchedLead ? matchLeadOwner(matchedLead) : true,
           };
         })
-        .filter((x) => Boolean(x.lead_id))
+        .filter((x) => Boolean(x.lead_id) && x._ownerMatch)
         .sort((a, b) => b.created_at.localeCompare(a.created_at))
-        .slice(0, 12);
+        .slice(0, 12)
+        .map(({ _ownerMatch: _om, ...rest }) => rest);
     }
 
     const recentlyUpdatedLeads = [...nonDeleted]
       .sort((a, b) => b.updated_at.localeCompare(a.updated_at))
       .slice(0, 10);
+
+    const filteredLeads = [...dateLeads]
+      .sort((a, b) => b.created_at.localeCompare(a.created_at))
+      .map((l) => ({
+        id: l.id,
+        lead_code: l.lead_code,
+        customer_name: l.customer_name,
+        mobile: l.mobile,
+        stage: l.stage,
+        lead_source: l.lead_source || 'Unspecified',
+        assigned_to: l.assigned_to,
+        assigned_to_email: l.assigned_to_email || '',
+        assigned_to_name: l.assigned_to_name || '',
+        is_inactive: l.is_inactive,
+        created_at: l.created_at,
+        updated_at: l.updated_at,
+      }));
+
+    const leadCodeMap: Record<string, { id: string; customer_name: string; mobile: string }> = {};
+    for (const l of leadsAll) {
+      if (l.is_deleted === 0 && l.lead_code) {
+        leadCodeMap[l.lead_code] = {
+          id: l.id,
+          customer_name: l.customer_name,
+          mobile: l.mobile,
+        };
+      }
+    }
 
     return {
       cards: {
@@ -3271,6 +3378,9 @@ export async function dispatchCrmRequest<T = unknown>(
       },
       sourceDistribution,
       stageDistribution,
+      sourcesList,
+      filteredLeads,
+      leadCodeMap,
       employeeAllocation,
       todaysActivities,
       overdueActivities,
