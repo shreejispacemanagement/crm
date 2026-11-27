@@ -583,6 +583,9 @@ export default function App() {
               onSettingsUpdated={setSettings}
               onOpenLead={openLead}
               onCreateLead={() => setShowCreateLead(true)}
+              onWorkspaceRefresh={() => {
+                loadWorkspaceMeta();
+              }}
               refreshSignal={refreshSignal}
             />
           )}

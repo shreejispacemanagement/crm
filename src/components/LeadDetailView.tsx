@@ -4,11 +4,13 @@ import {
   CalendarPlus,
   CheckCircle2,
   Edit3,
+  Maximize2,
   MessageSquarePlus,
   RefreshCw,
   RotateCcw,
   Trash2,
   UserCheck,
+  X,
   XCircle,
 } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
@@ -43,8 +45,10 @@ interface LeadDetailViewProps {
   user: UserProfile;
   users: UserProfile[];
   masters: MasterItem[];
+  variant?: 'page' | 'drawer';
   backLabel?: string;
   onBack: () => void;
+  onSwitchToFullPage?: () => void;
   onOpenLead: (id: string) => void;
   onMutated: () => void;
 }
@@ -54,11 +58,14 @@ export const LeadDetailView: React.FC<LeadDetailViewProps> = ({
   user,
   users,
   masters,
+  variant = 'page',
   backLabel = 'Back to Leads',
   onBack,
+  onSwitchToFullPage,
   onOpenLead,
   onMutated,
 }) => {
+  const isDrawer = variant === 'drawer';
   const [lead, setLead] = useState<LeadRecord | null>(null);
   const [activities, setActivities] = useState<ActivityRecord[]>([]);
   const [communications, setCommunications] = useState<CommunicationRecord[]>([]);
@@ -130,6 +137,14 @@ export const LeadDetailView: React.FC<LeadDetailViewProps> = ({
   };
 
   useEffect(() => {
+    setEditingCustomer(false);
+    setEditingRequirement(false);
+    setEditingBooking(false);
+    setShowActForm(false);
+    setShowCommForm(false);
+    setCompletingAct(null);
+    setReschedulingAct(null);
+    setCancellingAct(null);
     load();
   }, [leadId]);
 
@@ -353,19 +368,50 @@ export const LeadDetailView: React.FC<LeadDetailViewProps> = ({
   return (
     <div className="space-y-5">
       {/* Header Bar */}
-      <div className="rounded-xl border border-[#E2E8F0] bg-white p-5 dark:border-[#1E3349] dark:bg-[#121E2C]">
-        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
-          <div className="space-y-1">
-            <button
-              type="button"
-              onClick={onBack}
-              className="inline-flex items-center gap-1 text-xs font-medium text-[#737373] hover:text-[#C99B56] mb-1"
-            >
-              <ArrowLeft className="h-3.5 w-3.5" /> {backLabel}
-            </button>
+      <div className="rounded-xl border border-[#E2E8F0] bg-white p-4 sm:p-5 dark:border-[#1E3349] dark:bg-[#121E2C]">
+        <div className={`flex flex-col ${isDrawer ? 'gap-3' : 'lg:flex-row lg:items-center justify-between gap-4'}`}>
+          <div className="space-y-1 min-w-0">
+            <div className="flex items-center justify-between gap-2 mb-1">
+              {!isDrawer ? (
+                <button
+                  type="button"
+                  onClick={onBack}
+                  className="inline-flex items-center gap-1 text-xs font-medium text-[#737373] hover:text-[#C99B56]"
+                >
+                  <ArrowLeft className="h-3.5 w-3.5" /> {backLabel}
+                </button>
+              ) : (
+                <span className="text-[11px] font-semibold uppercase tracking-wider text-[#C99B56]">
+                  Quick Lead Drawer
+                </span>
+              )}
+
+              {isDrawer && (
+                <div className="flex items-center gap-1.5 shrink-0">
+                  {onSwitchToFullPage && (
+                    <button
+                      type="button"
+                      onClick={onSwitchToFullPage}
+                      title="Open Full Detail View"
+                      className="inline-flex items-center gap-1 rounded-lg border border-[#E2E8F0] px-2.5 py-1 text-[11px] font-medium text-[#16273A] hover:bg-[#FBF6EE] dark:border-[#1E3349] dark:text-white dark:hover:bg-[#1A2C40]"
+                    >
+                      <Maximize2 className="h-3 w-3" /> Full Page
+                    </button>
+                  )}
+                  <button
+                    type="button"
+                    onClick={onBack}
+                    aria-label="Close lead drawer"
+                    className="inline-flex items-center justify-center rounded-lg border border-[#E2E8F0] p-1.5 text-[#737373] hover:bg-[#FBF6EE] hover:text-[#16273A] dark:border-[#1E3349] dark:text-[#A3A3A3] dark:hover:bg-[#1A2C40] dark:hover:text-white"
+                  >
+                    <X className="h-4 w-4" />
+                  </button>
+                </div>
+              )}
+            </div>
             <div className="flex flex-wrap items-center gap-2.5">
               <span className="font-mono-tabular text-sm font-bold text-[#C99B56]">{lead.lead_code}</span>
-              <h1 className="text-xl font-bold text-[#16273A] dark:text-white">{lead.customer_name}</h1>
+              <h1 className="text-lg sm:text-xl font-bold text-[#16273A] dark:text-white">{lead.customer_name}</h1>
               <LeadContactActions
                 lead={lead}
                 variant="detail"
@@ -497,10 +543,10 @@ export const LeadDetailView: React.FC<LeadDetailViewProps> = ({
         )}
       </div>
 
-      {/* Main 2-Column Content */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
+      {/* Main Content (2-Column in Full Page, Stacked Activity-First in Drawer) */}
+      <div className={isDrawer ? 'flex flex-col gap-4' : 'grid grid-cols-1 lg:grid-cols-12 gap-5'}>
         {/* Left Column: Customer, Requirement, Booking/Dead Details */}
-        <div className="lg:col-span-5 space-y-5">
+        <div className={isDrawer ? 'order-2 space-y-4' : 'lg:col-span-5 space-y-5'}>
           {/* Customer Details */}
           <div className="rounded-xl border border-[#E2E8F0] bg-white p-5 dark:border-[#1E3349] dark:bg-[#121E2C]">
             <div className="flex items-center justify-between mb-3">
@@ -1202,7 +1248,7 @@ export const LeadDetailView: React.FC<LeadDetailViewProps> = ({
         </div>
 
         {/* Right Column: Upcoming Activities, Quick Actions & Timeline/Audit Tabs */}
-        <div className="lg:col-span-7 space-y-5">
+        <div className={isDrawer ? 'order-1 space-y-4' : 'lg:col-span-7 space-y-5'}>
           {/* Quick Action Buttons + Upcoming Activities */}
           <div className="rounded-xl border border-[#E2E8F0] bg-white p-5 dark:border-[#1E3349] dark:bg-[#121E2C]">
             <div className="flex flex-wrap items-center justify-between gap-2 mb-4">

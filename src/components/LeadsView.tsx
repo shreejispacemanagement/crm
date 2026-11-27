@@ -5,6 +5,8 @@ import {
   Download,
   Filter,
   Kanban,
+  Maximize2,
+  PanelRightOpen,
   Plus,
   RotateCcw,
   Search,
@@ -22,7 +24,10 @@ import {
   type UserProfile,
 } from '../types.ts';
 import { LeadContactActions } from './LeadContactActions.tsx';
+import { LeadDetailView } from './LeadDetailView.tsx';
 import { BookingModal, DeadModal } from './StageModals.tsx';
+
+type LeadOpenMode = 'drawer' | 'detail';
 
 interface LeadsViewProps {
   user: UserProfile;
@@ -33,6 +38,7 @@ interface LeadsViewProps {
   onSettingsUpdated: (s: CompanySettings) => void;
   onOpenLead: (leadId: string) => void;
   onCreateLead: () => void;
+  onWorkspaceRefresh?: () => void;
   refreshSignal: number;
 }
 
@@ -45,11 +51,59 @@ export const LeadsView: React.FC<LeadsViewProps> = ({
   onSettingsUpdated,
   onOpenLead,
   onCreateLead,
+  onWorkspaceRefresh,
   refreshSignal,
 }) => {
   const [viewMode, setViewMode] = useState<LeadViewMode>(user.lead_view_preference || 'table');
+  const openModeStorageKey = `ssm_lead_open_mode_${user.id}`;
+  const [leadOpenMode, setLeadOpenMode] = useState<LeadOpenMode>(() => {
+    try {
+      const saved = window.localStorage.getItem(`ssm_lead_open_mode_${user.id}`);
+      return saved === 'detail' ? 'detail' : 'drawer';
+    } catch {
+      return 'drawer';
+    }
+  });
+  const [drawerLeadId, setDrawerLeadId] = useState<string | null>(null);
   const [pageSize, setPageSize] = useState<number>(user.page_size_preference || 25);
   const [page, setPage] = useState(1);
+
+  useEffect(() => {
+    try {
+      const saved = window.localStorage.getItem(openModeStorageKey);
+      if (saved === 'drawer' || saved === 'detail') {
+        setLeadOpenMode(saved);
+      }
+    } catch {
+      // ignore
+    }
+  }, [openModeStorageKey]);
+
+  useEffect(() => {
+    if (!drawerLeadId) return;
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setDrawerLeadId(null);
+    };
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, [drawerLeadId]);
+
+  const handleSwitchOpenMode = (mode: LeadOpenMode) => {
+    setLeadOpenMode(mode);
+    try {
+      window.localStorage.setItem(openModeStorageKey, mode);
+    } catch {
+      // ignore
+    }
+  };
+
+  const handleSelectLead = (leadId: string) => {
+    if (leadOpenMode === 'drawer') {
+      setDrawerLeadId(leadId);
+    } else {
+      onOpenLead(leadId);
+    }
+  };
 
   const initialCols =
     user.table_columns_preference && user.table_columns_preference.length > 0
@@ -360,7 +414,7 @@ export const LeadsView: React.FC<LeadsViewProps> = ({
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
-          {/* View Toggle */}
+          {/* List Layout Toggle */}
           <div className="inline-flex rounded-lg border border-[#E2E8F0] bg-white p-0.5 dark:border-[#1E3349] dark:bg-[#121E2C]">
             <button
               type="button"
@@ -383,6 +437,35 @@ export const LeadsView: React.FC<LeadsViewProps> = ({
               }`}
             >
               <Kanban className="h-3.5 w-3.5" /> Kanban
+            </button>
+          </div>
+
+          {/* Saved Lead Open Mode Toggle (Drawer View vs Detail View) */}
+          <div
+            title="Saved preference: choose whether clicking a lead opens Quick Drawer View or Full Detail View"
+            className="inline-flex items-center rounded-lg border border-[#E2E8F0] bg-white p-0.5 dark:border-[#1E3349] dark:bg-[#121E2C]"
+          >
+            <button
+              type="button"
+              onClick={() => handleSwitchOpenMode('drawer')}
+              className={`inline-flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-xs font-medium whitespace-nowrap transition-colors ${
+                leadOpenMode === 'drawer'
+                  ? 'bg-[#16273A] text-white dark:bg-[#C99B56] dark:text-[#16273A]'
+                  : 'text-[#525252] hover:text-[#16273A] dark:text-[#A3A3A3] dark:hover:text-white'
+              }`}
+            >
+              <PanelRightOpen className="h-3.5 w-3.5" /> Drawer View
+            </button>
+            <button
+              type="button"
+              onClick={() => handleSwitchOpenMode('detail')}
+              className={`inline-flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-xs font-medium whitespace-nowrap transition-colors ${
+                leadOpenMode === 'detail'
+                  ? 'bg-[#16273A] text-white dark:bg-[#C99B56] dark:text-[#16273A]'
+                  : 'text-[#525252] hover:text-[#16273A] dark:text-[#A3A3A3] dark:hover:text-white'
+              }`}
+            >
+              <Maximize2 className="h-3.5 w-3.5" /> Detail View
             </button>
           </div>
 
@@ -791,8 +874,10 @@ export const LeadsView: React.FC<LeadsViewProps> = ({
                   leads.map((lead) => (
                     <tr
                       key={lead.id}
-                      onClick={() => onOpenLead(lead.id)}
-                      className="cursor-pointer hover:bg-[#FBF6EE]/40 dark:hover:bg-[#1A2C40] transition-colors"
+                      onClick={() => handleSelectLead(lead.id)}
+                      className={`cursor-pointer hover:bg-[#FBF6EE]/40 dark:hover:bg-[#1A2C40] transition-colors ${
+                        drawerLeadId === lead.id ? 'bg-[#FBF6EE]/60 dark:bg-[#1A2C40]/80' : ''
+                      }`}
                     >
                       {columns.map((key) => (
                         <td key={key} className="px-4 py-3 whitespace-nowrap">
@@ -876,8 +961,10 @@ export const LeadsView: React.FC<LeadsViewProps> = ({
                       key={lead.id}
                       draggable={!(stage.is_terminal === 1)}
                       onDragStart={() => setDraggedLead(lead)}
-                      onClick={() => onOpenLead(lead.id)}
-                      className="cursor-pointer rounded-lg border border-[#E2E8F0] bg-white p-3 hover:border-[#C99B56] dark:border-[#1E3349] dark:bg-[#1B1B1B] dark:hover:border-[#C99B56] transition-colors"
+                      onClick={() => handleSelectLead(lead.id)}
+                      className={`cursor-pointer rounded-lg border bg-white p-3 hover:border-[#C99B56] dark:bg-[#1B1B1B] dark:hover:border-[#C99B56] transition-colors ${
+                        drawerLeadId === lead.id ? 'border-[#C99B56] ring-1 ring-[#C99B56]' : 'border-[#E2E8F0] dark:border-[#1E3349]'
+                      }`}
                     >
                       <div className="flex items-center justify-between gap-2 text-[11px]">
                         <span className="font-mono-tabular font-semibold text-[#C99B56]">{lead.lead_code}</span>
@@ -947,6 +1034,36 @@ export const LeadsView: React.FC<LeadsViewProps> = ({
             fetchLeads();
           }}
         />
+      )}
+
+      {/* Slide-Over Quick Lead Drawer */}
+      {drawerLeadId && (
+        <div className="fixed inset-0 z-50 flex justify-end">
+          <div
+            className="fixed inset-0 bg-black/50 backdrop-blur-[1px]"
+            onClick={() => setDrawerLeadId(null)}
+          />
+          <div className="relative z-10 h-full w-full max-w-2xl lg:max-w-[780px] overflow-y-auto border-l border-[#E2E8F0] bg-[#F8FAFC] p-4 sm:p-5 shadow-2xl dark:border-[#1E3349] dark:bg-[#0C141E]">
+            <LeadDetailView
+              leadId={drawerLeadId}
+              user={user}
+              users={users}
+              masters={masters}
+              variant="drawer"
+              onBack={() => setDrawerLeadId(null)}
+              onSwitchToFullPage={() => {
+                const targetId = drawerLeadId;
+                setDrawerLeadId(null);
+                onOpenLead(targetId);
+              }}
+              onOpenLead={(nextId) => setDrawerLeadId(nextId)}
+              onMutated={() => {
+                fetchLeads(true);
+                onWorkspaceRefresh?.();
+              }}
+            />
+          </div>
+        </div>
       )}
     </div>
   );
