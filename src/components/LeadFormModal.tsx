@@ -5,7 +5,9 @@ import {
   formatAmountInWords,
   formatDateOnly,
   generateBudgetOptions,
+  getDefaultAreaUnitForSubtype,
   getMobileValidationError,
+  getSubtypeAreaMode,
   handleMobileFieldChange,
   sanitizeIndianMobileInput,
 } from '../lib/api.ts';
@@ -82,7 +84,11 @@ export const LeadFormModal: React.FC<LeadFormModalProps> = ({
   const [budgetTo, setBudgetTo] = useState('');
   const [minArea, setMinArea] = useState('');
   const [maxArea, setMaxArea] = useState('');
-  const [areaUnit, setAreaUnit] = useState<string>('Sq. Ft.');
+  const [minPlotArea, setMinPlotArea] = useState('');
+  const [maxPlotArea, setMaxPlotArea] = useState('');
+  const [minConstructionArea, setMinConstructionArea] = useState('');
+  const [maxConstructionArea, setMaxConstructionArea] = useState('');
+  const [areaUnit, setAreaUnit] = useState<string>(() => getDefaultAreaUnitForSubtype(subtypes[0]?.name || ''));
 
   const [bhkConfig, setBhkConfig] = useState('');
   const [commercialConfig, setCommercialConfig] = useState('');
@@ -105,9 +111,13 @@ export const LeadFormModal: React.FC<LeadFormModalProps> = ({
 
   const budgetOptions = useMemo(() => generateBudgetOptions(transactionType), [transactionType]);
 
+  const areaMode = getSubtypeAreaMode(propertySubtype);
+
   useEffect(() => {
     if (subtypes.length > 0 && !subtypes.some((s) => s.name === propertySubtype)) {
-      setPropertySubtype(subtypes[0].name);
+      const nextSubtype = subtypes[0].name;
+      setPropertySubtype(nextSubtype);
+      setAreaUnit(getDefaultAreaUnitForSubtype(nextSubtype));
     }
   }, [propertyType, subtypes, propertySubtype]);
 
@@ -162,6 +172,13 @@ export const LeadFormModal: React.FC<LeadFormModalProps> = ({
       return;
     }
 
+    const hasAnyArea =
+      areaMode === 'plot_and_construction'
+        ? Boolean(minPlotArea || maxPlotArea || minConstructionArea || maxConstructionArea)
+        : areaMode === 'plot_only'
+        ? Boolean(minPlotArea || maxPlotArea)
+        : Boolean(minArea || maxArea);
+
     setSaving(true);
     try {
       const res = await apiFetch<{ lead: { id: string } }>('/api/leads', {
@@ -182,9 +199,13 @@ export const LeadFormModal: React.FC<LeadFormModalProps> = ({
           localities: selectedLocalities,
           budget_from: budgetFrom ? Number(budgetFrom) : null,
           budget_to: budgetTo ? Number(budgetTo) : null,
-          min_area: minArea ? Number(minArea) : null,
-          max_area: maxArea ? Number(maxArea) : null,
-          area_unit: minArea || maxArea ? areaUnit : null,
+          min_area: areaMode === 'standard' && minArea ? Number(minArea) : null,
+          max_area: areaMode === 'standard' && maxArea ? Number(maxArea) : null,
+          min_plot_area: areaMode !== 'standard' && minPlotArea ? Number(minPlotArea) : null,
+          max_plot_area: areaMode !== 'standard' && maxPlotArea ? Number(maxPlotArea) : null,
+          min_construction_area: areaMode === 'plot_and_construction' && minConstructionArea ? Number(minConstructionArea) : null,
+          max_construction_area: areaMode === 'plot_and_construction' && maxConstructionArea ? Number(maxConstructionArea) : null,
+          area_unit: hasAnyArea ? areaUnit : null,
           bhk_config: propertyType === 'Residential' ? bhkConfig || null : null,
           commercial_config: propertyType === 'Commercial' ? commercialConfig || null : null,
           furnishing_type: furnishingType || null,
@@ -464,7 +485,11 @@ export const LeadFormModal: React.FC<LeadFormModalProps> = ({
                 <label className="block text-xs font-medium text-[#404040] dark:text-[#D4D4D4] mb-1">Property Subtype *</label>
                 <select
                   value={propertySubtype}
-                  onChange={(e) => setPropertySubtype(e.target.value)}
+                  onChange={(e) => {
+                    const nextSubtype = e.target.value;
+                    setPropertySubtype(nextSubtype);
+                    setAreaUnit(getDefaultAreaUnitForSubtype(nextSubtype));
+                  }}
                   className="w-full rounded-lg border border-[#E2E8F0] bg-white px-3 py-2 text-sm dark:border-[#1E3349] dark:bg-[#0C141E] dark:text-white"
                 >
                   {subtypes.map((s) => (
@@ -630,45 +655,149 @@ export const LeadFormModal: React.FC<LeadFormModalProps> = ({
               </div>
             </div>
 
-            {/* Area */}
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mt-3.5">
-              <div>
-                <label className="block text-xs font-medium text-[#404040] dark:text-[#D4D4D4] mb-1">Min Area</label>
-                <input
-                  type="number"
-                  min={0}
-                  value={minArea}
-                  onChange={(e) => setMinArea(e.target.value)}
-                  className="w-full rounded-lg border border-[#E2E8F0] bg-white px-3 py-2 text-sm font-mono-tabular dark:border-[#1E3349] dark:bg-[#0C141E] dark:text-white"
-                />
+            {/* Area (Conditional by Property Subtype) */}
+            {areaMode === 'plot_and_construction' ? (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 mt-3.5">
+                <div>
+                  <label className="block text-xs font-medium text-[#404040] dark:text-[#D4D4D4] mb-1">Min Plot Area</label>
+                  <input
+                    type="number"
+                    min={0}
+                    value={minPlotArea}
+                    onChange={(e) => setMinPlotArea(e.target.value)}
+                    className="w-full rounded-lg border border-[#E2E8F0] bg-white px-3 py-2 text-sm font-mono-tabular dark:border-[#1E3349] dark:bg-[#0C141E] dark:text-white"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-[#404040] dark:text-[#D4D4D4] mb-1">Max Plot Area</label>
+                  <input
+                    type="number"
+                    min={0}
+                    value={maxPlotArea}
+                    onChange={(e) => setMaxPlotArea(e.target.value)}
+                    className="w-full rounded-lg border border-[#E2E8F0] bg-white px-3 py-2 text-sm font-mono-tabular dark:border-[#1E3349] dark:bg-[#0C141E] dark:text-white"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-[#404040] dark:text-[#D4D4D4] mb-1">
+                    Min Construction Area
+                  </label>
+                  <input
+                    type="number"
+                    min={0}
+                    value={minConstructionArea}
+                    onChange={(e) => setMinConstructionArea(e.target.value)}
+                    className="w-full rounded-lg border border-[#E2E8F0] bg-white px-3 py-2 text-sm font-mono-tabular dark:border-[#1E3349] dark:bg-[#0C141E] dark:text-white"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-[#404040] dark:text-[#D4D4D4] mb-1">
+                    Max Construction Area
+                  </label>
+                  <input
+                    type="number"
+                    min={0}
+                    value={maxConstructionArea}
+                    onChange={(e) => setMaxConstructionArea(e.target.value)}
+                    className="w-full rounded-lg border border-[#E2E8F0] bg-white px-3 py-2 text-sm font-mono-tabular dark:border-[#1E3349] dark:bg-[#0C141E] dark:text-white"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-[#404040] dark:text-[#D4D4D4] mb-1">
+                    Area Unit {minPlotArea || maxPlotArea || minConstructionArea || maxConstructionArea ? '*' : ''}
+                  </label>
+                  <select
+                    value={areaUnit}
+                    onChange={(e) => setAreaUnit(e.target.value)}
+                    className="w-full rounded-lg border border-[#E2E8F0] bg-white px-3 py-2 text-sm dark:border-[#1E3349] dark:bg-[#0C141E] dark:text-white"
+                  >
+                    {AREA_UNITS.map((u) => (
+                      <option key={u} value={u}>
+                        {u}
+                      </option>
+                    ))}
+                  </select>
+                </div>
               </div>
-              <div>
-                <label className="block text-xs font-medium text-[#404040] dark:text-[#D4D4D4] mb-1">Max Area</label>
-                <input
-                  type="number"
-                  min={0}
-                  value={maxArea}
-                  onChange={(e) => setMaxArea(e.target.value)}
-                  className="w-full rounded-lg border border-[#E2E8F0] bg-white px-3 py-2 text-sm font-mono-tabular dark:border-[#1E3349] dark:bg-[#0C141E] dark:text-white"
-                />
+            ) : areaMode === 'plot_only' ? (
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mt-3.5">
+                <div>
+                  <label className="block text-xs font-medium text-[#404040] dark:text-[#D4D4D4] mb-1">Min Plot Area</label>
+                  <input
+                    type="number"
+                    min={0}
+                    value={minPlotArea}
+                    onChange={(e) => setMinPlotArea(e.target.value)}
+                    className="w-full rounded-lg border border-[#E2E8F0] bg-white px-3 py-2 text-sm font-mono-tabular dark:border-[#1E3349] dark:bg-[#0C141E] dark:text-white"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-[#404040] dark:text-[#D4D4D4] mb-1">Max Plot Area</label>
+                  <input
+                    type="number"
+                    min={0}
+                    value={maxPlotArea}
+                    onChange={(e) => setMaxPlotArea(e.target.value)}
+                    className="w-full rounded-lg border border-[#E2E8F0] bg-white px-3 py-2 text-sm font-mono-tabular dark:border-[#1E3349] dark:bg-[#0C141E] dark:text-white"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-[#404040] dark:text-[#D4D4D4] mb-1">
+                    Area Unit {minPlotArea || maxPlotArea ? '*' : ''}
+                  </label>
+                  <select
+                    value={areaUnit}
+                    onChange={(e) => setAreaUnit(e.target.value)}
+                    className="w-full rounded-lg border border-[#E2E8F0] bg-white px-3 py-2 text-sm dark:border-[#1E3349] dark:bg-[#0C141E] dark:text-white"
+                  >
+                    {AREA_UNITS.map((u) => (
+                      <option key={u} value={u}>
+                        {u}
+                      </option>
+                    ))}
+                  </select>
+                </div>
               </div>
-              <div>
-                <label className="block text-xs font-medium text-[#404040] dark:text-[#D4D4D4] mb-1">
-                  Area Unit {minArea || maxArea ? '*' : ''}
-                </label>
-                <select
-                  value={areaUnit}
-                  onChange={(e) => setAreaUnit(e.target.value)}
-                  className="w-full rounded-lg border border-[#E2E8F0] bg-white px-3 py-2 text-sm dark:border-[#1E3349] dark:bg-[#0C141E] dark:text-white"
-                >
-                  {AREA_UNITS.map((u) => (
-                    <option key={u} value={u}>
-                      {u}
-                    </option>
-                  ))}
-                </select>
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mt-3.5">
+                <div>
+                  <label className="block text-xs font-medium text-[#404040] dark:text-[#D4D4D4] mb-1">Min Area</label>
+                  <input
+                    type="number"
+                    min={0}
+                    value={minArea}
+                    onChange={(e) => setMinArea(e.target.value)}
+                    className="w-full rounded-lg border border-[#E2E8F0] bg-white px-3 py-2 text-sm font-mono-tabular dark:border-[#1E3349] dark:bg-[#0C141E] dark:text-white"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-[#404040] dark:text-[#D4D4D4] mb-1">Max Area</label>
+                  <input
+                    type="number"
+                    min={0}
+                    value={maxArea}
+                    onChange={(e) => setMaxArea(e.target.value)}
+                    className="w-full rounded-lg border border-[#E2E8F0] bg-white px-3 py-2 text-sm font-mono-tabular dark:border-[#1E3349] dark:bg-[#0C141E] dark:text-white"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-[#404040] dark:text-[#D4D4D4] mb-1">
+                    Area Unit {minArea || maxArea ? '*' : ''}
+                  </label>
+                  <select
+                    value={areaUnit}
+                    onChange={(e) => setAreaUnit(e.target.value)}
+                    className="w-full rounded-lg border border-[#E2E8F0] bg-white px-3 py-2 text-sm dark:border-[#1E3349] dark:bg-[#0C141E] dark:text-white"
+                  >
+                    {AREA_UNITS.map((u) => (
+                      <option key={u} value={u}>
+                        {u}
+                      </option>
+                    ))}
+                  </select>
+                </div>
               </div>
-            </div>
+            )}
 
             {/* Residential vs Commercial Conditional Fields */}
             <div className="grid grid-cols-1 sm:grid-cols-4 gap-3 mt-3.5">

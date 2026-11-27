@@ -29,16 +29,46 @@ import type {
   UserProfile,
 } from '../types.ts';
 import { mapSettingsDoc, mapUserDoc, tsToIso } from './crmAuth.ts';
-import { ensureAdditionalLocalitiesSeeded, ensureDefaultMastersSeeded } from './crmSeed.ts';
-import { buildSpreadsheetBlob, generateImportTemplateBlob, parseSpreadsheetBase64Client } from './excelClient.ts';
-import { OperationType, auth, db, handleFirestoreError } from './firebase.ts';
+import {
+  ensureAdditionalLocalitiesSeeded,
+  ensureAdditionalSubtypesSeeded,
+  ensureDefaultMastersSeeded,
+} from './crmSeed.ts';
+import {
+  IMPORT_TEMPLATE_HEADERS,
+  buildSpreadsheetBlob,
+  generateImportTemplateBlob,
+  parseSpreadsheetBase64Client,
+} from './excelClient.ts';
+import {
+  OperationType,
+  auth,
+  db,
+  ensureFirestoreOnline,
+  handleFirestoreError,
+  withFirestoreRetry,
+} from './firebase.ts';
 
+let uidCounter = 0;
 function uidGen(prefix: string): string {
-  return `${prefix}_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
+  uidCounter = (uidCounter + 1) % 100000;
+  return `${prefix}_${Date.now()}_${uidCounter}_${Math.random().toString(36).slice(2, 7)}`;
 }
 
 export function isValidIndianMobile(val: string): boolean {
   return /^[6-9][0-9]{9}$/.test(val.trim());
+}
+
+function sanitizeMobileForImport(raw: string): string {
+  const trimmed = String(raw || '').trim();
+  const hasPlus91Prefix = /^\+\s*91/.test(trimmed);
+  let digits = trimmed.replace(/\D/g, '');
+  if (hasPlus91Prefix && digits.startsWith('91')) {
+    digits = digits.slice(2);
+  } else if (digits.length > 10 && digits.startsWith('91')) {
+    digits = digits.slice(2);
+  }
+  return digits;
 }
 
 function toFiniteNumberOrNull(val: unknown): number | null {
@@ -143,6 +173,16 @@ function mapLeadDoc(id: string, data: Record<string, unknown>): LeadRecord {
     budget_to: data.budget_to !== null && data.budget_to !== undefined ? Number(data.budget_to) : null,
     min_area: data.min_area !== null && data.min_area !== undefined ? Number(data.min_area) : null,
     max_area: data.max_area !== null && data.max_area !== undefined ? Number(data.max_area) : null,
+    min_plot_area: data.min_plot_area !== null && data.min_plot_area !== undefined ? Number(data.min_plot_area) : null,
+    max_plot_area: data.max_plot_area !== null && data.max_plot_area !== undefined ? Number(data.max_plot_area) : null,
+    min_construction_area:
+      data.min_construction_area !== null && data.min_construction_area !== undefined
+        ? Number(data.min_construction_area)
+        : null,
+    max_construction_area:
+      data.max_construction_area !== null && data.max_construction_area !== undefined
+        ? Number(data.max_construction_area)
+        : null,
     area_unit: data.area_unit ? String(data.area_unit) : null,
     bhk_config: data.bhk_config ? String(data.bhk_config) : null,
     commercial_config: data.commercial_config ? String(data.commercial_config) : null,
@@ -239,7 +279,7 @@ function mapActivityDoc(id: string, data: Record<string, unknown>): ActivityReco
 
 export async function fetchWorkspaceSettings(): Promise<CompanySettings> {
   try {
-    const snap = await getDoc(doc(db, 'settings', 'workspace'));
+    const snap = await withFirestoreRetry(() => getDoc(doc(db, 'settings', 'workspace')));
     return mapSettingsDoc(snap.exists() ? (snap.data() as Record<string, unknown>) : undefined);
   } catch (error) {
     handleFirestoreError(error, OperationType.GET, 'settings/workspace');
@@ -261,7 +301,9 @@ const MASTER_CATEGORY_LIST = [
 
 export async function fetchMasters(): Promise<MasterItem[]> {
   try {
-    const snap = await getDocs(query(collection(db, 'masters'), where('category', 'in', MASTER_CATEGORY_LIST)));
+    const snap = await withFirestoreRetry(() =>
+      getDocs(query(collection(db, 'masters'), where('category', 'in', MASTER_CATEGORY_LIST)))
+    );
     return snap.docs
       .map((d) => mapMasterDoc(d.id, d.data() as Record<string, unknown>))
       .sort((a, b) => a.sort_order - b.sort_order || a.name.localeCompare(b.name));
@@ -273,8 +315,8 @@ export async function fetchMasters(): Promise<MasterItem[]> {
 export async function fetchTeamMembers(currentUser: UserProfile, activeLeads?: LeadRecord[]): Promise<UserProfile[]> {
   if (currentUser.role !== 'super_admin') {
     try {
-      const dirSnap = await getDocs(
-        query(collection(db, 'employeeDirectory'), where('status', 'in', ['active', 'inactive']))
+      const dirSnap = await withFirestoreRetry(() =>
+        getDocs(query(collection(db, 'employeeDirectory'), where('status', 'in', ['active', 'inactive'])))
       );
       return dirSnap.docs
         .map((d) => {
@@ -305,8 +347,8 @@ export async function fetchTeamMembers(currentUser: UserProfile, activeLeads?: L
 
   try {
     const [uSnap, iSnap, leadsList] = await Promise.all([
-      getDocs(collection(db, 'users')),
-      getDocs(collection(db, 'employeeInvites')),
+      withFirestoreRetry(() => getDocs(collection(db, 'users'))),
+      withFirestoreRetry(() => getDocs(collection(db, 'employeeInvites'))),
       activeLeads ? Promise.resolve(activeLeads) : fetchAuthorizedLeads(currentUser, { deleted: true }),
     ]);
 
@@ -366,7 +408,7 @@ export async function fetchAuthorizedLeads(
   try {
     let snap;
     if (user.role === 'super_admin') {
-      snap = await getDocs(collection(db, 'leads'));
+      snap = await withFirestoreRetry(() => getDocs(collection(db, 'leads')));
       let maxSeq = 0;
       for (const d of snap.docs) {
         const seqFromId = extractLeadSeq(d.id);
@@ -383,7 +425,7 @@ export async function fetchAuthorizedLeads(
         where('assigned_to_email', '==', user.email.toLowerCase()),
         where('is_deleted', '==', false)
       );
-      snap = await getDocs(q);
+      snap = await withFirestoreRetry(() => getDocs(q));
     }
     const all = snap.docs.map((d) => mapLeadDoc(d.id, d.data() as Record<string, unknown>));
     if (opts?.deleted) return all;
@@ -397,14 +439,14 @@ export async function fetchAuthorizedActivities(user: UserProfile): Promise<Acti
   try {
     let snap;
     if (user.role === 'super_admin') {
-      snap = await getDocs(collection(db, 'activities'));
+      snap = await withFirestoreRetry(() => getDocs(collection(db, 'activities')));
     } else {
       const q = query(
         collection(db, 'activities'),
         where('assigned_to_email', '==', user.email.toLowerCase()),
         where('lead_is_deleted', '==', false)
       );
-      snap = await getDocs(q);
+      snap = await withFirestoreRetry(() => getDocs(q));
     }
     return snap.docs
       .filter((d) => d.data().lead_is_deleted !== true)
@@ -418,8 +460,8 @@ export async function checkMobileDuplicates(mobile: string, excludeLeadId?: stri
   const cleanMobile = mobile.trim();
   if (!isValidIndianMobile(cleanMobile)) return [];
   try {
-    const snap = await getDocs(
-      query(collection(db, 'mobileLookup', cleanMobile, 'matches'), where('mobile', '==', cleanMobile))
+    const snap = await withFirestoreRetry(() =>
+      getDocs(query(collection(db, 'mobileLookup', cleanMobile, 'matches'), where('mobile', '==', cleanMobile)))
     );
     return snap.docs
       .filter((d) => d.id !== excludeLeadId)
@@ -456,15 +498,17 @@ async function writeTimeline(
   const actorUid = auth.currentUser?.uid || user.uid || user.id;
   const actorName = (user.full_name || user.email || 'User').trim().slice(0, 120);
   try {
-    await setDoc(doc(db, 'leads', leadId, 'timeline', id), {
-      id,
-      lead_id: leadId,
-      event_type: eventType.slice(0, 100),
-      description: description.slice(0, 2000),
-      employee_id: actorUid,
-      employee_name: actorName,
-      createdAt: serverTimestamp(),
-    });
+    await withFirestoreRetry(() =>
+      setDoc(doc(db, 'leads', leadId, 'timeline', id), {
+        id,
+        lead_id: leadId,
+        event_type: eventType.slice(0, 100),
+        description: description.slice(0, 2000),
+        employee_id: actorUid,
+        employee_name: actorName,
+        createdAt: serverTimestamp(),
+      })
+    );
   } catch (error) {
     handleFirestoreError(error, OperationType.CREATE, `leads/${leadId}/timeline/${id}`);
   }
@@ -487,22 +531,24 @@ async function writeAudit(params: {
   const actorUid = auth.currentUser?.uid || params.user.uid || params.user.id;
   const actorName = (params.user.full_name || params.user.email || 'User').trim().slice(0, 120);
   try {
-    await setDoc(doc(db, 'auditLogs', id), {
-      id,
-      entity_type: params.entityType.slice(0, 60),
-      entity_id: params.entityId.slice(0, 128),
-      lead_id: params.leadId || null,
-      lead_code: params.leadCode || null,
-      lead_assigned_to_email: params.leadAssignedToEmail || null,
-      action_type: params.actionType.slice(0, 80),
-      field_name: params.fieldName ? params.fieldName.slice(0, 80) : null,
-      previous_value: params.previousValue !== undefined && params.previousValue !== null ? String(params.previousValue).slice(0, 2000) : null,
-      new_value: params.newValue !== undefined && params.newValue !== null ? String(params.newValue).slice(0, 2000) : null,
-      remarks: params.remarks ? params.remarks.slice(0, 2000) : null,
-      employee_id: actorUid,
-      employee_name: actorName,
-      createdAt: serverTimestamp(),
-    });
+    await withFirestoreRetry(() =>
+      setDoc(doc(db, 'auditLogs', id), {
+        id,
+        entity_type: params.entityType.slice(0, 60),
+        entity_id: params.entityId.slice(0, 128),
+        lead_id: params.leadId || null,
+        lead_code: params.leadCode || null,
+        lead_assigned_to_email: params.leadAssignedToEmail || null,
+        action_type: params.actionType.slice(0, 80),
+        field_name: params.fieldName ? params.fieldName.slice(0, 80) : null,
+        previous_value: params.previousValue !== undefined && params.previousValue !== null ? String(params.previousValue).slice(0, 2000) : null,
+        new_value: params.newValue !== undefined && params.newValue !== null ? String(params.newValue).slice(0, 2000) : null,
+        remarks: params.remarks ? params.remarks.slice(0, 2000) : null,
+        employee_id: actorUid,
+        employee_name: actorName,
+        createdAt: serverTimestamp(),
+      })
+    );
   } catch (error) {
     handleFirestoreError(error, OperationType.CREATE, `auditLogs/${id}`);
   }
@@ -520,20 +566,22 @@ async function createNotificationDoc(params: {
 }): Promise<void> {
   const id = uidGen('notif');
   try {
-    await setDoc(doc(db, 'notifications', id), {
-      id,
-      user_uid: params.userUid || null,
-      user_email: params.userEmail.toLowerCase(),
-      lead_id: params.leadId || null,
-      lead_code: params.leadCode || null,
-      activity_id: params.activityId || null,
-      notif_type: params.notifType.slice(0, 80),
-      title: params.title.slice(0, 200),
-      message: params.message.slice(0, 1000),
-      is_read: false,
-      createdAt: serverTimestamp(),
-      updatedAt: serverTimestamp(),
-    });
+    await withFirestoreRetry(() =>
+      setDoc(doc(db, 'notifications', id), {
+        id,
+        user_uid: params.userUid || null,
+        user_email: params.userEmail.toLowerCase(),
+        lead_id: params.leadId || null,
+        lead_code: params.leadCode || null,
+        activity_id: params.activityId || null,
+        notif_type: params.notifType.slice(0, 80),
+        title: params.title.slice(0, 200),
+        message: params.message.slice(0, 1000),
+        is_read: false,
+        createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp(),
+      })
+    );
   } catch (error) {
     handleFirestoreError(error, OperationType.CREATE, `notifications/${id}`);
   }
@@ -584,11 +632,23 @@ async function syncMobileLookup(lead: {
     updatedAt: serverTimestamp(),
   };
   try {
-    const existing = await getDoc(ref);
-    if (!existing.exists()) {
-      await setDoc(ref, { ...payload, createdAt: serverTimestamp() });
-    } else {
-      await setDoc(ref, { ...payload, createdAt: existing.data().createdAt || serverTimestamp() });
+    if (lead.isNew) {
+      await withFirestoreRetry(() => setDoc(ref, { ...payload, createdAt: serverTimestamp() }));
+      return;
+    }
+    try {
+      await withFirestoreRetry(() => updateDoc(ref, payload));
+    } catch (updateErr) {
+      const code =
+        typeof updateErr === 'object' && updateErr !== null && 'code' in updateErr
+          ? String((updateErr as { code?: unknown }).code || '').toLowerCase()
+          : '';
+      const msg = updateErr instanceof Error ? updateErr.message.toLowerCase() : String(updateErr).toLowerCase();
+      if (code === 'not-found' || msg.includes('no document to update')) {
+        await withFirestoreRetry(() => setDoc(ref, { ...payload, createdAt: serverTimestamp() }));
+      } else {
+        throw updateErr;
+      }
     }
   } catch (error) {
     handleFirestoreError(error, OperationType.WRITE, `mobileLookup/${lead.mobile}/matches/${lead.id}`);
@@ -622,7 +682,7 @@ async function syncWorkspaceLeadSeqFloor(maxExistingSeq: number): Promise<void> 
 async function allocateLeadCodes(count: number, user: UserProfile): Promise<string[]> {
   let maxSeq = 0;
   try {
-    const snap = await getDocs(collection(db, 'leads'));
+    const snap = await withFirestoreRetry(() => getDocs(collection(db, 'leads')));
     for (const d of snap.docs) {
       const seqId = extractLeadSeq(d.id);
       const seqCode = extractLeadSeq(String(d.data().lead_code || ''));
@@ -634,43 +694,45 @@ async function allocateLeadCodes(count: number, user: UserProfile): Promise<stri
   }
 
   try {
-    return await runTransaction(db, async (tx) => {
-      const ref = doc(db, 'settings', 'workspace');
-      const snap = await tx.get(ref);
-      const current = snap.exists() ? Number(snap.data().lead_seq || 0) : 0;
-      const base = Math.max(current, maxSeq);
-      const nextSeq = base + count;
+    return await withFirestoreRetry(() =>
+      runTransaction(db, async (tx) => {
+        const ref = doc(db, 'settings', 'workspace');
+        const snap = await tx.get(ref);
+        const current = snap.exists() ? Number(snap.data().lead_seq || 0) : 0;
+        const base = Math.max(current, maxSeq);
+        const nextSeq = base + count;
 
-      if (!snap.exists()) {
-        tx.set(ref, {
-          company_name: 'Shreeji Space Management CRM',
-          short_name: 'Shreeji Space',
-          company_logo: './assets/aistudio/image_b871e6e7.png',
-          default_table_columns: [
-            'lead_code',
-            'customer_name',
-            'mobile',
-            'requirement',
-            'localities',
-            'budget',
-            'stage',
-            'assigned_to',
-            'created_at',
-          ],
-          lead_seq: nextSeq,
-          createdAt: serverTimestamp(),
-          updatedAt: serverTimestamp(),
-        });
-      } else {
-        tx.update(ref, { lead_seq: nextSeq, updatedAt: serverTimestamp() });
-      }
+        if (!snap.exists()) {
+          tx.set(ref, {
+            company_name: 'Shreeji Space Management CRM',
+            short_name: 'Shreeji Space',
+            company_logo: './assets/aistudio/image_b871e6e7.png',
+            default_table_columns: [
+              'lead_code',
+              'customer_name',
+              'mobile',
+              'requirement',
+              'localities',
+              'budget',
+              'stage',
+              'assigned_to',
+              'created_at',
+            ],
+            lead_seq: nextSeq,
+            createdAt: serverTimestamp(),
+            updatedAt: serverTimestamp(),
+          });
+        } else {
+          tx.update(ref, { lead_seq: nextSeq, updatedAt: serverTimestamp() });
+        }
 
-      const codes: string[] = [];
-      for (let i = 1; i <= count; i++) {
-        codes.push(`SSM-${String(base + i).padStart(6, '0')}`);
-      }
-      return codes;
-    });
+        const codes: string[] = [];
+        for (let i = 1; i <= count; i++) {
+          codes.push(`SSM-${String(base + i).padStart(6, '0')}`);
+        }
+        return codes;
+      })
+    );
   } catch (error) {
     handleFirestoreError(error, OperationType.WRITE, 'settings/workspace');
   }
@@ -1356,44 +1418,90 @@ function buildReportData(
   }
 }
 
+function pickImportColumn(raw: Record<string, string>, candidateKeys: string[]): string {
+  const entries = Object.entries(raw);
+  for (const key of candidateKeys) {
+    if (raw[key] !== undefined) return String(raw[key] || '').trim();
+  }
+  const normalizedTargets = candidateKeys.map((k) => k.toLowerCase().replace(/[^a-z0-9]/g, ''));
+  for (const [colName, val] of entries) {
+    const normCol = colName.toLowerCase().replace(/[^a-z0-9]/g, '');
+    if (normalizedTargets.includes(normCol)) return String(val || '').trim();
+  }
+  return '';
+}
+
+function normalizeSubtypeToken(val: string): string {
+  const t = val.trim().toLowerCase().replace(/[\s_-]+/g, ' ');
+  if (t === 'bunglow') return 'bungalow';
+  if (t === 'tenement') return 'tenament';
+  if (t === 'row house') return 'rowhouse';
+  return t;
+}
+
 function validateAndNormalizeImportRows(
   rawRows: Array<Record<string, string>>,
-  masters: MasterItem[],
-  team: UserProfile[]
+  masters: MasterItem[]
 ): Promise<ImportPreviewRow[]> {
   const activeMasters = masters.filter((m) => m.is_active === 1);
   const matchMaster = (cat: string, val: string) =>
     activeMasters.find((m) => m.category === cat && m.name.toLowerCase() === val.trim().toLowerCase());
-  const activeUsers = team.filter((u) => u.status === 'active');
+  const matchSubtype = (val: string) => {
+    const exact = matchMaster('property_subtype', val);
+    if (exact) return exact;
+    const normInput = normalizeSubtypeToken(val);
+    return activeMasters.find(
+      (m) => m.category === 'property_subtype' && normalizeSubtypeToken(m.name) === normInput
+    );
+  };
+  const matchBhk = (val: string) => {
+    const exact = matchMaster('bhk_config', val);
+    if (exact) return exact;
+    const compact = val.trim().toLowerCase().replace(/\s+/g, '');
+    return activeMasters.find((m) => {
+      if (m.category !== 'bhk_config') return false;
+      const mCompact = m.name.toLowerCase().replace(/\s+/g, '');
+      return mCompact === compact || `${compact}bhk` === mCompact;
+    });
+  };
 
   return Promise.all(
     rawRows.map(async (raw, idx) => {
       const errors: string[] = [];
-      const customerName = (raw['Customer Name'] || '').trim();
-      const mobile = (raw['Mobile'] || '').trim();
-      const altMobile = (raw['Alternate Mobile'] || '').trim();
-      const whatsapp = (raw['WhatsApp'] || '').trim();
-      const email = (raw['Email'] || '').trim();
-      const company = (raw['Company'] || '').trim();
-      const sourceRaw = (raw['Lead Source'] || '').trim();
-      const propTypeRaw = (raw['Property Type'] || '').trim();
-      const subtypeRaw = (raw['Property Subtype'] || '').trim();
-      const txTypeRaw = (raw['Transaction Type'] || '').trim();
-      const localitiesRaw = (raw['Localities'] || '').trim();
-      const budgetFromRaw = (raw['Budget From'] || '').trim();
-      const budgetToRaw = (raw['Budget To'] || '').trim();
-      const bhkRaw = (raw['BHK'] || '').trim();
-      const minAreaRaw = (raw['Min Area'] || '').trim();
-      const maxAreaRaw = (raw['Max Area'] || '').trim();
-      const areaUnitRaw = (raw['Area Unit'] || '').trim();
-      const empRaw = (raw['Assigned Employee'] || '').trim();
-      const remarksRaw = (raw['Remarks'] || '').trim();
+      const customerName = pickImportColumn(raw, ['Customer Name']);
+      const primaryMobileRaw = pickImportColumn(raw, ['Primary Mobile', 'Mobile']);
+      const whatsappRaw = pickImportColumn(raw, ['Whatsapp', 'WhatsApp', 'WhatsApp Number']);
+      const sourceRaw = pickImportColumn(raw, ['Lead Source']);
+      const propTypeRaw = pickImportColumn(raw, ['Property Type']);
+      const subtypeRaw = pickImportColumn(raw, ['Property Subtype']);
+      const txTypeRaw = pickImportColumn(raw, ['Transaction Type']);
+      const budgetFromRaw = pickImportColumn(raw, ['Budget From (Numeric Only)', 'Budget From', 'Budget from']);
+      const budgetToRaw = pickImportColumn(raw, ['Budget To (Numeric Only)', 'Budget To']);
+      const bhkRaw = pickImportColumn(raw, [
+        'BHK (If Residential, Leave Blank If Commercial)',
+        'BHK (Residential Only)',
+        'BHK',
+      ]);
+
+      const mobile = primaryMobileRaw ? sanitizeMobileForImport(primaryMobileRaw) : '';
+      const whatsapp = whatsappRaw ? sanitizeMobileForImport(whatsappRaw) : '';
 
       if (!customerName) errors.push('Customer Name is mandatory.');
-      if (!isValidIndianMobile(mobile)) errors.push('Mobile must be a 10-digit Indian mobile.');
-      if (altMobile && !isValidIndianMobile(altMobile)) errors.push('Alternate Mobile must be a 10-digit Indian mobile.');
-      if (whatsapp && !isValidIndianMobile(whatsapp)) errors.push('WhatsApp must be a 10-digit Indian mobile.');
-      if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) errors.push('Invalid Email address.');
+      if (!mobile) {
+        errors.push('Primary Mobile is mandatory.');
+      } else if (mobile.length > 10) {
+        errors.push(`Primary Mobile cannot be more than 10 digits (${mobile.length} digits).`);
+      } else if (!isValidIndianMobile(mobile)) {
+        errors.push('Primary Mobile must be a valid 10-digit Indian mobile starting with 6-9.');
+      }
+
+      if (whatsapp) {
+        if (whatsapp.length > 10) {
+          errors.push(`Whatsapp cannot be more than 10 digits (${whatsapp.length} digits).`);
+        } else if (!isValidIndianMobile(whatsapp)) {
+          errors.push('Whatsapp must be a valid 10-digit Indian mobile starting with 6-9.');
+        }
+      }
 
       const srcMaster = sourceRaw ? matchMaster('lead_source', sourceRaw) : null;
       if (!srcMaster) errors.push(`Invalid or inactive Lead Source: "${sourceRaw}".`);
@@ -1401,7 +1509,7 @@ function validateAndNormalizeImportRows(
       const ptMaster = propTypeRaw ? matchMaster('property_type', propTypeRaw) : null;
       if (!ptMaster) errors.push(`Invalid or inactive Property Type: "${propTypeRaw}".`);
 
-      const subMaster = subtypeRaw ? matchMaster('property_subtype', subtypeRaw) : null;
+      const subMaster = subtypeRaw ? matchSubtype(subtypeRaw) : null;
       if (!subMaster) {
         errors.push(`Invalid or inactive Property Subtype: "${subtypeRaw}".`);
       } else if (ptMaster && subMaster.parent_value && subMaster.parent_value !== ptMaster.name) {
@@ -1411,82 +1519,66 @@ function validateAndNormalizeImportRows(
       const txMaster = txTypeRaw ? matchMaster('transaction_type', txTypeRaw) : null;
       if (!txMaster) errors.push(`Invalid or inactive Transaction Type: "${txTypeRaw}".`);
 
-      const locTokens = localitiesRaw
-        .split(',')
-        .map((s) => s.trim())
-        .filter(Boolean);
-      const resolvedLocalities: string[] = [];
-      if (locTokens.length === 0) {
-        errors.push('At least one Locality is mandatory.');
-      } else {
-        for (const tok of locTokens) {
-          const lm = matchMaster('locality', tok);
-          if (!lm) errors.push(`Unknown or inactive Locality: "${tok}".`);
-          else resolvedLocalities.push(lm.name);
-        }
-      }
+      const parseNumericBudget = (val: string): number | null => {
+        if (!val) return null;
+        const cleaned = val.replace(/,/g, '').trim();
+        if (!/^\d+(\.\d+)?$/.test(cleaned)) return Number.NaN;
+        return Number(cleaned);
+      };
 
-      const budgetFrom = budgetFromRaw ? Number(budgetFromRaw) : null;
-      const budgetTo = budgetToRaw ? Number(budgetToRaw) : null;
-      if (budgetFromRaw && Number.isNaN(budgetFrom)) errors.push('Budget From must be numeric.');
-      if (budgetToRaw && Number.isNaN(budgetTo)) errors.push('Budget To must be numeric.');
-      if (budgetFrom !== null && budgetTo !== null && budgetFrom > budgetTo) errors.push('Budget From cannot exceed Budget To.');
+      const budgetFrom = parseNumericBudget(budgetFromRaw);
+      const budgetTo = parseNumericBudget(budgetToRaw);
+      if (budgetFromRaw && (budgetFrom === null || Number.isNaN(budgetFrom))) {
+        errors.push('Budget From must be numeric only.');
+      }
+      if (budgetToRaw && (budgetTo === null || Number.isNaN(budgetTo))) {
+        errors.push('Budget To must be numeric only.');
+      }
+      if (
+        budgetFrom !== null &&
+        !Number.isNaN(budgetFrom) &&
+        budgetTo !== null &&
+        !Number.isNaN(budgetTo) &&
+        budgetFrom > budgetTo
+      ) {
+        errors.push('Budget From cannot exceed Budget To.');
+      }
 
       let bhkValue: string | null = null;
-      if (bhkRaw) {
-        const bm = matchMaster('bhk_config', bhkRaw);
+      const isResidential = (ptMaster?.name || propTypeRaw).trim().toLowerCase() === 'residential';
+      if (isResidential && bhkRaw && !['-', 'na', 'n/a'].includes(bhkRaw.toLowerCase())) {
+        const bm = matchBhk(bhkRaw);
         if (!bm) errors.push(`Invalid BHK value: "${bhkRaw}".`);
         else bhkValue = bm.name;
-      }
-
-      const minArea = minAreaRaw ? Number(minAreaRaw) : null;
-      const maxArea = maxAreaRaw ? Number(maxAreaRaw) : null;
-      if (minAreaRaw && Number.isNaN(minArea)) errors.push('Min Area must be numeric.');
-      if (maxAreaRaw && Number.isNaN(maxArea)) errors.push('Max Area must be numeric.');
-      if (minArea !== null && maxArea !== null && minArea > maxArea) errors.push('Min Area cannot exceed Max Area.');
-      const validUnits = ['Sq. Ft.', 'Sq. Yards (Vaar)', 'Sq. Mtr.'];
-      if ((minArea !== null || maxArea !== null) && !validUnits.includes(areaUnitRaw)) {
-        errors.push('Area Unit (Sq. Ft. / Sq. Yards (Vaar) / Sq. Mtr.) is required when Area is entered.');
-      }
-
-      let matchedEmp: UserProfile | undefined;
-      if (!empRaw) {
-        errors.push('Assigned Employee (email or full name) is mandatory.');
-      } else {
-        matchedEmp = activeUsers.find(
-          (u) => u.email.toLowerCase() === empRaw.toLowerCase() || u.full_name.toLowerCase() === empRaw.toLowerCase()
-        );
-        if (!matchedEmp) errors.push(`Invalid or inactive Assigned Employee: "${empRaw}".`);
       }
 
       const duplicates = isValidIndianMobile(mobile) ? await checkMobileDuplicates(mobile) : [];
 
       return {
         rowNumber: idx + 2,
-        raw,
+        raw: {
+          'Customer Name': customerName,
+          'Primary Mobile': mobile || primaryMobileRaw,
+          'Whatsapp': whatsapp || whatsappRaw,
+          'Lead Source': sourceRaw,
+          'Property Type': propTypeRaw,
+          'Property Subtype': subtypeRaw,
+          'Transaction Type': txTypeRaw,
+          'Budget From (Numeric Only)': budgetFromRaw,
+          'Budget To (Numeric Only)': budgetToRaw,
+          'BHK (If Residential, Leave Blank If Commercial)': isResidential ? bhkRaw : '',
+        },
         normalized: {
           customer_name: customerName,
           mobile,
-          alternate_mobile: altMobile || null,
           whatsapp: whatsapp || null,
-          email: email || null,
-          company_name: company || null,
           lead_source: srcMaster?.name || sourceRaw,
           property_type: ptMaster?.name || propTypeRaw,
           property_subtype: subMaster?.name || subtypeRaw,
           transaction_type: txMaster?.name || txTypeRaw,
-          localities: resolvedLocalities,
-          budget_from: budgetFrom,
-          budget_to: budgetTo,
+          budget_from: budgetFrom !== null && !Number.isNaN(budgetFrom) ? budgetFrom : null,
+          budget_to: budgetTo !== null && !Number.isNaN(budgetTo) ? budgetTo : null,
           bhk_config: bhkValue,
-          min_area: minArea,
-          max_area: maxArea,
-          area_unit: areaUnitRaw || null,
-          assigned_to: matchedEmp?.id || null,
-          assigned_to_uid: matchedEmp?.uid || null,
-          assigned_to_email: matchedEmp?.email || null,
-          assigned_to_name: matchedEmp?.full_name || null,
-          requirement_remarks: remarksRaw || null,
         },
         errors,
         duplicates,
@@ -1585,25 +1677,39 @@ export async function dispatchCrmRequest<T = unknown>(
       await ensureDefaultMastersSeeded([]);
       if (typeof window !== 'undefined') {
         window.localStorage.setItem('ssm_ahm_localities_synced_v2', '1');
+        window.localStorage.setItem('ssm_res_plot_subtype_synced_v1', '1');
       }
       masters = await fetchMasters();
-    } else if (
-      user.role === 'super_admin' &&
-      typeof window !== 'undefined' &&
-      window.localStorage.getItem('ssm_ahm_localities_synced_v2') !== '1'
-    ) {
-      const added = await ensureAdditionalLocalitiesSeeded(masters);
-      window.localStorage.setItem('ssm_ahm_localities_synced_v2', '1');
-      if (added > 0) {
-        await writeAudit({
-          entityType: 'master',
-          entityId: 'ahm_localities_sync_v2',
-          actionType: 'Created',
-          fieldName: 'locality',
-          newValue: `Added ${added} Ahmedabad localities`,
-          user,
-        });
-        masters = await fetchMasters();
+    } else if (user.role === 'super_admin' && typeof window !== 'undefined') {
+      if (window.localStorage.getItem('ssm_ahm_localities_synced_v2') !== '1') {
+        const added = await ensureAdditionalLocalitiesSeeded(masters);
+        window.localStorage.setItem('ssm_ahm_localities_synced_v2', '1');
+        if (added > 0) {
+          await writeAudit({
+            entityType: 'master',
+            entityId: 'ahm_localities_sync_v2',
+            actionType: 'Created',
+            fieldName: 'locality',
+            newValue: `Added ${added} Ahmedabad localities`,
+            user,
+          });
+          masters = await fetchMasters();
+        }
+      }
+      if (window.localStorage.getItem('ssm_res_plot_subtype_synced_v1') !== '1') {
+        const addedSubtypes = await ensureAdditionalSubtypesSeeded(masters);
+        window.localStorage.setItem('ssm_res_plot_subtype_synced_v1', '1');
+        if (addedSubtypes > 0) {
+          await writeAudit({
+            entityType: 'master',
+            entityId: 'res_plot_subtype_sync_v1',
+            actionType: 'Created',
+            fieldName: 'property_subtype',
+            newValue: 'Added Residential Plot property subtype',
+            user,
+          });
+          masters = await fetchMasters();
+        }
       }
     }
     return { masters } as T;
@@ -2068,9 +2174,31 @@ export async function dispatchCrmRequest<T = unknown>(
 
     const minArea = toFiniteNumberOrNull(body.min_area);
     const maxArea = toFiniteNumberOrNull(body.max_area);
+    const minPlotArea = toFiniteNumberOrNull(body.min_plot_area);
+    const maxPlotArea = toFiniteNumberOrNull(body.max_plot_area);
+    const minConstructionArea = toFiniteNumberOrNull(body.min_construction_area);
+    const maxConstructionArea = toFiniteNumberOrNull(body.max_construction_area);
     const areaUnit = body.area_unit ? String(body.area_unit).trim().slice(0, 40) : null;
     if (minArea !== null && maxArea !== null && minArea > maxArea) throw new Error('Minimum Area cannot exceed Maximum Area.');
-    if ((minArea !== null || maxArea !== null) && !areaUnit) throw new Error('Area Unit is mandatory when area is entered.');
+    if (minPlotArea !== null && maxPlotArea !== null && minPlotArea > maxPlotArea) {
+      throw new Error('Minimum Plot Area cannot exceed Maximum Plot Area.');
+    }
+    if (minConstructionArea !== null && maxConstructionArea !== null && minConstructionArea > maxConstructionArea) {
+      throw new Error('Minimum Construction Area cannot exceed Maximum Construction Area.');
+    }
+    if (
+      (minArea !== null ||
+        maxArea !== null ||
+        minPlotArea !== null ||
+        maxPlotArea !== null ||
+        minConstructionArea !== null ||
+        maxConstructionArea !== null) &&
+      !areaUnit
+    ) {
+      throw new Error('Area Unit is mandatory when area is entered.');
+    }
+
+    await ensureFirestoreOnline();
 
     const [team, masters] = await Promise.all([fetchTeamMembers(user), fetchMasters()]);
     let assignee = user;
@@ -2093,70 +2221,76 @@ export async function dispatchCrmRequest<T = unknown>(
     const assigneeEmail = assignee.email.trim().toLowerCase().slice(0, 200);
 
     try {
-      await setDoc(doc(db, 'leads', leadId), {
-        id: leadId,
-        lead_code: leadCode,
-        customer_name: customerName.slice(0, 150),
-        mobile,
-        alternate_mobile: altMobile,
-        whatsapp,
-        email,
-        company_name: body.company_name ? String(body.company_name).trim().slice(0, 150) : null,
-        customer_remarks: body.customer_remarks ? String(body.customer_remarks).trim().slice(0, 2000) : null,
-        lead_source: leadSource,
-        property_type: propertyType,
-        property_subtype: propertySubtype,
-        transaction_type: transactionType,
-        localities,
-        budget_from: budgetFrom,
-        budget_to: budgetTo,
-        min_area: minArea,
-        max_area: maxArea,
-        area_unit: areaUnit,
-        bhk_config: body.bhk_config ? String(body.bhk_config).trim().slice(0, 60) : null,
-        commercial_config: body.commercial_config ? String(body.commercial_config).trim().slice(0, 200) : null,
-        furnishing_type: body.furnishing_type ? String(body.furnishing_type).trim().slice(0, 60) : null,
-        preferred_floor: body.preferred_floor ? String(body.preferred_floor).trim().slice(0, 60) : null,
-        possession_pref: body.possession_pref ? String(body.possession_pref).trim().slice(0, 60) : null,
-        required_workstations: toFiniteNumberOrNull(body.required_workstations),
-        required_cabins: toFiniteNumberOrNull(body.required_cabins),
-        requirement_remarks: body.requirement_remarks ? String(body.requirement_remarks).trim().slice(0, 2000) : null,
-        stage: initialStage,
-        is_terminal_stage: stageMeta.is_terminal === 1,
-        created_by: userUid,
-        created_by_name: creatorName,
-        assigned_to: assigneeId,
-        assigned_to_uid: assignee.uid ? String(assignee.uid).slice(0, 128) : null,
-        assigned_to_email: assigneeEmail,
-        assigned_to_name: assigneeName,
-        is_deleted: false,
-        deleted_at: null,
-        deleted_by: null,
-        deleted_by_name: null,
-        is_inactive: false,
-        inactive_since: null,
-        last_qualifying_interaction_at: nowIso,
-        last_interaction_type: null,
-        last_interaction_remarks: null,
-        inactivity_notified_15: false,
-        inactivity_escalated_22: false,
-        booking_date: null,
-        booking_project_name: null,
-        final_transaction_amount: null,
-        brokerage_amount: null,
-        brokerage_percentage: null,
-        payment_status: null,
-        booking_remarks: null,
-        dead_reason: null,
-        dead_remarks: null,
-        dead_by: null,
-        dead_by_name: null,
-        dead_at: null,
-        import_batch_ref: null,
-        created_date_iso: nowIso,
-        createdAt: serverTimestamp(),
-        updatedAt: serverTimestamp(),
-      });
+      await withFirestoreRetry(() =>
+        setDoc(doc(db, 'leads', leadId), {
+          id: leadId,
+          lead_code: leadCode,
+          customer_name: customerName.slice(0, 150),
+          mobile,
+          alternate_mobile: altMobile,
+          whatsapp,
+          email,
+          company_name: body.company_name ? String(body.company_name).trim().slice(0, 150) : null,
+          customer_remarks: body.customer_remarks ? String(body.customer_remarks).trim().slice(0, 2000) : null,
+          lead_source: leadSource,
+          property_type: propertyType,
+          property_subtype: propertySubtype,
+          transaction_type: transactionType,
+          localities,
+          budget_from: budgetFrom,
+          budget_to: budgetTo,
+          min_area: minArea,
+          max_area: maxArea,
+          min_plot_area: minPlotArea,
+          max_plot_area: maxPlotArea,
+          min_construction_area: minConstructionArea,
+          max_construction_area: maxConstructionArea,
+          area_unit: areaUnit,
+          bhk_config: body.bhk_config ? String(body.bhk_config).trim().slice(0, 60) : null,
+          commercial_config: body.commercial_config ? String(body.commercial_config).trim().slice(0, 200) : null,
+          furnishing_type: body.furnishing_type ? String(body.furnishing_type).trim().slice(0, 60) : null,
+          preferred_floor: body.preferred_floor ? String(body.preferred_floor).trim().slice(0, 60) : null,
+          possession_pref: body.possession_pref ? String(body.possession_pref).trim().slice(0, 60) : null,
+          required_workstations: toFiniteNumberOrNull(body.required_workstations),
+          required_cabins: toFiniteNumberOrNull(body.required_cabins),
+          requirement_remarks: body.requirement_remarks ? String(body.requirement_remarks).trim().slice(0, 2000) : null,
+          stage: initialStage,
+          is_terminal_stage: stageMeta.is_terminal === 1,
+          created_by: userUid,
+          created_by_name: creatorName,
+          assigned_to: assigneeId,
+          assigned_to_uid: assignee.uid ? String(assignee.uid).slice(0, 128) : null,
+          assigned_to_email: assigneeEmail,
+          assigned_to_name: assigneeName,
+          is_deleted: false,
+          deleted_at: null,
+          deleted_by: null,
+          deleted_by_name: null,
+          is_inactive: false,
+          inactive_since: null,
+          last_qualifying_interaction_at: nowIso,
+          last_interaction_type: null,
+          last_interaction_remarks: null,
+          inactivity_notified_15: false,
+          inactivity_escalated_22: false,
+          booking_date: null,
+          booking_project_name: null,
+          final_transaction_amount: null,
+          brokerage_amount: null,
+          brokerage_percentage: null,
+          payment_status: null,
+          booking_remarks: null,
+          dead_reason: null,
+          dead_remarks: null,
+          dead_by: null,
+          dead_by_name: null,
+          dead_at: null,
+          import_batch_ref: null,
+          created_date_iso: nowIso,
+          createdAt: serverTimestamp(),
+          updatedAt: serverTimestamp(),
+        })
+      );
     } catch (error) {
       handleFirestoreError(error, OperationType.CREATE, `leads/${leadId}`);
     }
@@ -2172,6 +2306,7 @@ export async function dispatchCrmRequest<T = unknown>(
       assigned_to: assigneeId,
       assigned_to_name: assigneeName,
       is_deleted: false,
+      isNew: true,
     });
 
     await writeTimeline(
@@ -2256,7 +2391,7 @@ export async function dispatchCrmRequest<T = unknown>(
     }
 
     try {
-      const freshSnap = await getDoc(doc(db, 'leads', leadId));
+      const freshSnap = await withFirestoreRetry(() => getDoc(doc(db, 'leads', leadId)));
       return { lead: mapLeadDoc(leadId, freshSnap.data() as Record<string, unknown>) } as T;
     } catch (error) {
       handleFirestoreError(error, OperationType.GET, `leads/${leadId}`);
@@ -2366,7 +2501,8 @@ export async function dispatchCrmRequest<T = unknown>(
 
     // PATCH /api/leads/:id
     if (!subAction && method === 'PATCH') {
-      const snap = await getDoc(doc(db, 'leads', leadId));
+      await ensureFirestoreOnline();
+      const snap = await withFirestoreRetry(() => getDoc(doc(db, 'leads', leadId)));
       if (!snap.exists()) throw new Error('Lead not found.');
       const existing = mapLeadDoc(snap.id, snap.data() as Record<string, unknown>);
       if (existing.is_terminal_stage && user.role !== 'super_admin') {
@@ -2386,16 +2522,57 @@ export async function dispatchCrmRequest<T = unknown>(
         body.min_area !== undefined ? (body.min_area === '' || body.min_area === null ? null : Number(body.min_area)) : existing.min_area;
       const nextMaxArea =
         body.max_area !== undefined ? (body.max_area === '' || body.max_area === null ? null : Number(body.max_area)) : existing.max_area;
+      const nextMinPlotArea =
+        body.min_plot_area !== undefined
+          ? body.min_plot_area === '' || body.min_plot_area === null
+            ? null
+            : Number(body.min_plot_area)
+          : existing.min_plot_area;
+      const nextMaxPlotArea =
+        body.max_plot_area !== undefined
+          ? body.max_plot_area === '' || body.max_plot_area === null
+            ? null
+            : Number(body.max_plot_area)
+          : existing.max_plot_area;
+      const nextMinConstructionArea =
+        body.min_construction_area !== undefined
+          ? body.min_construction_area === '' || body.min_construction_area === null
+            ? null
+            : Number(body.min_construction_area)
+          : existing.min_construction_area;
+      const nextMaxConstructionArea =
+        body.max_construction_area !== undefined
+          ? body.max_construction_area === '' || body.max_construction_area === null
+            ? null
+            : Number(body.max_construction_area)
+          : existing.max_construction_area;
       const nextAreaUnit = body.area_unit !== undefined ? (body.area_unit || null) : existing.area_unit;
       if (nextMinArea !== null && nextMaxArea !== null && nextMinArea > nextMaxArea) throw new Error('Minimum Area cannot exceed Maximum Area.');
-      if ((nextMinArea !== null || nextMaxArea !== null) && !nextAreaUnit) throw new Error('Area Unit is mandatory when area is entered.');
+      if (nextMinPlotArea !== null && nextMaxPlotArea !== null && nextMinPlotArea > nextMaxPlotArea) {
+        throw new Error('Minimum Plot Area cannot exceed Maximum Plot Area.');
+      }
+      if (nextMinConstructionArea !== null && nextMaxConstructionArea !== null && nextMinConstructionArea > nextMaxConstructionArea) {
+        throw new Error('Minimum Construction Area cannot exceed Maximum Construction Area.');
+      }
+      if (
+        (nextMinArea !== null ||
+          nextMaxArea !== null ||
+          nextMinPlotArea !== null ||
+          nextMaxPlotArea !== null ||
+          nextMinConstructionArea !== null ||
+          nextMaxConstructionArea !== null) &&
+        !nextAreaUnit
+      ) {
+        throw new Error('Area Unit is mandatory when area is entered.');
+      }
 
       const updates: Record<string, unknown> = {};
       const changed: string[] = [];
       const editableFields = [
         'customer_name', 'mobile', 'alternate_mobile', 'whatsapp', 'email', 'company_name', 'customer_remarks',
         'lead_source', 'property_type', 'property_subtype', 'transaction_type', 'budget_from', 'budget_to',
-        'min_area', 'max_area', 'area_unit', 'bhk_config', 'commercial_config', 'furnishing_type',
+        'min_area', 'max_area', 'min_plot_area', 'max_plot_area', 'min_construction_area', 'max_construction_area', 'area_unit',
+        'bhk_config', 'commercial_config', 'furnishing_type',
         'preferred_floor', 'possession_pref', 'required_workstations', 'required_cabins', 'requirement_remarks',
         'booking_date', 'booking_project_name', 'final_transaction_amount', 'brokerage_amount',
         'brokerage_percentage', 'payment_status', 'booking_remarks', 'dead_reason', 'dead_remarks',
@@ -2410,7 +2587,24 @@ export async function dispatchCrmRequest<T = unknown>(
           continue;
         }
         let val: string | number | null = body[f] === '' ? null : (body[f] as string | number | null);
-        if (['budget_from', 'budget_to', 'min_area', 'max_area', 'final_transaction_amount', 'brokerage_amount', 'brokerage_percentage', 'required_workstations', 'required_cabins'].includes(f) && val !== null) {
+        if (
+          [
+            'budget_from',
+            'budget_to',
+            'min_area',
+            'max_area',
+            'min_plot_area',
+            'max_plot_area',
+            'min_construction_area',
+            'max_construction_area',
+            'final_transaction_amount',
+            'brokerage_amount',
+            'brokerage_percentage',
+            'required_workstations',
+            'required_cabins',
+          ].includes(f) &&
+          val !== null
+        ) {
           val = Number(val);
         }
         const prevVal = (existing as unknown as Record<string, unknown>)[f];
@@ -2437,7 +2631,9 @@ export async function dispatchCrmRequest<T = unknown>(
 
       if (Array.isArray(body.localities)) {
         const clean = body.localities.filter((x): x is string => typeof x === 'string' && x.trim().length > 0).slice(0, 30);
-        if (clean.length === 0) throw new Error('At least one Preferred Locality is mandatory.');
+        if (clean.length === 0 && existing.localities.length > 0) {
+          throw new Error('At least one Preferred Locality is mandatory.');
+        }
         if (JSON.stringify(clean) !== JSON.stringify(existing.localities)) {
           updates.localities = clean;
           changed.push('localities');
@@ -2458,7 +2654,7 @@ export async function dispatchCrmRequest<T = unknown>(
 
       if (Object.keys(updates).length > 0) {
         updates.updatedAt = serverTimestamp();
-        await updateDoc(doc(db, 'leads', leadId), updates);
+        await withFirestoreRetry(() => updateDoc(doc(db, 'leads', leadId), updates));
         if (updates.mobile && updates.mobile !== existing.mobile) {
           await deleteDoc(doc(db, 'mobileLookup', existing.mobile, 'matches', leadId)).catch(() => {});
         }
@@ -2473,11 +2669,12 @@ export async function dispatchCrmRequest<T = unknown>(
           assigned_to: existing.assigned_to,
           assigned_to_name: existing.assigned_to_name || 'Assigned',
           is_deleted: existing.is_deleted === 1,
+          isNew: Boolean(updates.mobile && updates.mobile !== existing.mobile),
         });
         await writeTimeline(leadId, 'Lead Updated', `Updated field(s): ${changed.join(', ')}.`, user);
       }
 
-      const fresh = await getDoc(doc(db, 'leads', leadId));
+      const fresh = await withFirestoreRetry(() => getDoc(doc(db, 'leads', leadId)));
       return { lead: mapLeadDoc(leadId, fresh.data() as Record<string, unknown>) } as T;
     }
 
@@ -3427,7 +3624,7 @@ export async function dispatchCrmRequest<T = unknown>(
   // ---- IMPORT PREVIEW / COMMIT / HISTORY ----
   if (path === '/api/import/history' && method === 'GET') {
     if (user.role !== 'super_admin') throw new Error('Super Admin required.');
-    const snap = await getDocs(collection(db, 'importBatches'));
+    const snap = await withFirestoreRetry(() => getDocs(collection(db, 'importBatches')));
     const batches: ImportBatchRecord[] = snap.docs
       .map((d) => {
         const r = d.data() as Record<string, unknown>;
@@ -3452,52 +3649,53 @@ export async function dispatchCrmRequest<T = unknown>(
 
   if (path === '/api/import/preview' && method === 'POST') {
     if (user.role !== 'super_admin') throw new Error('Super Admin required.');
+    await ensureFirestoreOnline();
     const parsedRows = await parseSpreadsheetBase64Client(String(body.fileBase64 || ''), String(body.filename || 'import.xlsx'));
     if (parsedRows.length === 0) {
-      throw new Error('No data rows found in the uploaded file.');
+      throw new Error('No data rows found in the uploaded Excel file.');
     }
 
-    const [masters, team] = await Promise.all([fetchMasters(), fetchTeamMembers(user)]);
+    const masters = await fetchMasters();
     const batchRef = body.retryBatchRef
       ? String(body.retryBatchRef).trim()
       : `IMP-${new Date().toISOString().slice(0, 10).replace(/-/g, '')}-${Math.random().toString(36).slice(2, 7).toUpperCase()}`;
-    const rows = await validateAndNormalizeImportRows(parsedRows, masters, team);
+    const rows = await validateAndNormalizeImportRows(parsedRows, masters);
     return { batchRef, filename: String(body.filename || 'import.xlsx'), rows } as T;
   }
 
   if (path === '/api/import/commit' && method === 'POST') {
     if (user.role !== 'super_admin') throw new Error('Super Admin required.');
+    await ensureFirestoreOnline();
     const batchRef = String(body.batchRef || '');
     const filename = String(body.filename || 'import.xlsx');
     const rawRows = Array.isArray(body.rawRows) ? (body.rawRows as Array<Record<string, string>>) : [];
     const decisionsMap = (body.duplicateDecisions || {}) as Record<string, 'skip' | 'separate'>;
+    const assignedToUserId = String(body.assignedToUserId || '').trim();
+
+    const [masters, team] = await Promise.all([fetchMasters(), fetchTeamMembers(user)]);
+    const activeUsers = team.filter((u) => u.status === 'active');
+    const batchAssignee = activeUsers.find((u) => u.id === assignedToUserId || u.uid === assignedToUserId);
+    if (!batchAssignee) {
+      throw new Error('Please select an active employee to assign this bulk import.');
+    }
 
     // Duplicate retry guard via fingerprint
-    const existingBatches = await getDocs(collection(db, 'importBatches'));
-    const fingerprint = `${batchRef}:${rawRows.length}:${rawRows.slice(0, 3).map((r) => r['Mobile']).join(',')}`;
+    const existingBatches = await withFirestoreRetry(() => getDocs(collection(db, 'importBatches')));
+    const fingerprint = `${batchRef}:${rawRows.length}:${rawRows
+      .slice(0, 3)
+      .map((r) => pickImportColumn(r, ['Primary Mobile', 'Mobile']))
+      .join(',')}`;
     if (existingBatches.docs.some((d) => d.data().batch_ref === `${batchRef}#${fingerprint}`)) {
       throw new Error('This exact import batch was already committed. Duplicate retry blocked.');
     }
 
-    const [masters, team] = await Promise.all([fetchMasters(), fetchTeamMembers(user)]);
-    const validated = await validateAndNormalizeImportRows(rawRows, masters, team);
+    const validated = await validateAndNormalizeImportRows(rawRows, masters);
 
-    const rowsToInsert = validated.filter((row) => {
-      if (!row.isValid) return false;
-      if (row.duplicates.length > 0 && (decisionsMap[String(row.rowNumber)] || 'skip') === 'skip') return false;
-      return true;
-    });
-
-    const codes = rowsToInsert.length > 0 ? await allocateLeadCodes(rowsToInsert.length, user) : [];
-    let codeCursor = 0;
-
-    let successCount = 0;
     let skippedCount = 0;
     let failedCount = 0;
     const recordedDecisions: ImportBatchRecord['decisions'] = [];
     const errorRows: ImportBatchRecord['errors'] = [];
-    const notifyCounts = new Map<string, { uid: string | null; email: string; count: number }>();
-    const nowIso = new Date().toISOString();
+    const importQueue: ImportPreviewRow[] = [];
 
     for (const row of validated) {
       if (!row.isValid) {
@@ -3527,139 +3725,189 @@ export async function dispatchCrmRequest<T = unknown>(
         }
       }
 
-      const n = row.normalized;
-      const leadCode = codes[codeCursor++];
-      const leadId = leadCode.replace('-', '_');
-      const assigneeEmail = String(n.assigned_to_email || '').toLowerCase();
-      const assigneeId = String(n.assigned_to || '');
-      const assigneeUid = n.assigned_to_uid ? String(n.assigned_to_uid) : null;
-      const assigneeName = String(n.assigned_to_name || '');
-
-      await setDoc(doc(db, 'leads', leadId), {
-        id: leadId,
-        lead_code: leadCode,
-        customer_name: String(n.customer_name).slice(0, 150),
-        mobile: String(n.mobile),
-        alternate_mobile: n.alternate_mobile ? String(n.alternate_mobile) : null,
-        whatsapp: n.whatsapp ? String(n.whatsapp) : null,
-        email: n.email ? String(n.email) : null,
-        company_name: n.company_name ? String(n.company_name).slice(0, 150) : null,
-        customer_remarks: null,
-        lead_source: String(n.lead_source),
-        property_type: String(n.property_type),
-        property_subtype: String(n.property_subtype),
-        transaction_type: String(n.transaction_type),
-        localities: (n.localities as string[]).slice(0, 30),
-        budget_from: n.budget_from ?? null,
-        budget_to: n.budget_to ?? null,
-        min_area: n.min_area ?? null,
-        max_area: n.max_area ?? null,
-        area_unit: n.area_unit ?? null,
-        bhk_config: n.bhk_config ?? null,
-        commercial_config: null,
-        furnishing_type: null,
-        preferred_floor: null,
-        possession_pref: null,
-        required_workstations: null,
-        required_cabins: null,
-        requirement_remarks: n.requirement_remarks ? String(n.requirement_remarks).slice(0, 2000) : null,
-        stage: 'New Lead',
-        is_terminal_stage: false,
-        created_by: userUid,
-        created_by_name: user.full_name,
-        assigned_to: assigneeId,
-        assigned_to_uid: assigneeUid,
-        assigned_to_email: assigneeEmail,
-        assigned_to_name: assigneeName,
-        is_deleted: false,
-        deleted_at: null,
-        deleted_by: null,
-        deleted_by_name: null,
-        is_inactive: false,
-        inactive_since: null,
-        last_qualifying_interaction_at: nowIso,
-        last_interaction_type: null,
-        last_interaction_remarks: null,
-        inactivity_notified_15: false,
-        inactivity_escalated_22: false,
-        booking_date: null,
-        booking_project_name: null,
-        final_transaction_amount: null,
-        brokerage_amount: null,
-        brokerage_percentage: null,
-        payment_status: null,
-        booking_remarks: null,
-        dead_reason: null,
-        dead_remarks: null,
-        dead_by: null,
-        dead_by_name: null,
-        dead_at: null,
-        import_batch_ref: batchRef,
-        created_date_iso: nowIso,
-        createdAt: serverTimestamp(),
-        updatedAt: serverTimestamp(),
-      });
-
-      await syncMobileLookup({
-        id: leadId,
-        lead_code: leadCode,
-        mobile: String(n.mobile),
-        customer_name: String(n.customer_name),
-        property_subtype: String(n.property_subtype),
-        transaction_type: String(n.transaction_type),
-        stage: 'New Lead',
-        assigned_to: assigneeId,
-        assigned_to_name: assigneeName,
-        is_deleted: false,
-      });
-
-      await writeTimeline(leadId, 'Lead Imported', `Imported via Excel/CSV batch ${batchRef} (${filename}).`, user);
-      await writeAudit({
-        entityType: 'lead',
-        entityId: leadId,
-        leadId,
-        leadCode,
-        leadAssignedToEmail: assigneeEmail,
-        actionType: 'Created',
-        fieldName: 'import_batch_ref',
-        newValue: batchRef,
-        remarks: `Imported from ${filename}`,
-        user,
-      });
-
-      const curNotify = notifyCounts.get(assigneeEmail) || { uid: assigneeUid, email: assigneeEmail, count: 0 };
-      curNotify.count += 1;
-      notifyCounts.set(assigneeEmail, curNotify);
-      successCount++;
+      importQueue.push(row);
     }
 
-    for (const item of notifyCounts.values()) {
-      if (item.email !== user.email.toLowerCase()) {
-        await createNotificationDoc({
-          userUid: item.uid,
-          userEmail: item.email,
-          notifType: 'New Lead Assigned',
-          title: `${item.count} Imported Lead(s) Assigned`,
-          message: `${item.count} new lead(s) from import batch ${batchRef} were assigned to you.`,
+    const codes = importQueue.length > 0 ? await allocateLeadCodes(importQueue.length, user) : [];
+    const nowIso = new Date().toISOString();
+    const actorName = (user.full_name || user.email || 'User').trim().slice(0, 120);
+    const assigneeEmail = batchAssignee.email.trim().toLowerCase().slice(0, 200);
+    const assigneeId = String(batchAssignee.id || batchAssignee.uid || userUid).slice(0, 128);
+    const assigneeUid = batchAssignee.uid ? String(batchAssignee.uid).slice(0, 128) : null;
+    const assigneeName = (batchAssignee.full_name || batchAssignee.email || 'Assignee').trim().slice(0, 120);
+
+    // Commit up to 100 leads per Firestore writeBatch (4 ops per lead = 400 <= 500 batch limit)
+    // so lead, mobileLookup, timeline, and audit are written atomically without extra getDoc reads.
+    const BATCH_LEAD_CHUNK = 100;
+    let successCount = 0;
+
+    for (let start = 0; start < importQueue.length; start += BATCH_LEAD_CHUNK) {
+      const chunk = importQueue.slice(start, start + BATCH_LEAD_CHUNK);
+      const batch = writeBatch(db);
+
+      for (let idx = 0; idx < chunk.length; idx++) {
+        const row = chunk[idx];
+        const n = row.normalized;
+        const leadCode = codes[start + idx];
+        const leadId = leadCode.replace('-', '_');
+        const mobile = String(n.mobile).trim();
+        const customerName = String(n.customer_name || '').trim().slice(0, 150);
+        const propertySubtype = String(n.property_subtype || '').trim();
+        const transactionType = String(n.transaction_type || '').trim();
+
+        batch.set(doc(db, 'leads', leadId), {
+          id: leadId,
+          lead_code: leadCode,
+          customer_name: customerName,
+          mobile,
+          alternate_mobile: null,
+          whatsapp: n.whatsapp ? String(n.whatsapp) : null,
+          email: null,
+          company_name: null,
+          customer_remarks: null,
+          lead_source: String(n.lead_source),
+          property_type: String(n.property_type),
+          property_subtype: propertySubtype,
+          transaction_type: transactionType,
+          localities: [],
+          budget_from: n.budget_from ?? null,
+          budget_to: n.budget_to ?? null,
+          min_area: null,
+          max_area: null,
+          min_plot_area: null,
+          max_plot_area: null,
+          min_construction_area: null,
+          max_construction_area: null,
+          area_unit: null,
+          bhk_config: n.bhk_config ?? null,
+          commercial_config: null,
+          furnishing_type: null,
+          preferred_floor: null,
+          possession_pref: null,
+          required_workstations: null,
+          required_cabins: null,
+          requirement_remarks: null,
+          stage: 'New Lead',
+          is_terminal_stage: false,
+          created_by: userUid,
+          created_by_name: actorName,
+          assigned_to: assigneeId,
+          assigned_to_uid: assigneeUid,
+          assigned_to_email: assigneeEmail,
+          assigned_to_name: assigneeName,
+          is_deleted: false,
+          deleted_at: null,
+          deleted_by: null,
+          deleted_by_name: null,
+          is_inactive: false,
+          inactive_since: null,
+          last_qualifying_interaction_at: nowIso,
+          last_interaction_type: null,
+          last_interaction_remarks: null,
+          inactivity_notified_15: false,
+          inactivity_escalated_22: false,
+          booking_date: null,
+          booking_project_name: null,
+          final_transaction_amount: null,
+          brokerage_amount: null,
+          brokerage_percentage: null,
+          payment_status: null,
+          booking_remarks: null,
+          dead_reason: null,
+          dead_remarks: null,
+          dead_by: null,
+          dead_by_name: null,
+          dead_at: null,
+          import_batch_ref: batchRef,
+          created_date_iso: nowIso,
+          createdAt: serverTimestamp(),
+          updatedAt: serverTimestamp(),
+        });
+
+        batch.set(doc(db, 'mobileLookup', mobile, 'matches', leadId), {
+          lead_id: leadId,
+          lead_code: leadCode,
+          mobile,
+          customer_name: customerName,
+          requirement_summary: `${propertySubtype} · ${transactionType}`.slice(0, 250),
+          stage: 'New Lead',
+          assigned_to: assigneeId,
+          assigned_to_name: assigneeName,
+          is_deleted: false,
+          createdAt: serverTimestamp(),
+          updatedAt: serverTimestamp(),
+        });
+
+        const tlId = uidGen('tl');
+        batch.set(doc(db, 'leads', leadId, 'timeline', tlId), {
+          id: tlId,
+          lead_id: leadId,
+          event_type: 'Lead Imported',
+          description: `Imported via Excel batch ${batchRef} (${filename}).`.slice(0, 2000),
+          employee_id: userUid,
+          employee_name: actorName,
+          createdAt: serverTimestamp(),
+        });
+
+        const auditId = uidGen('audit');
+        batch.set(doc(db, 'auditLogs', auditId), {
+          id: auditId,
+          entity_type: 'lead',
+          entity_id: leadId,
+          lead_id: leadId,
+          lead_code: leadCode,
+          lead_assigned_to_email: assigneeEmail,
+          action_type: 'Created',
+          field_name: 'import_batch_ref',
+          previous_value: null,
+          new_value: batchRef.slice(0, 2000),
+          remarks: `Imported from ${filename}`.slice(0, 2000),
+          employee_id: userUid,
+          employee_name: actorName,
+          createdAt: serverTimestamp(),
         });
       }
+
+      try {
+        await withFirestoreRetry(() => batch.commit());
+      } catch (error) {
+        handleFirestoreError(error, OperationType.WRITE, `leads/batch_${start}`);
+      }
+
+      successCount += chunk.length;
+    }
+
+    if (successCount > 0 && assigneeEmail !== user.email.toLowerCase()) {
+      await createNotificationDoc({
+        userUid: assigneeUid,
+        userEmail: assigneeEmail,
+        notifType: 'New Lead Assigned',
+        title: `${successCount} Imported Lead(s) Assigned`,
+        message: `${successCount} new lead(s) from import batch ${batchRef} were assigned to you.`,
+      });
     }
 
     const batchId = uidGen('imp');
-    await setDoc(doc(db, 'importBatches', batchId), {
-      id: batchId,
-      batch_ref: `${batchRef}#${fingerprint}`.slice(0, 80),
-      filename: filename.slice(0, 200),
-      uploaded_by: userUid,
-      uploaded_by_name: user.full_name,
-      total_count: validated.length,
-      success_count: successCount,
-      skipped_count: skippedCount,
-      failed_count: failedCount,
-      decisions: recordedDecisions.slice(0, 500),
-      errors: errorRows.slice(0, 500),
-      createdAt: serverTimestamp(),
-    });
+    try {
+      await withFirestoreRetry(() =>
+        setDoc(doc(db, 'importBatches', batchId), {
+          id: batchId,
+          batch_ref: `${batchRef}#${fingerprint}`.slice(0, 80),
+          filename: filename.slice(0, 200),
+          uploaded_by: userUid,
+          uploaded_by_name: actorName,
+          total_count: validated.length,
+          success_count: successCount,
+          skipped_count: skippedCount,
+          failed_count: failedCount,
+          decisions: recordedDecisions.slice(0, 500),
+          errors: errorRows.slice(0, 500),
+          createdAt: serverTimestamp(),
+        })
+      );
+    } catch (error) {
+      handleFirestoreError(error, OperationType.CREATE, `importBatches/${batchId}`);
+    }
 
     return {
       batchRef,
@@ -3763,32 +4011,33 @@ export async function dispatchCrmDownload(
   const body = options.body && typeof options.body === 'string' ? (JSON.parse(options.body) as Record<string, unknown>) : {};
 
   if (path === '/api/import/template') {
-    const fmt = params.get('format') === 'csv' ? 'csv' : 'xlsx';
-    const blob = await generateImportTemplateBlob(fmt);
+    const blob = await generateImportTemplateBlob();
     triggerBlobDownload(blob, filename);
     return;
   }
 
   if (path === '/api/import/error-report') {
     const list = Array.isArray(body.errors) ? (body.errors as Array<Record<string, unknown>>) : [];
-    const fmt = body.format === 'csv' ? 'csv' : 'xlsx';
-    const headers = [
-      'Row #', 'Error Reasons', 'Customer Name', 'Mobile', 'Alternate Mobile', 'WhatsApp', 'Email', 'Company',
-      'Lead Source', 'Property Type', 'Property Subtype', 'Transaction Type', 'Localities', 'Budget From',
-      'Budget To', 'BHK', 'Min Area', 'Max Area', 'Area Unit', 'Assigned Employee', 'Remarks',
-    ];
+    const headers = ['Row #', 'Error Reasons', ...IMPORT_TEMPLATE_HEADERS];
     const rows = list.map((item) => {
       const raw = (item.raw || {}) as Record<string, string>;
       const errs = Array.isArray(item.errors) ? item.errors.join(' | ') : '';
       return [
-        Number(item.rowNumber || 0), errs, raw['Customer Name'] || '', raw['Mobile'] || '', raw['Alternate Mobile'] || '',
-        raw['WhatsApp'] || '', raw['Email'] || '', raw['Company'] || '', raw['Lead Source'] || '', raw['Property Type'] || '',
-        raw['Property Subtype'] || '', raw['Transaction Type'] || '', raw['Localities'] || '', raw['Budget From'] || '',
-        raw['Budget To'] || '', raw['BHK'] || '', raw['Min Area'] || '', raw['Max Area'] || '', raw['Area Unit'] || '',
-        raw['Assigned Employee'] || '', raw['Remarks'] || '',
+        Number(item.rowNumber || 0),
+        errs,
+        pickImportColumn(raw, ['Customer Name']),
+        pickImportColumn(raw, ['Primary Mobile', 'Mobile']),
+        pickImportColumn(raw, ['Whatsapp', 'WhatsApp', 'WhatsApp Number']),
+        pickImportColumn(raw, ['Lead Source']),
+        pickImportColumn(raw, ['Property Type']),
+        pickImportColumn(raw, ['Property Subtype']),
+        pickImportColumn(raw, ['Transaction Type']),
+        pickImportColumn(raw, ['Budget From (Numeric Only)', 'Budget From', 'Budget from']),
+        pickImportColumn(raw, ['Budget To (Numeric Only)', 'Budget To']),
+        pickImportColumn(raw, ['BHK (If Residential, Leave Blank If Commercial)', 'BHK (Residential Only)', 'BHK']),
       ];
     });
-    const blob = await buildSpreadsheetBlob('Import Errors', headers, rows, fmt);
+    const blob = await buildSpreadsheetBlob('Import Errors', headers, rows, 'xlsx');
     triggerBlobDownload(blob, filename);
     return;
   }
@@ -3838,14 +4087,15 @@ export async function dispatchCrmDownload(
       headers = [
         'Lead ID', 'Customer Name', 'Mobile', 'Alternate Mobile', 'WhatsApp', 'Email', 'Company', 'Lead Source',
         'Property Type', 'Property Subtype', 'Transaction Type', 'Localities', 'Budget From (INR)', 'Budget To (INR)',
-        'Min Area', 'Max Area', 'Area Unit', 'BHK / Config', 'Furnishing', 'Possession', 'Stage', 'Inactive',
+        'Min Area', 'Max Area', 'Min Plot Area', 'Max Plot Area', 'Min Construction Area', 'Max Construction Area', 'Area Unit', 'BHK / Config', 'Furnishing', 'Possession', 'Stage', 'Inactive',
         'Assigned To', 'Created By', 'Created Date', 'Booking Date', 'Booking Project', 'Transaction Amount (INR)',
         'Brokerage (INR)', 'Payment Status', 'Dead Reason', 'Dead Remarks', 'Activity Summary',
       ];
       dataRows = mapped.map((l) => [
         l.lead_code, l.customer_name, l.mobile, l.alternate_mobile || '', l.whatsapp || '', l.email || '',
         l.company_name || '', l.lead_source, l.property_type, l.property_subtype, l.transaction_type,
-        l.localities.join(', '), l.budget_from, l.budget_to, l.min_area, l.max_area, l.area_unit || '',
+        l.localities.join(', '), l.budget_from, l.budget_to, l.min_area, l.max_area,
+        l.min_plot_area, l.max_plot_area, l.min_construction_area, l.max_construction_area, l.area_unit || '',
         l.bhk_config || l.commercial_config || '', l.furnishing_type || '', l.possession_pref || '', l.stage,
         l.is_inactive ? `Yes (${l.inactive_days}d)` : 'No', l.assigned_to_name || '', l.created_by_name || '',
         l.created_at.slice(0, 10), l.booking_date || '', l.booking_project_name || '', l.final_transaction_amount,

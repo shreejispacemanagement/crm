@@ -22,7 +22,9 @@ import {
   formatDateTime,
   formatINR,
   generateBudgetOptions,
+  getDefaultAreaUnitForSubtype,
   getMobileValidationError,
+  getSubtypeAreaMode,
   handleMobileFieldChange,
   sanitizeIndianMobileInput,
 } from '../lib/api.ts';
@@ -183,6 +185,7 @@ export const LeadDetailView: React.FC<LeadDetailViewProps> = ({
   const isTerminal = Boolean(stageMeta?.is_terminal);
   const canEdit = user.role === 'super_admin' || !isTerminal;
   const isAdmin = user.role === 'super_admin';
+  const areaMode = getSubtypeAreaMode(lead.property_subtype);
 
   const handleStageSelect = async (nextStageName: string) => {
     if (nextStageName === lead.stage) return;
@@ -801,7 +804,11 @@ export const LeadDetailView: React.FC<LeadDetailViewProps> = ({
                       budget_to: lead.budget_to ?? '',
                       min_area: lead.min_area ?? '',
                       max_area: lead.max_area ?? '',
-                      area_unit: lead.area_unit || 'Sq. Ft.',
+                      min_plot_area: lead.min_plot_area ?? '',
+                      max_plot_area: lead.max_plot_area ?? '',
+                      min_construction_area: lead.min_construction_area ?? '',
+                      max_construction_area: lead.max_construction_area ?? '',
+                      area_unit: lead.area_unit || getDefaultAreaUnitForSubtype(lead.property_subtype),
                       bhk_config: lead.bhk_config || '',
                       commercial_config: lead.commercial_config || '',
                       furnishing_type: lead.furnishing_type || '',
@@ -914,33 +921,130 @@ export const LeadDetailView: React.FC<LeadDetailViewProps> = ({
                     />
                   </div>
                 </div>
-                <div className="grid grid-cols-3 gap-2">
-                  <input
-                    type="number"
-                    value={String(editDraft.min_area ?? '')}
-                    onChange={(e) => setEditDraft({ ...editDraft, min_area: e.target.value })}
-                    placeholder="Min Area"
-                    className="rounded-lg border border-[#E2E8F0] px-2.5 py-1.5 font-mono-tabular dark:border-[#1E3349] dark:bg-[#0C141E] dark:text-white"
-                  />
-                  <input
-                    type="number"
-                    value={String(editDraft.max_area ?? '')}
-                    onChange={(e) => setEditDraft({ ...editDraft, max_area: e.target.value })}
-                    placeholder="Max Area"
-                    className="rounded-lg border border-[#E2E8F0] px-2.5 py-1.5 font-mono-tabular dark:border-[#1E3349] dark:bg-[#0C141E] dark:text-white"
-                  />
-                  <select
-                    value={String(editDraft.area_unit || 'Sq. Ft.')}
-                    onChange={(e) => setEditDraft({ ...editDraft, area_unit: e.target.value })}
-                    className="rounded-lg border border-[#E2E8F0] px-2 py-1.5 dark:border-[#1E3349] dark:bg-[#0C141E] dark:text-white"
-                  >
-                    {AREA_UNITS.map((u) => (
-                      <option key={u} value={u}>
-                        {u}
-                      </option>
-                    ))}
-                  </select>
-                </div>
+                {areaMode === 'plot_and_construction' ? (
+                  <div className="space-y-2">
+                    <div className="grid grid-cols-2 gap-2">
+                      <div>
+                        <span className="block text-[11px] text-[#737373] mb-1">Min Plot Area</span>
+                        <input
+                          type="number"
+                          min={0}
+                          value={String(editDraft.min_plot_area ?? '')}
+                          onChange={(e) => setEditDraft({ ...editDraft, min_plot_area: e.target.value })}
+                          placeholder="Min Plot Area"
+                          className="w-full rounded-lg border border-[#E2E8F0] px-2.5 py-1.5 font-mono-tabular dark:border-[#1E3349] dark:bg-[#0C141E] dark:text-white"
+                        />
+                      </div>
+                      <div>
+                        <span className="block text-[11px] text-[#737373] mb-1">Max Plot Area</span>
+                        <input
+                          type="number"
+                          min={0}
+                          value={String(editDraft.max_plot_area ?? '')}
+                          onChange={(e) => setEditDraft({ ...editDraft, max_plot_area: e.target.value })}
+                          placeholder="Max Plot Area"
+                          className="w-full rounded-lg border border-[#E2E8F0] px-2.5 py-1.5 font-mono-tabular dark:border-[#1E3349] dark:bg-[#0C141E] dark:text-white"
+                        />
+                      </div>
+                      <div>
+                        <span className="block text-[11px] text-[#737373] mb-1">Min Construction Area</span>
+                        <input
+                          type="number"
+                          min={0}
+                          value={String(editDraft.min_construction_area ?? '')}
+                          onChange={(e) => setEditDraft({ ...editDraft, min_construction_area: e.target.value })}
+                          placeholder="Min Construction Area"
+                          className="w-full rounded-lg border border-[#E2E8F0] px-2.5 py-1.5 font-mono-tabular dark:border-[#1E3349] dark:bg-[#0C141E] dark:text-white"
+                        />
+                      </div>
+                      <div>
+                        <span className="block text-[11px] text-[#737373] mb-1">Max Construction Area</span>
+                        <input
+                          type="number"
+                          min={0}
+                          value={String(editDraft.max_construction_area ?? '')}
+                          onChange={(e) => setEditDraft({ ...editDraft, max_construction_area: e.target.value })}
+                          placeholder="Max Construction Area"
+                          className="w-full rounded-lg border border-[#E2E8F0] px-2.5 py-1.5 font-mono-tabular dark:border-[#1E3349] dark:bg-[#0C141E] dark:text-white"
+                        />
+                      </div>
+                    </div>
+                    <div>
+                      <span className="block text-[11px] text-[#737373] mb-1">Area Unit</span>
+                      <select
+                        value={String(editDraft.area_unit || getDefaultAreaUnitForSubtype(lead.property_subtype))}
+                        onChange={(e) => setEditDraft({ ...editDraft, area_unit: e.target.value })}
+                        className="w-full rounded-lg border border-[#E2E8F0] px-2 py-1.5 dark:border-[#1E3349] dark:bg-[#0C141E] dark:text-white"
+                      >
+                        {AREA_UNITS.map((u) => (
+                          <option key={u} value={u}>
+                            {u}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  </div>
+                ) : areaMode === 'plot_only' ? (
+                  <div className="grid grid-cols-3 gap-2">
+                    <input
+                      type="number"
+                      min={0}
+                      value={String(editDraft.min_plot_area ?? '')}
+                      onChange={(e) => setEditDraft({ ...editDraft, min_plot_area: e.target.value })}
+                      placeholder="Min Plot Area"
+                      className="rounded-lg border border-[#E2E8F0] px-2.5 py-1.5 font-mono-tabular dark:border-[#1E3349] dark:bg-[#0C141E] dark:text-white"
+                    />
+                    <input
+                      type="number"
+                      min={0}
+                      value={String(editDraft.max_plot_area ?? '')}
+                      onChange={(e) => setEditDraft({ ...editDraft, max_plot_area: e.target.value })}
+                      placeholder="Max Plot Area"
+                      className="rounded-lg border border-[#E2E8F0] px-2.5 py-1.5 font-mono-tabular dark:border-[#1E3349] dark:bg-[#0C141E] dark:text-white"
+                    />
+                    <select
+                      value={String(editDraft.area_unit || getDefaultAreaUnitForSubtype(lead.property_subtype))}
+                      onChange={(e) => setEditDraft({ ...editDraft, area_unit: e.target.value })}
+                      className="rounded-lg border border-[#E2E8F0] px-2 py-1.5 dark:border-[#1E3349] dark:bg-[#0C141E] dark:text-white"
+                    >
+                      {AREA_UNITS.map((u) => (
+                        <option key={u} value={u}>
+                          {u}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-3 gap-2">
+                    <input
+                      type="number"
+                      min={0}
+                      value={String(editDraft.min_area ?? '')}
+                      onChange={(e) => setEditDraft({ ...editDraft, min_area: e.target.value })}
+                      placeholder="Min Area"
+                      className="rounded-lg border border-[#E2E8F0] px-2.5 py-1.5 font-mono-tabular dark:border-[#1E3349] dark:bg-[#0C141E] dark:text-white"
+                    />
+                    <input
+                      type="number"
+                      min={0}
+                      value={String(editDraft.max_area ?? '')}
+                      onChange={(e) => setEditDraft({ ...editDraft, max_area: e.target.value })}
+                      placeholder="Max Area"
+                      className="rounded-lg border border-[#E2E8F0] px-2.5 py-1.5 font-mono-tabular dark:border-[#1E3349] dark:bg-[#0C141E] dark:text-white"
+                    />
+                    <select
+                      value={String(editDraft.area_unit || 'Sq. Ft.')}
+                      onChange={(e) => setEditDraft({ ...editDraft, area_unit: e.target.value })}
+                      className="rounded-lg border border-[#E2E8F0] px-2 py-1.5 dark:border-[#1E3349] dark:bg-[#0C141E] dark:text-white"
+                    >
+                      {AREA_UNITS.map((u) => (
+                        <option key={u} value={u}>
+                          {u}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                )}
                 <div className="grid grid-cols-2 gap-2">
                   {lead.property_type === 'Residential' ? (
                     <select
@@ -1058,7 +1162,9 @@ export const LeadDetailView: React.FC<LeadDetailViewProps> = ({
                 </div>
                 <div className="col-span-2">
                   <dt className="text-[#737373] dark:text-[#A3A3A3]">Preferred Localities</dt>
-                  <dd className="text-[#16273A] dark:text-white mt-0.5">{lead.localities.join(' · ')}</dd>
+                  <dd className="text-[#16273A] dark:text-white mt-0.5">
+                    {lead.localities.length > 0 ? lead.localities.join(' · ') : '—'}
+                  </dd>
                 </div>
                 <div>
                   <dt className="text-[#737373] dark:text-[#A3A3A3]">Budget (INR)</dt>
@@ -1066,14 +1172,46 @@ export const LeadDetailView: React.FC<LeadDetailViewProps> = ({
                     {formatBudgetRange(lead.budget_from, lead.budget_to)}
                   </dd>
                 </div>
-                <div>
-                  <dt className="text-[#737373] dark:text-[#A3A3A3]">Area</dt>
-                  <dd className="font-mono-tabular text-[#16273A] dark:text-white">
-                    {lead.min_area || lead.max_area
-                      ? `${lead.min_area ?? '—'} to ${lead.max_area ?? '—'} ${lead.area_unit || ''}`
-                      : '—'}
-                  </dd>
-                </div>
+                {areaMode === 'plot_and_construction' ? (
+                  <>
+                    <div>
+                      <dt className="text-[#737373] dark:text-[#A3A3A3]">Plot Area</dt>
+                      <dd className="font-mono-tabular text-[#16273A] dark:text-white">
+                        {lead.min_plot_area || lead.max_plot_area
+                          ? `${lead.min_plot_area ?? '—'} to ${lead.max_plot_area ?? '—'} ${lead.area_unit || ''}`
+                          : '—'}
+                      </dd>
+                    </div>
+                    <div>
+                      <dt className="text-[#737373] dark:text-[#A3A3A3]">Construction Area</dt>
+                      <dd className="font-mono-tabular text-[#16273A] dark:text-white">
+                        {lead.min_construction_area || lead.max_construction_area
+                          ? `${lead.min_construction_area ?? '—'} to ${lead.max_construction_area ?? '—'} ${lead.area_unit || ''}`
+                          : '—'}
+                      </dd>
+                    </div>
+                  </>
+                ) : areaMode === 'plot_only' ? (
+                  <div>
+                    <dt className="text-[#737373] dark:text-[#A3A3A3]">Plot Area</dt>
+                    <dd className="font-mono-tabular text-[#16273A] dark:text-white">
+                      {lead.min_plot_area || lead.max_plot_area
+                        ? `${lead.min_plot_area ?? '—'} to ${lead.max_plot_area ?? '—'} ${lead.area_unit || ''}`
+                        : lead.min_area || lead.max_area
+                        ? `${lead.min_area ?? '—'} to ${lead.max_area ?? '—'} ${lead.area_unit || ''}`
+                        : '—'}
+                    </dd>
+                  </div>
+                ) : (
+                  <div>
+                    <dt className="text-[#737373] dark:text-[#A3A3A3]">Area</dt>
+                    <dd className="font-mono-tabular text-[#16273A] dark:text-white">
+                      {lead.min_area || lead.max_area
+                        ? `${lead.min_area ?? '—'} to ${lead.max_area ?? '—'} ${lead.area_unit || ''}`
+                        : '—'}
+                    </dd>
+                  </div>
+                )}
                 {lead.property_type === 'Residential' ? (
                   <div>
                     <dt className="text-[#737373] dark:text-[#A3A3A3]">BHK</dt>

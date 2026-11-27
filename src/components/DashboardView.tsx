@@ -1504,7 +1504,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
                         </span>
                       </LeadHoverCard>
                       <span className="text-[#737373] dark:text-[#A3A3A3]">
-                        {l.property_subtype} · {l.localities.join(', ')}
+                        {[l.property_subtype, l.localities.join(', ')].filter(Boolean).join(' · ')}
                       </span>
                     </div>
                     <div className="text-[11px] font-mono-tabular text-[#737373] dark:text-[#A3A3A3] whitespace-nowrap shrink-0">

@@ -102,6 +102,10 @@ export interface LeadRecord {
   budget_to: number | null;
   min_area: number | null;
   max_area: number | null;
+  min_plot_area: number | null;
+  max_plot_area: number | null;
+  min_construction_area: number | null;
+  max_construction_area: number | null;
   area_unit: string | null;
   bhk_config: string | null;
   commercial_config: string | null;

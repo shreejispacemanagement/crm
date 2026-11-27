@@ -331,7 +331,7 @@ export default function App() {
     { key: 'leads', label: 'Leads', icon: <Users className="h-4 w-4" /> },
     { key: 'calendar', label: 'Calendar', icon: <Calendar className="h-4 w-4" /> },
     { key: 'reports', label: 'Reports', icon: <BarChart3 className="h-4 w-4" /> },
-    { key: 'import', label: 'Excel/CSV Import', icon: <FileSpreadsheet className="h-4 w-4" />, adminOnly: true },
+    { key: 'import', label: 'Excel Import', icon: <FileSpreadsheet className="h-4 w-4" />, adminOnly: true },
     { key: 'masters', label: 'Masters', icon: <Database className="h-4 w-4" />, adminOnly: true },
     { key: 'users', label: 'Team & Roles', icon: <Users className="h-4 w-4" />, adminOnly: true },
     { key: 'deleted', label: 'Deleted Leads', icon: <Trash2 className="h-4 w-4" />, adminOnly: true },
@@ -627,6 +627,7 @@ export default function App() {
 
           {activeNav === 'import' && isAdmin && (
             <ImportView
+              users={users}
               onImported={() => {
                 setRefreshSignal((s) => s + 1);
                 loadWorkspaceMeta();

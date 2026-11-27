@@ -200,3 +200,23 @@ export function getMobileValidationError(
   }
   return null;
 }
+
+export type SubtypeAreaMode = 'standard' | 'plot_only' | 'plot_and_construction';
+
+export function getSubtypeAreaMode(subtype: string | null | undefined): SubtypeAreaMode {
+  const norm = String(subtype || '')
+    .trim()
+    .toLowerCase()
+    .replace(/[\s_-]+/g, ' ');
+  if (['bungalow', 'bunglow', 'tenament', 'tenement', 'rowhouse', 'row house', 'weekend home'].includes(norm)) {
+    return 'plot_and_construction';
+  }
+  if (norm === 'residential plot' || norm === 'plot') {
+    return 'plot_only';
+  }
+  return 'standard';
+}
+
+export function getDefaultAreaUnitForSubtype(subtype: string | null | undefined): string {
+  return getSubtypeAreaMode(subtype) === 'standard' ? 'Sq. Ft.' : 'Sq. Yards (Vaar)';
+}

@@ -363,7 +363,11 @@ export const LeadsView: React.FC<LeadsViewProps> = ({
           </span>
         );
       case 'localities':
-        return <span className="text-[#525252] dark:text-[#A3A3A3]">{lead.localities.join(', ')}</span>;
+        return (
+          <span className="text-[#525252] dark:text-[#A3A3A3]">
+            {lead.localities.length > 0 ? lead.localities.join(', ') : '—'}
+          </span>
+        );
       case 'budget':
         return (
           <span className="font-mono-tabular text-[#16273A] dark:text-white">
@@ -989,7 +993,7 @@ export const LeadsView: React.FC<LeadsViewProps> = ({
                         {[lead.bhk_config, lead.property_subtype, lead.transaction_type].filter(Boolean).join(' · ')}
                       </div>
                       <div className="mt-1 text-[11px] text-[#737373] dark:text-[#A3A3A3] truncate">
-                        {lead.localities.join(', ')}
+                        {lead.localities.length > 0 ? lead.localities.join(', ') : '—'}
                       </div>
                       <div className="mt-2 pt-2 border-t border-[#E2E8F0]/60 dark:border-[#1E3349] flex items-center justify-between text-[11px]">
                         <span className="font-mono-tabular font-medium text-[#16273A] dark:text-white">

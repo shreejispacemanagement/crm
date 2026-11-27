@@ -188,7 +188,8 @@ service cloud.firestore {
         && data.keys().hasOnly([
           'id', 'lead_code', 'customer_name', 'mobile', 'alternate_mobile', 'whatsapp', 'email', 'company_name',
           'customer_remarks', 'lead_source', 'property_type', 'property_subtype', 'transaction_type', 'localities',
-          'budget_from', 'budget_to', 'min_area', 'max_area', 'area_unit', 'bhk_config', 'commercial_config',
+          'budget_from', 'budget_to', 'min_area', 'max_area', 'min_plot_area', 'max_plot_area',
+          'min_construction_area', 'max_construction_area', 'area_unit', 'bhk_config', 'commercial_config',
           'furnishing_type', 'preferred_floor', 'possession_pref', 'required_workstations', 'required_cabins',
           'requirement_remarks', 'stage', 'is_terminal_stage', 'created_by', 'created_by_name', 'assigned_to',
           'assigned_to_uid', 'assigned_to_email', 'assigned_to_name', 'is_deleted', 'deleted_at', 'deleted_by',
@@ -217,11 +218,15 @@ service cloud.firestore {
       return data.property_type is string && data.property_type.size() >= 1 && data.property_type.size() <= 120
         && data.property_subtype is string && data.property_subtype.size() >= 1 && data.property_subtype.size() <= 120
         && data.transaction_type is string && data.transaction_type.size() >= 1 && data.transaction_type.size() <= 120
-        && isStringList(data, 'localities', 1, 30)
+        && isStringList(data, 'localities', 0, 30)
         && isOptionalNumber(data, 'budget_from')
         && isOptionalNumber(data, 'budget_to')
         && isOptionalNumber(data, 'min_area')
         && isOptionalNumber(data, 'max_area')
+        && isOptionalNumber(data, 'min_plot_area')
+        && isOptionalNumber(data, 'max_plot_area')
+        && isOptionalNumber(data, 'min_construction_area')
+        && isOptionalNumber(data, 'max_construction_area')
         && isOptionalString(data, 'area_unit', 40)
         && isOptionalString(data, 'bhk_config', 60)
         && isOptionalString(data, 'commercial_config', 200)

@@ -2,24 +2,15 @@ import type ExcelJS from 'exceljs';
 
 export const IMPORT_TEMPLATE_HEADERS = [
   'Customer Name',
-  'Mobile',
-  'Alternate Mobile',
-  'WhatsApp',
-  'Email',
-  'Company',
+  'Primary Mobile',
+  'Whatsapp',
   'Lead Source',
   'Property Type',
   'Property Subtype',
   'Transaction Type',
-  'Localities',
-  'Budget From',
-  'Budget To',
-  'BHK',
-  'Min Area',
-  'Max Area',
-  'Area Unit',
-  'Assigned Employee',
-  'Remarks',
+  'Budget From (Numeric Only)',
+  'Budget To (Numeric Only)',
+  'BHK (If Residential, Leave Blank If Commercial)',
 ];
 
 function base64ToUint8Array(fileBase64: string): Uint8Array {
@@ -45,54 +36,6 @@ function cellToString(val: ExcelJS.CellValue): string {
   return String(val);
 }
 
-function parseCsvText(text: string): string[][] {
-  const rows: string[][] = [];
-  let current: string[] = [];
-  let field = '';
-  let inQuotes = false;
-  const normalized = text.replace(/^\uFEFF/, '');
-
-  for (let i = 0; i < normalized.length; i++) {
-    const ch = normalized[i];
-    const next = normalized[i + 1];
-    if (inQuotes) {
-      if (ch === '"' && next === '"') {
-        field += '"';
-        i++;
-      } else if (ch === '"') {
-        inQuotes = false;
-      } else {
-        field += ch;
-      }
-    } else {
-      if (ch === '"') {
-        inQuotes = true;
-      } else if (ch === ',') {
-        current.push(field);
-        field = '';
-      } else if (ch === '\r' && next === '\n') {
-        current.push(field);
-        rows.push(current);
-        current = [];
-        field = '';
-        i++;
-      } else if (ch === '\n' || ch === '\r') {
-        current.push(field);
-        rows.push(current);
-        current = [];
-        field = '';
-      } else {
-        field += ch;
-      }
-    }
-  }
-  if (field.length > 0 || current.length > 0) {
-    current.push(field);
-    rows.push(current);
-  }
-  return rows;
-}
-
 function escapeCsvCell(val: string | number | null | undefined): string {
   const str = val === null || val === undefined ? '' : String(val);
   if (/[",\r\n]/.test(str)) {
@@ -101,40 +44,51 @@ function escapeCsvCell(val: string | number | null | undefined): string {
   return str;
 }
 
-export async function generateImportTemplateBlob(format: 'xlsx' | 'csv'): Promise<Blob> {
-  const sampleRow = [
+export async function generateImportTemplateBlob(): Promise<Blob> {
+  const residentialSampleRow = [
     'Rohan Kulkarni',
     '9825012345',
-    '',
     '9825012345',
-    'rohan.k@example.in',
-    'Kulkarni Associates',
     'Website',
     'Residential',
     'Apartment',
     'Sale',
-    'Satellite, Bodakdev',
-    '12000000',
-    '16000000',
+    12000000,
+    16000000,
     '3 BHK',
-    '1650',
-    '2100',
-    'Sq. Ft.',
-    'aarav.patel@shreejispace.in',
-    'Looking for East-facing unit',
   ];
-
-  if (format === 'csv') {
-    const csv = [IMPORT_TEMPLATE_HEADERS.map(escapeCsvCell).join(','), sampleRow.map(escapeCsvCell).join(',')].join('\r\n');
-    return new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
-  }
+  const commercialSampleRow = [
+    'Meera Enterprise',
+    '9898012345',
+    '',
+    'Referral',
+    'Commercial',
+    'Office',
+    'Rent',
+    80000,
+    120000,
+    '',
+  ];
 
   const ExcelJS = (await import('exceljs')).default;
   const wb = new ExcelJS.Workbook();
   const ws = wb.addWorksheet('Lead Import Template');
   ws.addRow(IMPORT_TEMPLATE_HEADERS);
-  ws.addRow(sampleRow);
+  ws.addRow(residentialSampleRow);
+  ws.addRow(commercialSampleRow);
   ws.getRow(1).font = { bold: true };
+  ws.columns = [
+    { width: 22 },
+    { width: 16 },
+    { width: 16 },
+    { width: 16 },
+    { width: 15 },
+    { width: 18 },
+    { width: 17 },
+    { width: 26 },
+    { width: 24 },
+    { width: 42 },
+  ];
   const buf = await wb.xlsx.writeBuffer();
   return new Blob([buf], {
     type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
@@ -145,26 +99,12 @@ export async function parseSpreadsheetBase64Client(
   fileBase64: string,
   filename: string
 ): Promise<Array<Record<string, string>>> {
-  const bytes = base64ToUint8Array(fileBase64);
-  const lower = filename.toLowerCase();
-
-  if (lower.endsWith('.csv')) {
-    const text = new TextDecoder('utf-8').decode(bytes);
-    const rows = parseCsvText(text);
-    if (rows.length < 2) return [];
-    const headers = rows[0].map((h) => h.trim());
-    return rows
-      .slice(1)
-      .filter((r) => r.some((cell) => cell.trim() !== ''))
-      .map((r) => {
-        const obj: Record<string, string> = {};
-        headers.forEach((h, i) => {
-          if (h) obj[h] = (r[i] ?? '').trim();
-        });
-        return obj;
-      });
+  const lower = filename.toLowerCase().trim();
+  if (!lower.endsWith('.xlsx')) {
+    throw new Error('Only Excel (.xlsx) files are supported for bulk lead import.');
   }
 
+  const bytes = base64ToUint8Array(fileBase64);
   const ExcelJS = (await import('exceljs')).default;
   const wb = new ExcelJS.Workbook();
   const ab = new ArrayBuffer(bytes.byteLength);

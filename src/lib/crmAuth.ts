@@ -12,7 +12,7 @@ import {
   writeBatch,
 } from 'firebase/firestore';
 import type { CompanySettings, UserProfile } from '../types.ts';
-import { OperationType, auth, db, googleProvider, handleFirestoreError } from './firebase.ts';
+import { OperationType, auth, db, googleProvider, handleFirestoreError, withFirestoreRetry } from './firebase.ts';
 
 export const BOOTSTRAPPED_ADMIN_EMAIL = 'shreejispacemanagement@gmail.com';
 
@@ -122,7 +122,7 @@ export async function resolveFirebaseSession(firebaseUser: User, isExplicitSignI
 
   let settingsSnap;
   try {
-    settingsSnap = await getDoc(doc(db, 'settings', 'workspace'));
+    settingsSnap = await withFirestoreRetry(() => getDoc(doc(db, 'settings', 'workspace')));
   } catch (error) {
     handleFirestoreError(error, OperationType.GET, 'settings/workspace');
   }
@@ -130,7 +130,7 @@ export async function resolveFirebaseSession(firebaseUser: User, isExplicitSignI
 
   let userSnap;
   try {
-    userSnap = await getDoc(doc(db, 'users', uid));
+    userSnap = await withFirestoreRetry(() => getDoc(doc(db, 'users', uid)));
   } catch (error) {
     handleFirestoreError(error, OperationType.GET, `users/${uid}`);
   }
@@ -179,7 +179,7 @@ export async function resolveFirebaseSession(firebaseUser: User, isExplicitSignI
   let invDocs: Array<{ id: string; data: Record<string, unknown> }> = [];
   try {
     const q = query(collection(db, 'employeeInvites'), where('email', '==', email));
-    const snap = await getDocs(q);
+    const snap = await withFirestoreRetry(() => getDocs(q));
     invDocs = snap.docs.map((d) => ({ id: d.id, data: d.data() as Record<string, unknown> }));
   } catch (error) {
     handleFirestoreError(error, OperationType.LIST, 'employeeInvites');

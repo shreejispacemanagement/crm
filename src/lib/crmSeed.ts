@@ -75,6 +75,17 @@ export function buildDefaultMasterItems(): SeedMasterDef[] {
   ['Apartment', 'Bungalow', 'Tenament', 'Rowhouse', 'Penthouse', 'Weekend Home'].forEach((n, i) =>
     push('property_subtype', i + 1, n, { parent_value: 'Residential' })
   );
+  items.push({
+    id: 'property_subtype_residential_plot',
+    category: 'property_subtype',
+    name: 'Residential Plot',
+    parent_value: 'Residential',
+    sort_order: 7,
+    is_active: true,
+    is_terminal: false,
+    terminal_outcome: null,
+    system_key: null,
+  });
   ['Office', 'Showroom', 'Other'].forEach((n, i) =>
     push('property_subtype', i + 7, n, { parent_value: 'Commercial' })
   );
@@ -370,6 +381,40 @@ export async function ensureAdditionalLocalitiesSeeded(existingMasters: MasterIt
         m.category === 'locality' &&
         !existingIds.has(m.id) &&
         !existingLocalityNames.has(m.name.trim().toLowerCase())
+    )
+    .map((m) => {
+      nextOrder += 1;
+      return { ...m, sort_order: nextOrder };
+    });
+
+  if (missing.length === 0) return 0;
+
+  try {
+    await commitMasterItemsChunked(missing);
+    return missing.length;
+  } catch (error) {
+    handleFirestoreError(error, OperationType.WRITE, 'masters');
+  }
+}
+
+export async function ensureAdditionalSubtypesSeeded(existingMasters: MasterItem[]): Promise<number> {
+  const existingIds = new Set(existingMasters.map((m) => m.id));
+  const existingSubtypeNames = new Set(
+    existingMasters
+      .filter((m) => m.category === 'property_subtype')
+      .map((m) => m.name.trim().toLowerCase())
+  );
+
+  let nextOrder = existingMasters
+    .filter((m) => m.category === 'property_subtype')
+    .reduce((mx, m) => Math.max(mx, m.sort_order), 0);
+
+  const missing = buildDefaultMasterItems()
+    .filter(
+      (m) =>
+        m.category === 'property_subtype' &&
+        !existingIds.has(m.id) &&
+        !existingSubtypeNames.has(m.name.trim().toLowerCase())
     )
     .map((m) => {
       nextOrder += 1;
